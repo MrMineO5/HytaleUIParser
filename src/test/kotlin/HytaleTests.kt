@@ -1,6 +1,7 @@
 import app.ultradev.hytaleuiparser.Parser
 import app.ultradev.hytaleuiparser.TokenIterator
 import app.ultradev.hytaleuiparser.Tokenizer
+import app.ultradev.hytaleuiparser.Validator
 import java.io.File
 import kotlin.test.Test
 
@@ -18,10 +19,17 @@ class HytaleTests {
             try {
                 val tokenizer = Tokenizer(it.reader())
                 val parser = Parser(TokenIterator(tokenizer))
-                parser.finish()
+                val root = parser.finish()
+                Validator.validate(root)
             } catch(e: Exception) {
                 throw RuntimeException("Failed to parse ${it.name}", e)
             }
         }
+
+        println(Validator.properties.entries.joinToString("\n") { "${it.key}: ${it.value}" })
+        println(Validator.types)
+
+        println()
+        println(Validator.typeProperties.entries.joinToString("\n") { "${it.key}: ${it.value}" })
     }
 }

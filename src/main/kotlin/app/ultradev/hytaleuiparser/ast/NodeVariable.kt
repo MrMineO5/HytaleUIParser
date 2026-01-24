@@ -6,4 +6,6 @@ data class NodeVariable(
 ) : AstNode(), VariableReference {
     override val children: List<AstNode>
         get() = listOf(variableMarker, identifier)
+
+    var declaration: NodeAssignVariable? = null
 }

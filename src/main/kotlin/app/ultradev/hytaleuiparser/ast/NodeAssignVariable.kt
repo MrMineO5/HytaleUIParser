@@ -4,7 +4,7 @@ data class NodeAssignVariable(
     val variable: NodeVariable,
     val assignment: NodeToken,
     val value: AstNode,
-    val endStatement: NodeToken? = null
+    val endStatement: NodeToken
 ) : AstNode() {
     init {
         if (value !is VariableValue) {
@@ -13,5 +13,5 @@ data class NodeAssignVariable(
     }
 
     override val children: List<AstNode>
-        get() = listOf(variable, assignment, value) + listOfNotNull(endStatement)
+        get() = listOf(variable, assignment, value, endStatement)
 }

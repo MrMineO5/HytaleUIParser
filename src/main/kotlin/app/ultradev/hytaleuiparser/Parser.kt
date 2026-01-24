@@ -72,8 +72,8 @@ class Parser(tokens: Iterator<Token>) {
         if (value !is VariableValue) throw ParserException(
             "Expected variable value after assignment operator", assignment
         ) // TODO: AstNode should always have a token?
-        parseEndStatement()
-        return NodeAssignVariable(variable, NodeToken(assignment), value)
+        val end = parseEndStatement()
+        return NodeAssignVariable(variable, NodeToken(assignment), value, end)
     }
 
     private fun parseReference(): NodeReference {
@@ -146,7 +146,14 @@ class Parser(tokens: Iterator<Token>) {
             Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> {
                 val mathOperator = tokens.next()
                 val right = parseVariableValue()
-                NodeMathOperation(variable, NodeToken(mathOperator), right)
+                if (right is NodeMathOperation) {
+                    NodeMathOperation(
+                        NodeMathOperation(variable, NodeToken(mathOperator), right.param1),
+                        right.operator, right.param2
+                    )
+                } else {
+                    NodeMathOperation(variable, NodeToken(mathOperator), right)
+                }
             }
 
             else -> variable
@@ -178,14 +185,6 @@ class Parser(tokens: Iterator<Token>) {
                 )
 
                 else -> throw ParserException("Expected spread, field, or end type", next)
-            }
-
-            val endStatement = tokens.peek()
-            when (endStatement.type) {
-                Token.Type.END_TYPE -> continue
-                Token.Type.FIELD_DELIMITER -> tokens.next()
-
-                else -> throw ParserException("Expected end statement or field delimiter", endStatement)
             }
         }
 
@@ -239,10 +238,6 @@ class Parser(tokens: Iterator<Token>) {
                     when (nextNext.type) {
                         Token.Type.FIELD_MARKER -> {
                             children.add(parseField())
-                            val endStatement = tokens.next()
-                            if (endStatement.type != Token.Type.END_STATEMENT) throw ParserException(
-                                "Expected end statement", endStatement
-                            )
                         }
 
                         Token.Type.START_ELEMENT, Token.Type.SELECTOR_MARKER -> children.add(parseElement())
@@ -262,7 +257,16 @@ class Parser(tokens: Iterator<Token>) {
         val fieldMarker = tokens.next()
         if (fieldMarker.type != Token.Type.FIELD_MARKER) throw ParserException("Expected field marker", fieldMarker)
         val value = parseVariableValue()
-        return NodeField(identifier, NodeToken(fieldMarker), value)
+
+        val next = tokens.peek()
+        val end = when (next.type) {
+            Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT -> NodeToken(tokens.next())
+            Token.Type.END_TYPE -> null
+
+            else -> throw ParserException("Expected field delimiter, end statement, or end type after field", next)
+        }
+
+        return NodeField(identifier, NodeToken(fieldMarker), value, end)
     }
 
     private fun parseSelector(): NodeSelector {
@@ -339,7 +343,15 @@ class Parser(tokens: Iterator<Token>) {
         val spreadMarker = tokens.next()
         if (spreadMarker.type != Token.Type.SPREAD) throw ParserException("Expected spread marker", spreadMarker)
         val variable = parseVariableOrRefMember()
-        return NodeSpread(NodeToken(spreadMarker), variable)
+
+        val next = tokens.peek()
+        val end = when (next.type) {
+            Token.Type.FIELD_DELIMITER -> NodeToken(tokens.next())
+            Token.Type.END_TYPE -> null
+
+            else -> throw ParserException("Expected field delimiter or end type after spread", next)
+        }
+        return NodeSpread(NodeToken(spreadMarker), variable, end)
     }
 
     private fun parseTranslation(): NodeTranslation {

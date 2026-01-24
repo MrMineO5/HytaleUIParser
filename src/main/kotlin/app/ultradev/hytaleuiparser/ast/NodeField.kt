@@ -3,7 +3,8 @@ package app.ultradev.hytaleuiparser.ast
 data class NodeField(
     val identifier: NodeIdentifier,
     val fieldMarker: NodeToken,
-    val value: AstNode
+    val value: AstNode,
+    val endStatement: NodeToken? = null
 ) : AstNode() {
     init {
         if (value !is VariableValue) {
@@ -12,5 +13,5 @@ data class NodeField(
     }
 
     override val children: List<AstNode>
-        get() = listOf(identifier, fieldMarker, value)
+        get() = listOf(identifier, fieldMarker, value) + listOfNotNull(endStatement)
 }

@@ -36,13 +36,14 @@ class Tokenizer(
 
         // Quotes strings
         if (ch == '"') {
-            val sb = StringBuilder()
+            val sb = StringBuilder("\"")
             var peek = peek()
             while (peek != '"' && peek != null) {
                 sb.append(read())
                 peek = peek()
             }
-            read() // Skips quote, does nothing if EOF
+            val ch = read() ?: error("Unterminated string") // Skips quote, does nothing if EOF
+            sb.append(ch)
             return Token(Token.Type.STRING, sb.toString(), startLine, startColumn)
         }
 

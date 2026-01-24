@@ -4,8 +4,8 @@ data class Token(
     val type: Type,
     val text: String,
 
-    val startLine: Int,
-    val startColumn: Int
+    val startLine: Int = -1,
+    val startColumn: Int = -1
 ) {
     enum class Type {
         IDENTIFIER,

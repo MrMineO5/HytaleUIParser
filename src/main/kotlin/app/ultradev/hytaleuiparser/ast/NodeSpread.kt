@@ -2,7 +2,8 @@ package app.ultradev.hytaleuiparser.ast
 
 data class NodeSpread(
     val spreadMarker: NodeToken,
-    val variable: AstNode
+    val variable: AstNode,
+    val endStatement: NodeToken? = null
 ) : AstNode() {
     init {
         if (variable !is VariableReference) {
@@ -11,5 +12,5 @@ data class NodeSpread(
     }
 
     override val children: List<AstNode>
-        get() = listOf(spreadMarker, variable)
+        get() = listOf(spreadMarker, variable) + listOfNotNull(endStatement)
 }
