@@ -1,0 +1,17 @@
+package app.ultradev.hytaleuiparser.ast
+
+data class NodeAssignVariable(
+    val variable: NodeVariable,
+    val assignment: NodeToken,
+    val value: AstNode,
+    val endStatement: NodeToken? = null
+) : AstNode() {
+    init {
+        if (value !is VariableValue) {
+            error("Expected variable value after assignment operator: $value")
+        }
+    }
+
+    override val children: List<AstNode>
+        get() = listOf(variable, assignment, value) + listOfNotNull(endStatement)
+}

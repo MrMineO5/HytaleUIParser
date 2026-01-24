@@ -9,10 +9,10 @@ data class Token(
 ) {
     enum class Type {
         IDENTIFIER,
-        VARIABLE,
-        FILE_REF,
-        ASSIGN,
-        MEMBER,
+        VARIABLE_MARKER,
+        REFERENCE_MARKER,
+        ASSIGNMENT,
+        MEMBER_MARKER,
         END_STATEMENT,
         SPREAD,
         START_ELEMENT,
@@ -20,7 +20,14 @@ data class Token(
         STRING,
         START_TYPE,
         END_TYPE,
-        SELECTOR,
-        FIELD
+        SELECTOR_MARKER,
+        FIELD_MARKER,
+        FIELD_DELIMITER,
+        COMMENT,
+
+        MATH_ADD,
+        MATH_SUBTRACT,
+
+        TRANSLATION_MARKER,
     }
 }

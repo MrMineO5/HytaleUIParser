@@ -7,14 +7,19 @@ import java.io.Reader
 
 class Tokenizer(
     reader: Reader
-) {
+) : Iterator<Token> {
     val reader = BufferedReader(reader)
 
     var line = 0
     var column = 0
 
-    fun nextToken(): Token? {
-        val ch = readNWSP() ?: return null
+    override fun hasNext(): Boolean {
+        skipWhitespace()
+        return peek() != null
+    }
+
+    override fun next(): Token {
+        val ch = readNWSP()!!
 
         val startLine = line
         val startColumn = column - 1
@@ -24,13 +29,16 @@ class Tokenizer(
             return Token(TokenSymbols.TOKEN_MAP[ch]!!, ch.toString(), startLine, startColumn)
         }
 
+        // Dots can be either a member or a spread operator
         if (ch == '.') {
-            if (peek() != '.') return Token(Token.Type.MEMBER, ch.toString(), startLine, startColumn)
+            if (peek() != '.') return Token(Token.Type.MEMBER_MARKER, ch.toString(), startLine, startColumn)
             read()
             if (peek() != '.') error("Found two dots, maybe a typo in spread operator?")
+            read()
             return Token(Token.Type.SPREAD, "...", startLine, startColumn)
         }
 
+        // Quotes strings
         if (ch == '"') {
             val sb = StringBuilder()
             var peek = peek()
@@ -42,12 +50,31 @@ class Tokenizer(
             return Token(Token.Type.STRING, sb.toString(), startLine, startColumn)
         }
 
+        // Comments
+        if (ch == '/' && peek() == '/') {
+            val sb = StringBuilder()
+            sb.append(ch)
+            sb.append(read())
+            while (peek() != '\n') sb.append(read())
+            read()
+            return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+        }
+
         // Parse identifier
         val sb = StringBuilder()
         sb.append(ch)
 
         while (peek()?.isLetterOrDigit() == true) sb.append(read())
         return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn)
+    }
+
+    private fun skipWhitespace() {
+        while (peek()?.isWhitespace() == true) read()
+    }
+
+    private fun skipLine() {
+        while (peek() != '\n') read()
+        read()
     }
 
     private fun readNWSP(): Char? {

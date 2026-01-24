@@ -5,8 +5,10 @@ object TokenSymbols {
     val VARIABLE_MARKER = '@'
     val ASSIGNMENT_MARKER = '='
     val MEMBER_MARKER = '.'
+    val TRANSLATION_MARKER = '%'
     val FIELD_MARKER = ':'
     val SELECTOR_OR_COLOR = '#';
+    val FIELD_DELIMITER = ','
 
     val END_STATEMENT = ';'
 
@@ -17,16 +19,24 @@ object TokenSymbols {
     val END_TYPE = ')'
 
 
+    val MATH_ADD = '+'
+    val MATH_SUBTRACT = '-'
+
+
     val TOKEN_MAP = mapOf(
-        FILE_REF_MARKER to Token.Type.FILE_REF,
-        VARIABLE_MARKER to Token.Type.VARIABLE,
-        ASSIGNMENT_MARKER to Token.Type.ASSIGN,
+        FILE_REF_MARKER to Token.Type.REFERENCE_MARKER,
+        VARIABLE_MARKER to Token.Type.VARIABLE_MARKER,
+        ASSIGNMENT_MARKER to Token.Type.ASSIGNMENT,
         END_STATEMENT to Token.Type.END_STATEMENT,
         START_ELEMENT to Token.Type.START_ELEMENT,
         END_ELEMENT to Token.Type.END_ELEMENT,
         START_TYPE to Token.Type.START_TYPE,
         END_TYPE to Token.Type.END_TYPE,
-        FIELD_MARKER to Token.Type.FIELD,
-        SELECTOR_OR_COLOR to Token.Type.SELECTOR
+        FIELD_MARKER to Token.Type.FIELD_MARKER,
+        SELECTOR_OR_COLOR to Token.Type.SELECTOR_MARKER,
+        FIELD_DELIMITER to Token.Type.FIELD_DELIMITER,
+        MATH_ADD to Token.Type.MATH_ADD,
+        MATH_SUBTRACT to Token.Type.MATH_SUBTRACT,
+        TRANSLATION_MARKER to Token.Type.TRANSLATION_MARKER
     )
 }
