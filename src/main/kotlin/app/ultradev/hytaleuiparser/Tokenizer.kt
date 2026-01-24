@@ -24,10 +24,6 @@ class Tokenizer(
         val startLine = line
         val startColumn = column - 1
 
-        // Basic single meaning symbols have static tokens
-        if (ch in TokenSymbols.TOKEN_MAP.keys) {
-            return Token(TokenSymbols.TOKEN_MAP[ch]!!, ch.toString(), startLine, startColumn)
-        }
 
         // Dots can be either a member or a spread operator
         if (ch == '.') {
@@ -58,6 +54,11 @@ class Tokenizer(
             while (peek() != '\n') sb.append(read())
             read()
             return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+        }
+
+        // Basic single meaning symbols have static tokens
+        if (ch in TokenSymbols.TOKEN_MAP.keys) {
+            return Token(TokenSymbols.TOKEN_MAP[ch]!!, ch.toString(), startLine, startColumn)
         }
 
         // Parse identifier

@@ -21,6 +21,8 @@ object TokenSymbols {
 
     val MATH_ADD = '+'
     val MATH_SUBTRACT = '-'
+    val MATH_MULTIPLY = '*'
+    val MATH_DIVIDE = '/'
 
 
     val TOKEN_MAP = mapOf(
@@ -35,8 +37,12 @@ object TokenSymbols {
         FIELD_MARKER to Token.Type.FIELD_MARKER,
         SELECTOR_OR_COLOR to Token.Type.SELECTOR_MARKER,
         FIELD_DELIMITER to Token.Type.FIELD_DELIMITER,
+
         MATH_ADD to Token.Type.MATH_ADD,
         MATH_SUBTRACT to Token.Type.MATH_SUBTRACT,
+        MATH_MULTIPLY to Token.Type.MATH_MULTIPLY,
+        MATH_DIVIDE to Token.Type.MATH_DIVIDE,
+
         TRANSLATION_MARKER to Token.Type.TRANSLATION_MARKER
     )
 }

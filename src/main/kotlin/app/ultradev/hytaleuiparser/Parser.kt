@@ -3,7 +3,8 @@ package app.ultradev.hytaleuiparser
 import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.token.Token
 
-class Parser(val tokens: TokenIterator) {
+class Parser(tokens: Iterator<Token>) {
+    val tokens = TokenIterator(tokens, skipComments = true)
     val nodes = mutableListOf<AstNode>()
 
     var previous: AstNode? = null
@@ -25,8 +26,8 @@ class Parser(val tokens: TokenIterator) {
         val node = tokens.peek()
 
         return when (node.type) {
-            Token.Type.VARIABLE_MARKER -> parseVariableAssignment()
-            Token.Type.REFERENCE_MARKER -> parseReferenceAssignment()
+            Token.Type.VARIABLE_MARKER -> parseVariableAssignmentOrElement()
+            Token.Type.REFERENCE_MARKER -> parseRefAssignmentOrElement()
 
 
             // Skip comments
@@ -35,7 +36,9 @@ class Parser(val tokens: TokenIterator) {
                 return parseRoot()
             }
 
-            else -> throw ParserException("Unsupported root node type found: ${node}", node)
+            Token.Type.IDENTIFIER -> parseElement()
+
+            else -> throw ParserException("Unsupported root node type found: ${node.type}", node)
         }
     }
 
@@ -114,7 +117,8 @@ class Parser(val tokens: TokenIterator) {
                     Token.Type.START_ELEMENT, Token.Type.SELECTOR_MARKER -> parseElement()
                     Token.Type.START_TYPE -> parseType()
 
-                    Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_TYPE, Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT -> parseStringConstant()
+                    Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_TYPE,
+                    Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> parseStringConstant()
 
                     Token.Type.MEMBER_MARKER -> parseDecimalNumber()
 
@@ -139,7 +143,7 @@ class Parser(val tokens: TokenIterator) {
         val next = tokens.peek()
 
         return when (next.type) {
-            Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT -> {
+            Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> {
                 val mathOperator = tokens.next()
                 val right = parseVariableValue()
                 NodeMathOperation(variable, NodeToken(mathOperator), right)
@@ -194,6 +198,7 @@ class Parser(val tokens: TokenIterator) {
         val identifier = when (ident.type) {
             Token.Type.IDENTIFIER -> parseIdentifier()
             Token.Type.VARIABLE_MARKER -> parseVariable()
+            Token.Type.REFERENCE_MARKER -> parseRefMember()
             else -> throw ParserException("Expected identifier or variable", ident)
         }
 
@@ -205,6 +210,12 @@ class Parser(val tokens: TokenIterator) {
 
         val body = parseElementBody()
         return NodeElement(identifier, body, selector)
+    }
+
+    private fun parseSelectorElement(): NodeSelectorElement {
+        val selector = parseSelector()
+        val body = parseElementBody()
+        return NodeSelectorElement(selector, body)
     }
 
     private fun parseElementBody(): NodeBody {
@@ -219,17 +230,9 @@ class Parser(val tokens: TokenIterator) {
             when (next.type) {
                 Token.Type.END_ELEMENT -> return NodeBody(NodeToken(start), NodeToken(tokens.next()), children)
 
-                Token.Type.VARIABLE_MARKER -> {
-                    // peek(2) would be the variable identifier
-                    // peek(3) is the assignment operator for assignments, and either opening group or selector marker for elements
-                    val nextNextNext = tokens.peek(3)
-                    when (nextNextNext.type) {
-                        Token.Type.ASSIGNMENT -> children.add(parseVariableAssignment())
-                        Token.Type.START_ELEMENT, Token.Type.SELECTOR_MARKER -> children.add(parseElement())
-
-                        else -> throw ParserException("Expected variable assignment or element", nextNextNext)
-                    }
-                }
+                Token.Type.VARIABLE_MARKER -> children.add(parseVariableAssignmentOrElement())
+                Token.Type.REFERENCE_MARKER -> children.add(parseRefAssignmentOrElement())
+                Token.Type.SELECTOR_MARKER -> children.add(parseSelectorElement())
 
                 Token.Type.IDENTIFIER -> {
                     val nextNext = tokens.peek(2)
@@ -320,6 +323,18 @@ class Parser(val tokens: TokenIterator) {
         return NodeRefMember(reference, NodeToken(memberMarker), member)
     }
 
+    private fun parseRefAssignmentOrElement(): AstNode {
+        val next = tokens.peek()
+        if (next.type != Token.Type.REFERENCE_MARKER) throw ParserException("Expected reference marker", next)
+        // peek(2) would be the reference identifier
+        val nextNextNext = tokens.peek(3)
+        return when (nextNextNext.type) {
+            Token.Type.ASSIGNMENT -> parseReferenceAssignment()
+            Token.Type.MEMBER_MARKER -> parseElement()
+            else -> throw ParserException("Expected reference assignment or member", nextNextNext)
+        }
+    }
+
     private fun parseSpread(): NodeSpread {
         val spreadMarker = tokens.next()
         if (spreadMarker.type != Token.Type.SPREAD) throw ParserException("Expected spread marker", spreadMarker)
@@ -343,5 +358,17 @@ class Parser(val tokens: TokenIterator) {
             NodeToken(translationMarker),
             NodeConstant(parts.map { NodeToken(it) }, parts.joinToString("") { it.text })
         )
+    }
+
+    private fun parseVariableAssignmentOrElement(): AstNode {
+        val next = tokens.peek()
+        if (next.type != Token.Type.VARIABLE_MARKER) throw ParserException("Expected variable marker", next)
+        // peek(2) would be the variable identifier
+        val nextNextNext = tokens.peek(3)
+        return when (nextNextNext.type) {
+            Token.Type.ASSIGNMENT -> parseVariableAssignment()
+            Token.Type.START_ELEMENT, Token.Type.SELECTOR_MARKER -> parseElement()
+            else -> throw ParserException("Expected variable assignment or element", nextNextNext)
+        }
     }
 }

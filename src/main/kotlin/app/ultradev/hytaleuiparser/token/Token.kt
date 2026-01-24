@@ -27,6 +27,8 @@ data class Token(
 
         MATH_ADD,
         MATH_SUBTRACT,
+        MATH_MULTIPLY,
+        MATH_DIVIDE,
 
         TRANSLATION_MARKER,
     }
