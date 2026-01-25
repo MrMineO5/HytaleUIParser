@@ -134,7 +134,8 @@ class Validator(
                 is NodeTranslation -> {
                     if (type != TypeType.String) throw ValidatorException("Expected $type, got ${value::class.simpleName}", value)
                 }
-
+                // Throws: @MainWidth = ($WorldTile.@TileWidth + $WorldTile.@TileSpacing) * $WorldTile.@WorldsPerRow + $Common.@DefaultScrollbarStyle.Size;
+                // WorldList.ui:6:93                                                                                   ^^^   
                 else -> throw ValidatorException("Expected primitive value, got ${value::class.simpleName}", value)
             }
         } else if (type.isEnum) {
@@ -206,6 +207,7 @@ class Validator(
             TypeType.String -> {} // All constants are strings
             TypeType.Integer -> value.valueText.toIntOrNull() ?: throw ValidatorException("Invalid integer value: ${value.valueText}", value)
             TypeType.Float -> value.valueText.toFloatOrNull() ?: throw ValidatorException("Invalid float value: ${value.valueText}", value)
+            TypeType.Double -> value.valueText.toDoubleOrNull() ?: throw ValidatorException("Invalid double value: ${value.valueText}", value)
             TypeType.Boolean -> value.valueText.toBooleanStrictOrNull() ?: throw ValidatorException("Invalid boolean value: ${value.valueText}", value)
 
             else -> error("Unknown primitive type: $type")

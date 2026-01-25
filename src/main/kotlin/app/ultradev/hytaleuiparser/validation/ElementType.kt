@@ -57,13 +57,22 @@ enum class ElementType {
     NumberField(
         mapOf(
             "Format" to TypeType.NumberFieldFormat,
-            "Value" to TypeType.Float,
+            // TODO: Ellie uses Double's in Hyui for value/step/min/max. Confirm if float possible.
+            "Value" to TypeType.Double,
+            "Min" to TypeType.Double,
+            "Max" to TypeType.Double,
+            "Step" to TypeType.Double,
+            "Style" to TypeType.InputFieldStyle,
+            "PlaceholderStyle" to TypeType.InputFieldStyle,
         )
     ),
     DropdownBox(
         mapOf(
             "Style" to TypeType.DropdownBoxStyle,
             "NoItemsText" to TypeType.String,
+            "PanelTitleText" to TypeType.String,
+            "MaxSelection" to TypeType.Integer,
+            "ShowLabel" to TypeType.Boolean,
         )
     ),
     Sprite(
@@ -150,6 +159,10 @@ enum class ElementType {
             "SlotsPerRow" to TypeType.Integer,
             "RenderItemQualityBackground" to TypeType.Boolean,
             "AreItemsDraggable" to TypeType.Boolean,
+            "KeepScrollPosition" to TypeType.Boolean,
+            "ShowScrollbar" to TypeType.Boolean,
+            "ScrollbarStyle" to TypeType.ScrollbarStyle,
+            "InfoDisplay" to TypeType.InfoDisplay,
         )
     ),
     ItemIcon,
@@ -171,7 +184,9 @@ enum class ElementType {
     ),
     TabNavigation(
         mapOf(
-            "Style" to TypeType.TabNavigationStyle
+            "Style" to TypeType.TabNavigationStyle,
+            "SelectedTab" to TypeType.String,
+            "AllowUnselection" to TypeType.Boolean,
         )
     ),
     ToggleButton(
@@ -180,13 +195,56 @@ enum class ElementType {
             "CheckedStyle" to TypeType.ButtonStyle,
         )
     ),
-    ItemPreviewComponent,
+    ItemPreviewComponent(
+        mapOf(
+            // We assume float...
+            "ItemScale" to TypeType.Float,
+        )
+    ),
     CharacterPreviewComponent,
-    SliderNumberField,
-    BlockSelector,
+    SliderNumberField(
+        mapOf(
+            "SliderStyle" to TypeType.SliderStyle,
+            "Style" to TypeType.InputFieldStyle,
+            "NumberFieldContainerAnchor" to TypeType.Anchor,
+            "NumberFieldStyle" to TypeType.InputFieldStyle,
+            "Min" to TypeType.Double,
+            "Max" to TypeType.Double,
+            // TODO: Confirm step valid on slider number field.
+            "Step" to TypeType.Double,
+            "Value" to TypeType.Double,
+            
+        )
+    ),
+    BlockSelector(
+        mapOf(
+            "Capacity" to TypeType.Integer,
+            "Style" to TypeType.BlockSelectorStyle,
+        )
+    ),
     ReorderableListGrip,
-    TabButton,
-    FloatSliderNumberField,
+    TabButton(
+        mapOf(
+            "Id" to TypeType.String,
+            // TODO: Confirm if patchstyle, or only string - seen only as string.
+            "Icon" to TypeType.String,
+            "IconSelected" to TypeType.String,
+        )
+    ),
+    // WHY DOES THIS EXIST?
+    FloatSliderNumberField(
+        mapOf(
+            "SliderStyle" to TypeType.SliderStyle,
+            "Style" to TypeType.InputFieldStyle,
+            "NumberFieldContainerAnchor" to TypeType.Anchor,
+            "NumberFieldStyle" to TypeType.InputFieldStyle,
+            "NumberFieldMaxDecimalPlaces" to TypeType.Integer,
+            "Min" to TypeType.Float,
+            "Max" to TypeType.Float,
+            "Step" to TypeType.Float,
+            "Value" to TypeType.Float,
+        )
+    ),
     ActionButton( // TODO: Should we create common properties for all buttons?
         Elements.BUTTON_PROPERTIES + mapOf(
             "KeyBindingLabel" to TypeType.String,
@@ -201,6 +259,17 @@ enum class ElementType {
         "InputBindingKey" to TypeType.String,
         "InputBindingKeyPrefix" to TypeType.String,
     )),
+    MenuItem(
+        mapOf(
+            "Text" to TypeType.String,
+            "TextTooltipStyle" to TypeType.TextTooltipStyle,
+            "PopupStyle" to TypeType.PopupStyle,
+            "Style" to TypeType.MenuItemStyle,
+            "SelectedStyle" to TypeType.MenuItemStyle,
+            "Icon" to TypeType.PatchStyle,
+            "IconAnchor" to TypeType.Anchor
+        )
+    ),
     ;
 
     val properties: Map<String, TypeType>

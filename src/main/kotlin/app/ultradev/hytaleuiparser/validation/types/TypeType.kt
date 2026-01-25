@@ -1,5 +1,8 @@
 package app.ultradev.hytaleuiparser.validation.types
 
+import java.lang.classfile.Label
+import javax.sound.midi.Patch
+
 enum class TypeType(
     val isPrimitive: Boolean,
     val isEnum: Boolean,
@@ -10,6 +13,8 @@ enum class TypeType(
     Integer,
     Boolean,
     Float,
+    // This is used for SliderNumberField
+    Double,
     Color,
 
     Sound(
@@ -46,18 +51,20 @@ enum class TypeType(
         )
     ),
     Anchor(
+        // These can actually all be floats...?
+        // ItemLibraryPanel.ui -> Use of math operators with non-integer values. Does it round? Cast?
         mapOf(
-            "Left" to Integer,
-            "Right" to Integer,
-            "Top" to Integer,
-            "Bottom" to Integer,
-            "Width" to Integer,
-            "Height" to Integer,
-            "MinWidth" to Integer,
-            "MaxWidth" to Integer,
-            "Full" to Integer,
-            "Horizontal" to Integer,
-            "Vertical" to Integer,
+            "Left" to Float,
+            "Right" to Float,
+            "Top" to Float,
+            "Bottom" to Float,
+            "Width" to Float,
+            "Height" to Float,
+            "MinWidth" to Float,
+            "MaxWidth" to Float,
+            "Full" to Float,
+            "Horizontal" to Float,
+            "Vertical" to Float,
         )
     ),
     Padding(
@@ -77,11 +84,16 @@ enum class TypeType(
     )),
 
     Alignment(listOf(
-        "Top", "Bottom", "Left", "Right"
+        // BenchInfoPane.ui - use of "TopLeft"
+        "Top", "Bottom", "Left", "Right", "TopLeft"
     )),
     
     Direction(listOf(
         "Center", "Start", "End"
+    )),
+    InfoDisplay(listOf(
+       // TODO: Confirm how this works, if it is just a list of valid states...
+        "None"
     )),
     LabelStyle(
         // TODO: move this to styles? Inherit from styles?
@@ -152,7 +164,8 @@ enum class TypeType(
     ButtonStyleElement(
         mapOf(
             "Background" to PatchStyle,
-            "LabelStyle" to LabelStyle
+            "LabelStyle" to LabelStyle,
+            "BindingLabelStyle" to LabelStyle
         )
     ),
     ButtonStyle(
@@ -180,6 +193,7 @@ enum class TypeType(
         mapOf(
             "TextColor" to Color,
             "FontSize" to Integer,
+            "RenderBold" to Boolean,
         )
     ),
     TextTooltipStyle(
@@ -188,7 +202,9 @@ enum class TypeType(
             "MaxWidth" to Integer,
             "LabelStyle" to LabelStyle,
             // This is actually an integer in examples.
-            "Padding" to Integer
+            "Padding" to Integer,
+            // ALIGNMENT??? Is this the exact same?
+            "Alignment" to Alignment
         )
     ),
 
@@ -270,6 +286,9 @@ enum class TypeType(
             "CursedIconPatch" to PatchStyle, // TODO: I assumed this is a patchstyle from the name, check this too
             "CursedIconAnchor" to Anchor,
             "ItemStackHoveredSound" to Sound,
+            "ItemStackActivateSound" to Sound,
+            // MouseHover sound?
+            // Close sound?
         )
     ),
 
@@ -277,7 +296,15 @@ enum class TypeType(
         mapOf(
             "LabelStyle" to LabelStyle,
             "Padding" to Padding,
-            "Background" to Color, // TODO: Could be patchstyle
+            "Background" to PatchStyle,
+            "Overlay" to PatchStyle,
+            "IconAnchor" to Anchor,
+            "Anchor" to Anchor,
+            "TooltipStyle" to TextTooltipStyle,
+            // TODO: VERIFY - is it double or float?
+            "IconOpacity" to Float,
+            "ContentMaskTexturePath" to String,
+            
         )
     ),
 
@@ -293,6 +320,7 @@ enum class TypeType(
         mapOf(
             "TabStyle" to TabNavigationStyleElement,
             "SelectedTabStyle" to TabNavigationStyleElement,
+            "TabSounds" to SoundsStyle
         )
     ),
 
@@ -325,6 +353,8 @@ enum class TypeType(
             "PanelAlign" to Alignment,
             "PanelOffset" to Integer,
             "EntryHeight" to Integer,
+            "EntryIconWidth" to Integer,
+            "EntryIconHeight" to Integer,
             "EntriesInViewport" to Integer,
             "HorizontalEntryPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
             "HoveredEntryBackground" to PatchStyle,
@@ -333,9 +363,38 @@ enum class TypeType(
             "EntrySounds" to SoundsStyle,
             "FocusOutlineSize" to Integer,
             "FocusOutlineColor" to Color,
+            "PanelTitleLabelStyle" to LabelStyle,
+            "SelectedEntryIconBackground" to PatchStyle,
         )
     ),
     
+    PopupStyle(
+        mapOf(
+            "Background" to Color,
+            "ButtonPadding" to Padding,
+            "Padding" to Padding,
+            "TooltipStyle" to TextTooltipStyle,
+            "ButtonStyle" to ButtonStyle,
+            "SelectedButtonStyle" to ButtonStyle,
+        )
+    ),
+    MenuItemStyle(
+        mapOf(
+            // These are actually patchstyles, they implement very similar features.
+            "Default" to PatchStyle,
+            "Hovered" to PatchStyle,
+            // TODO: Are there other states?
+        )
+    ),
+    BlockSelectorStyle(
+        mapOf(
+            "ItemGridStyle" to ItemGridStyle,
+            // TODO: Confirm patchstyle or only path? Presented as path only.
+            "SlotDropIcon" to PatchStyle,
+            "SlotDeleteIcon" to PatchStyle,
+            "SlotHoverOverlay" to PatchStyle,
+        )
+    )
     ;
 
     constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptyList())
