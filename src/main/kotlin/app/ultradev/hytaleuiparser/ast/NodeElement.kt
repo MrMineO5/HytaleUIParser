@@ -9,16 +9,26 @@ data class NodeElement(
         get() = listOf(type) + listOfNotNull(selector) + listOf(body)
 
     init {
-        body.elements.forEach {
-            if (it is NodeAssignVariable || it is NodeField || it is NodeElement || it is NodeSelectorElement) return@forEach
+        // TODO: Maybe write this in a cleaner way?
+        body.elements.zipWithNext().forEach { (prev, curr) ->
+            if (curr is NodeAssignVariable) {
+                if (prev !is NodeAssignVariable) error("Variables must come first")
+                return@forEach
+            }
+            if (curr is NodeField) {
+                if (prev is NodeElement || prev is NodeSelectorElement) error("Fields must come before elements")
+                return@forEach
+            }
+            if (curr is NodeElement || curr is NodeSelectorElement) return@forEach
+
             error(
-                "Unexpected node in element body: $it. Expected NodeField, NodeElement, or NodeSelectorElement."
+                "Unexpected node in element body: $curr. Expected NodeField, NodeElement, or NodeSelectorElement."
             )
         }
     }
 
-    val localVariables: List<NodeAssignVariable> = body.elements.filterIsInstance<NodeAssignVariable>()
-    val properties: List<NodeField> = body.elements.filterIsInstance<NodeField>()
-    val childElements: List<NodeElement> = body.elements.filterIsInstance<NodeElement>()
-    val selectorElements: List<NodeSelectorElement> = body.elements.filterIsInstance<NodeSelectorElement>()
+    val localVariables: List<NodeAssignVariable> get() = body.elements.filterIsInstance<NodeAssignVariable>()
+    val properties: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
+    val childElements: List<NodeElement> get() = body.elements.filterIsInstance<NodeElement>()
+    val selectorElements: List<NodeSelectorElement> get() = body.elements.filterIsInstance<NodeSelectorElement>()
 }

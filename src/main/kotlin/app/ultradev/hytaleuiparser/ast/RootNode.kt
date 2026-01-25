@@ -10,7 +10,9 @@ class RootNode(
         }
     }
 
-    val references: List<NodeAssignReference> = children.filterIsInstance<NodeAssignReference>()
-    val variables: List<NodeAssignVariable> = children.filterIsInstance<NodeAssignVariable>()
-    val elements: List<NodeElement> = children.filterIsInstance<NodeElement>()
+    val references: List<NodeAssignReference> get() = children.filterIsInstance<NodeAssignReference>()
+    val variables: List<NodeAssignVariable> get() = children.filterIsInstance<NodeAssignVariable>()
+    val elements: List<NodeElement> get() = children.filterIsInstance<NodeElement>()
+
+    lateinit var variableValues: Map<String, AstNode>
 }

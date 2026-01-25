@@ -6,4 +6,6 @@ abstract class AstNode {
     abstract val children: List<AstNode>
     open val tokens: List<Token>
         get() = children.flatMap { it.tokens }
+
+    val text: String get() = tokens.joinToString("") { it.text }
 }

@@ -6,7 +6,12 @@ enum class ElementType {
     Group(
 
     ),
-    TimerLabel,
+    TimerLabel(
+        mapOf(
+            "Style" to TypeType.LabelStyle,
+            "Seconds" to TypeType.Integer
+        )
+    ),
     Label,
     TextButton,
     Button,

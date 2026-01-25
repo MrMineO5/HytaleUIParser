@@ -4,6 +4,8 @@ import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 object Elements {
     val COMMON_PROPERTIES = mapOf(
-        "Anchor" to TypeType.Anchor
+        "Anchor" to TypeType.Anchor,
+        "Padding" to TypeType.Padding,
+        "Background" to TypeType.PatchStyle,
     )
 }

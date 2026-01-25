@@ -11,12 +11,15 @@ data class NodeType(
 
     init {
         body.elements.forEach {
-            if (it is NodeField || it is NodeSpread || it is NodeRefMember) return@forEach
+            if (it is NodeField || it is NodeSpread) return@forEach
             error(
                 "Unexpected node in element body: $it. Expected NodeField or NodeSpread."
             )
         }
     }
+
+    val spreads: List<NodeSpread> get() = body.elements.filterIsInstance<NodeSpread>()
+    val fields: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
 
     lateinit var derivedType: TypeType
 }
