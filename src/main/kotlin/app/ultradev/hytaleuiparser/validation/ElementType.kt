@@ -4,7 +4,10 @@ import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 enum class ElementType {
     Group(
-
+        mapOf(
+            "LayoutMode" to TypeType.LayoutMode,
+            "ScrollbarStyle" to TypeType.ScrollbarStyle,
+        )
     ),
     TimerLabel(
         mapOf(
@@ -12,7 +15,12 @@ enum class ElementType {
             "Seconds" to TypeType.Integer
         )
     ),
-    Label,
+    Label( 
+        mapOf(
+            "Style" to TypeType.LabelStyle,
+            "Text" to TypeType.String,
+        )
+    ),
     TextButton,
     Button,
     CheckBox,

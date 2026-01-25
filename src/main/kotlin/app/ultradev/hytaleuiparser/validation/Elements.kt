@@ -7,5 +7,9 @@ object Elements {
         "Anchor" to TypeType.Anchor,
         "Padding" to TypeType.Padding,
         "Background" to TypeType.PatchStyle,
+        "FlexWeight" to TypeType.Integer,
+        "HitTestVisible" to TypeType.Boolean,
+        "Visible" to TypeType.Boolean,
+        
     )
 }

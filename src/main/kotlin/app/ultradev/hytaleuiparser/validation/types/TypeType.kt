@@ -11,6 +11,47 @@ enum class TypeType(
     Boolean,
     Float,
     Double,
+    ScrollbarStyle(
+        mapOf(
+            "OnlyVisibleWhenHovered" to Boolean,
+            "Spacing" to Integer, 
+            "Size" to Integer
+            // TODO: Check size/spacing data types.
+        )
+    ),
+    SoundsStyleElement(
+        mapOf(
+            "SoundPath" to TypeType.String,
+            "MinPitch" to TypeType.Float,
+            "MaxPitch" to TypeType.Float,
+            "Volume" to TypeType.Integer, // TODO: Confirm volume is not actually float with Set.
+        )
+    ),
+    SoundsStyle(
+        mapOf(
+            "Activate" to TypeType.SoundsStyleElement,
+            "MouseHover" to TypeType.SoundsStyleElement,
+            "Close" to TypeType.SoundsStyleElement,
+            "Context" to TypeType.SoundsStyleElement, // TODO: Verify this appears on all sound styles.
+        )
+    ),
+ 
+    LayoutMode(
+        listOf(
+            "TopScrolling",
+            "MiddleCenter",
+            "Left",
+            "Right",
+            "Full",
+            "Middle",
+            "Bottom",
+            "BottomScrolling",
+            "CenterMiddle",
+            "Top",
+            "LeftCenterWrap",
+            "Center"
+        )
+    ),
     Anchor(
         mapOf(
             "Left" to Integer,
@@ -68,7 +109,29 @@ enum class TypeType(
             "Anchor" to Anchor,
         )
     ),
-    
+    CheckedStyleInnerElement(
+    mapOf(
+            "DefaultBackground" to TypeType.PatchStyle,
+            "HoveredBackground" to TypeType.PatchStyle,
+            "PressedBackground" to TypeType.PatchStyle,
+            "DisabledBackground" to TypeType.PatchStyle,
+            "ChangedSound" to TypeType.SoundsStyleElement,
+        )
+    ),
+    CheckedStyleElement(
+        mapOf(
+            "Checked" to TypeType.CheckedStyleInnerElement,
+            "Unchecked" to TypeType.CheckedStyleInnerElement
+        )
+    ),
+    CheckedStyle(
+        mapOf(
+            "Default" to CheckedStyleElement,
+            "Hovered" to CheckedStyleElement,
+            "Pressed" to TypeType.CheckedStyleElement,
+            "Sounds" to TypeType.SoundsStyle,
+        )
+    ),
     // Button styles - used by Button, TextButton, BackButton, ActionButton, ToggleButton, TabButton, ItemSlotButton
     ButtonStyleElement(
         mapOf(
