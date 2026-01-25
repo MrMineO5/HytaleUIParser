@@ -12,6 +12,8 @@ data class NodeAssignVariable(
         }
     }
 
+    val valueAsVariable: VariableValue = value as VariableValue
+
     override val children: List<AstNode>
         get() = listOf(variable, assignment, value, endStatement)
 }

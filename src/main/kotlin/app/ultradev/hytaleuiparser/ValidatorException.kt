@@ -8,6 +8,6 @@ class ValidatorException(
     cause: Throwable? = null,
 ) : Exception(message, cause) {
     override fun toString(): String {
-        return "ValidatorException(message='$message', node=$node)"
+        return "ValidatorException(message='$message', position=${node.file.path}:${node.tokens.first().let { "${it.startLine+1}:${it.startColumn+1}" }}, node=${node.text}, parsed=$node)"
     }
 }

@@ -14,5 +14,6 @@ class RootNode(
     val variables: List<NodeAssignVariable> get() = children.filterIsInstance<NodeAssignVariable>()
     val elements: List<NodeElement> get() = children.filterIsInstance<NodeElement>()
 
+    lateinit var path: String
     lateinit var variableValues: Map<String, AstNode>
 }

@@ -18,13 +18,16 @@ class Validator(
     fun validateRoot(path: String) {
         if (validated.contains(path)) return
         val root = files[path] ?: error("No root node for $path")
+        root.path = path
+        root.initFile(root)
         try {
-            val scope = Scope(references = root.references.associate {
-                it.variable.identifier.identifier to path.resolveNeighbour(it.filePath.valueText)
-            }.toMutableMap())
-
+            val scope = Scope(
+                root.references.associate {
+                    it.variable.identifier.identifier to path.resolveNeighbour(it.filePath.valueText)
+                }.toMutableMap(), root.variables
+            )
             root.variables.forEach {
-                validateAndAppendVariable(it, scope)
+                it.valueAsVariable._initResolvedScope(scope)
             }
 
             root.variableValues = scope.variables
@@ -57,9 +60,11 @@ class Validator(
     }
 
     fun validateElement(node: NodeElement, scope: Scope) {
-        val childScope = Scope(scope)
+        node.resolvedScope = scope
+
+        val childScope = Scope(scope, node.localVariables)
         node.localVariables.forEach {
-            validateAndAppendVariable(it, childScope)
+            it.valueAsVariable._initResolvedScope(childScope)
         }
 
         val elementType = findElementType(node, scope)
@@ -79,55 +84,13 @@ class Validator(
         node.selectorElements.forEach { validateSelectorElement(node, it, childScope) }
     }
 
-    fun validateAndAppendVariable(assignment: NodeAssignVariable, scope: Scope) {
-        validateVariableAssignment(assignment, scope)
-        scope.variables[assignment.variable.identifier.identifier] = assignment.value
-    }
-
-    fun validateVariableAssignment(assignment: NodeAssignVariable, scope: Scope) {
-        if (scope.variables[assignment.variable.identifier.identifier] != null) throw ValidatorException(
-            "Variable ${assignment.variable.identifier.identifier} already defined",
-            assignment
-        )
-
-        val value = assignment.value
-
-        when (value) {
-            is NodeElement -> validateElement(value, scope)
-            is NodeVariable -> {
-                try {
-                    scope.lookupVariable(value.identifier.identifier)
-                } catch (e: Exception) {
-                    throw ValidatorException("Variable ${value.identifier.identifier} not found", assignment, e)
-                }
-            }
-
-            is NodeRefMember -> {
-                try {
-                    lookupRefMember(value, scope)
-                } catch (e: Exception) {
-                    throw ValidatorException(
-                        "Reference ${value.text} not found",
-                        assignment,
-                        e
-                    )
-                }
-            }
-
-            is NodeType -> {} // Cannot validate here, need to validate on usage
-            is NodeColor, is NodeConstant -> {} // No validation needed
-
-            else -> throw ValidatorException("Unknown variable value type: ${value::class.simpleName}", assignment)
-        }
-    }
-
     private fun lookupSelectorElementSource(parent: NodeElement, selector: String, scope: Scope): NodeElement {
         val parentDef = when (parent.type) {
             is NodeIdentifier -> error("Cannot have selector elements inside plain elements")
-            is NodeVariable -> scope.lookupVariable(parent.type.identifier.identifier) as NodeElement
-            is NodeRefMember -> lookupRefMember(parent.type, scope) as NodeElement
+            is NodeVariable, is NodeRefMember -> deepLookupReference(parent.type, scope) as NodeElement
             else -> error("Unknown parent type: ${parent.type}")
         }
+        validateElement(parentDef, parentDef.resolvedScope)
         val sel = parentDef.childElements.find { it.selector?.identifier?.identifier == selector }
             ?: error("No selector element $selector on ${parentDef.type}") // TODO: Can selectors be transitive?
         return sel
@@ -135,11 +98,12 @@ class Validator(
 
     fun validateSelectorElement(parent: NodeElement, node: NodeSelectorElement, scope: Scope) {
         val source = lookupSelectorElementSource(parent, node.selector.identifier.identifier, scope)
+        validateElement(source, source.resolvedScope)
         val elementType = source.resolvedType
 
-        val childScope = Scope(scope)
+        val childScope = Scope(scope, node.localVariables)
         node.localVariables.forEach {
-            validateAndAppendVariable(it, childScope)
+            it.valueAsVariable._initResolvedScope(childScope)
         }
 
         if (!elementType.allowsChildren()) assert(node.childElements.isEmpty()) {
@@ -158,27 +122,39 @@ class Validator(
     fun validateProperty(node: AstNode, type: TypeType, scope: Scope) {
         when (node) {
             is NodeType -> validateType(node, type, scope)
-            is NodeVariable -> {
-                val value = scope.lookupVariable(node.identifier.identifier)
-                if (value !is NodeType) error("Expected type, got ${value::class.simpleName}")
-                validateType(value, type, scope)
+            is NodeVariable, is NodeRefMember -> {
+                val value = deepLookupReference(node, scope)
+                if (type.isPrimitive) {
+                    when (value) {
+                        is NodeConstant -> {}
+                        is NodeMathOperation -> {
+                            validateProperty(value.param1, type, scope)
+                            validateProperty(value.param2, type, scope)
+                            // TODO: Validate allowed operations
+                        }
+
+                        else -> throw ValidatorException("Expected primitive value, got ${value::class.simpleName}", value)
+                    }
+                } else if (type.isEnum) {
+                    if (value !is NodeConstant) throw ValidatorException("Expected constant, got ${value::class.simpleName}", value)
+                    if (value.valueText !in type.enum) throw ValidatorException("Invalid enum value: ${value.valueText}", value)
+                } else {
+                    if (value !is NodeType) throw ValidatorException("Expected type, got ${value::class.simpleName}", value)
+                    validateType(value, type, value.resolvedScope)
+                }
             }
         }
     }
 
     fun validateType(node: NodeType, type: TypeType, scope: Scope) {
         node.spreads.forEach { spread ->
-            val value = when (spread.variable) {
-                is NodeVariable -> scope.lookupVariable(spread.variable.identifier.identifier)
-                is NodeRefMember -> lookupRefMember(spread.variable, scope)
-                else -> error("Expected variable or reference")
-            }
-            if (value !is NodeType) error("Expected type, got ${value::class.simpleName}")
-            validateType(value, type, scope)
+            val value = deepLookupReference(spread.variableAsReference, scope)
+            if (value !is NodeType) throw ValidatorException("Expected type, got ${value::class.simpleName}", value)
+            validateType(value, type, value.resolvedScope)
         }
         node.fields.forEach { field ->
             val reqType = type.allowedFields[field.identifier.identifier]
-                ?: error("Unknown field: ${field.identifier.identifier} on $type for node $node")
+                ?: throw ValidatorException("Unknown field: ${field.identifier.identifier} on $type", field)
             validateProperty(field.value, reqType, scope)
         }
     }
@@ -188,8 +164,17 @@ class Validator(
         validateRoot(reference)
         val rootNode = files[reference]!!
         return rootNode.variableValues[ref.member.identifier.identifier] ?: throw ValidatorException(
-            "No member ${ref.member.identifier.identifier} on ${ref.reference.identifier.identifier}",
-            ref
+            "No member ${ref.member.identifier.identifier} on ${ref.reference.identifier.identifier}", ref
         )
+    }
+
+    fun deepLookupReference(reference: VariableReference, scope: Scope): AstNode {
+//        println("Looking up ${(reference as AstNode).text} in $scope")
+        val result = when (reference) {
+            is NodeRefMember -> lookupRefMember(reference, scope)
+            is NodeVariable -> scope.lookupVariable(reference.identifier.identifier)
+        }
+        if (result is VariableReference) return deepLookupReference(result, result.resolvedScope)
+        return result
     }
 }

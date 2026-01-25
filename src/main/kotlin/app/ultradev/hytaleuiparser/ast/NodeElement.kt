@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.validation.ElementType
+import app.ultradev.hytaleuiparser.validation.Scope
 
 data class NodeElement(
     val type: AstNode,
@@ -34,5 +35,10 @@ data class NodeElement(
     val childElements: List<NodeElement> get() = body.elements.filterIsInstance<NodeElement>()
     val selectorElements: List<NodeSelectorElement> get() = body.elements.filterIsInstance<NodeSelectorElement>()
 
+    lateinit var resolvedScope: Scope
     lateinit var resolvedType: ElementType
+
+    override fun _initResolvedScope(scope: Scope) {
+        resolvedScope = scope
+    }
 }

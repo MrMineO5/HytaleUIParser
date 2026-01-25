@@ -1,5 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.validation.Scope
+
 data class NodeVariable(
     val variableMarker: NodeToken,
     val identifier: NodeIdentifier
@@ -7,5 +9,9 @@ data class NodeVariable(
     override val children: List<AstNode>
         get() = listOf(variableMarker, identifier)
 
-    var declaration: NodeAssignVariable? = null
+    override lateinit var resolvedScope: Scope
+
+    override fun _initResolvedScope(scope: Scope) {
+        resolvedScope = scope
+    }
 }

@@ -13,4 +13,6 @@ data class NodeSpread(
 
     override val children: List<AstNode>
         get() = listOf(spreadMarker, variable) + listOfNotNull(endStatement)
+
+    val variableAsReference: VariableReference = variable as VariableReference
 }

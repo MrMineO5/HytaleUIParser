@@ -1,5 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 data class NodeType(
@@ -21,5 +22,10 @@ data class NodeType(
     val spreads: List<NodeSpread> get() = body.elements.filterIsInstance<NodeSpread>()
     val fields: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
 
+    lateinit var resolvedScope: Scope
     lateinit var derivedType: TypeType
+
+    override fun _initResolvedScope(scope: Scope) {
+        resolvedScope = scope
+    }
 }

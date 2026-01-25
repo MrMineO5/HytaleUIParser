@@ -1,3 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
-interface VariableReference : VariableValue
+import app.ultradev.hytaleuiparser.validation.Scope
+
+sealed interface VariableReference : VariableValue {
+    val resolvedScope: Scope
+}

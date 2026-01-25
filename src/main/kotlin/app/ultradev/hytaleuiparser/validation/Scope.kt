@@ -1,27 +1,48 @@
 package app.ultradev.hytaleuiparser.validation
 
+import app.ultradev.hytaleuiparser.ValidatorException
 import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.ast.NodeAssignVariable
 import app.ultradev.hytaleuiparser.ast.NodeVariable
-import app.ultradev.hytaleuiparser.ast.RootNode
-import java.nio.file.Path
 
 class Scope(
     val parent: Scope? = null,
     val variables: MutableMap<String, AstNode> = mutableMapOf(),
-    val references: MutableMap<String, String> = mutableMapOf()
+    val references: Map<String, String> = emptyMap()
 ) {
     constructor(parent: Scope?, variables: List<NodeAssignVariable>) : this(
         parent,
         variables.associate { it.variable.identifier.identifier to it.value }.toMutableMap()
-    )
-
-    fun lookupVariable(name: String): AstNode {
-        val variable = lookupVariable0(name)
-        if (variable is NodeVariable) return lookupVariable(variable.identifier.identifier)
-        return variable
+    ) {
+        val seenKeys = mutableSetOf<String>()
+        variables.forEach {
+            if (seenKeys.contains(it.variable.identifier.identifier))
+                throw ValidatorException("Duplicate variable: ${it.variable.identifier.identifier}", it)
+            seenKeys.add(it.variable.identifier.identifier)
+        }
     }
-    fun lookupReference(name: String): String = references[name] ?: parent?.lookupReference(name) ?: error("Reference $name not found")
 
-    private fun lookupVariable0(name: String): AstNode = variables[name] ?: parent?.lookupVariable(name) ?: error("Variable $name not found")
+    constructor(references: Map<String, String>, variables: List<NodeAssignVariable>) : this(
+        null,
+        variables.associate { it.variable.identifier.identifier to it.value }.toMutableMap(),
+        references
+    ) {
+        val seenKeys = mutableSetOf<String>()
+        variables.forEach {
+            if (seenKeys.contains(it.variable.identifier.identifier))
+                throw ValidatorException("Duplicate variable: ${it.variable.identifier.identifier}", it)
+            seenKeys.add(it.variable.identifier.identifier)
+        }
+    }
+
+    fun lookupVariable(name: String): AstNode = variables[name] ?: parent?.lookupVariable(name) ?: error("Variable $name not found, scope: $this")
+    fun lookupReference(name: String): String = references[name] ?: parent?.lookupReference(name) ?: error("Reference $name not found, scope: ")
+
+    override fun toString(): String {
+        return "Scope(\n" +
+                "${parent.toString().prependIndent("  ")},\n" +
+                "  variables=[${variables.keys.joinToString(", ")}],\n" +
+                "  references=${references}\n" +
+                ")"
+    }
 }

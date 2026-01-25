@@ -1,4 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
-interface VariableValue {
+import app.ultradev.hytaleuiparser.validation.Scope
+
+sealed interface VariableValue {
+    fun _initResolvedScope(scope: Scope) {}
 }
