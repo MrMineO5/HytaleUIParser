@@ -54,7 +54,7 @@ class HytaleTests {
         }.associate {
             val value = try {
                 val tokenizer = Tokenizer(it.reader())
-                val parser = Parser(TokenIterator(tokenizer))
+                val parser = Parser(tokenizer)
                 parser.finish()
             } catch(e: Exception) {
                 throw RuntimeException("Failed to parse ${it.name}", e)

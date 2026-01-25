@@ -22,10 +22,8 @@ data class NodeType(
     val spreads: List<NodeSpread> get() = body.elements.filterIsInstance<NodeSpread>()
     val fields: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
 
-    lateinit var resolvedScope: Scope
-    lateinit var derivedType: TypeType
-
-    override fun _initResolvedScope(scope: Scope) {
-        resolvedScope = scope
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        body.setScope(scope)
     }
 }

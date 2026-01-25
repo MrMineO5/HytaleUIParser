@@ -1,5 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.validation.Scope
+
 data class NodeField(
     val identifier: NodeIdentifier,
     val fieldMarker: NodeToken,
@@ -14,4 +16,9 @@ data class NodeField(
 
     override val children: List<AstNode>
         get() = listOf(identifier, fieldMarker, value) + listOfNotNull(endStatement)
+
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        value.setScope(scope)
+    }
 }

@@ -11,6 +11,7 @@ enum class TypeType(
     Boolean,
     Float,
     Double,
+    Color,
 
     Sound(
         mapOf(
@@ -82,7 +83,7 @@ enum class TypeType(
             "FontSize" to Integer,
             "FontName" to String, // "Primary", "Secondary"
             "LetterSpacing" to Integer,
-            "TextColor" to String,
+            "TextColor" to Color,
             "RenderBold" to Boolean,
             "RenderUppercase" to Boolean,
             "RenderItalics" to Boolean,
@@ -99,7 +100,7 @@ enum class TypeType(
             "VerticalBorder" to Integer,
             "HorizontalBorder" to Integer,
             "Border" to Integer,
-            "Color" to String, 
+            "Color" to Color,
             "LabelStyle" to LabelStyle,
             "Anchor" to Anchor,
         )
@@ -186,7 +187,7 @@ enum class TypeType(
 
     ColorPickerTextFieldDecorationElement( // TODO: Maybe this should actually correspond to a more commonly used structure
         mapOf(
-            "Background" to String,
+            "Background" to Color,
         )
     ),
     ColorPickerTextFieldDecoration(
@@ -197,10 +198,12 @@ enum class TypeType(
 
     ColorPickerStyle(
         mapOf(
-            "OpacitySelectorBackground" to String,
+            "OpacitySelectorBackground" to String, // TODO: Are these PatchStyles?
             "ButtonBackground" to String,
             "ButtonFill" to String,
-            "TextFieldDecoration" to ColorPickerTextFieldDecoration
+            "TextFieldDecoration" to ColorPickerTextFieldDecoration,
+            "TextFieldPadding" to Padding,
+            "TextFieldHeight" to Integer,
         )
     ),
 
@@ -209,6 +212,7 @@ enum class TypeType(
     ColorPickerDropdownBoxStyle(
         mapOf(
             "ColorPickerStyle" to ColorPickerStyle,
+
         )
     )
     
@@ -217,4 +221,6 @@ enum class TypeType(
     constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptyList())
     constructor() : this(true, false, emptyMap(), emptyList())
     constructor(enum: List<String>) : this(false, true, emptyMap(), enum)
+
+    fun canNegate(): Boolean = this == Integer || this == Float || this == Double
 }

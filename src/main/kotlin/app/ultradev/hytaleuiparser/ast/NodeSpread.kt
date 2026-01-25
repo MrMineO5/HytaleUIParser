@@ -1,5 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.validation.Scope
+
 data class NodeSpread(
     val spreadMarker: NodeToken,
     val variable: AstNode,
@@ -15,4 +17,9 @@ data class NodeSpread(
         get() = listOf(spreadMarker, variable) + listOfNotNull(endStatement)
 
     val variableAsReference: VariableReference = variable as VariableReference
+
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        variable.setScope(scope)
+    }
 }

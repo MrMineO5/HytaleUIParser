@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.token
 
 object TokenSymbols {
-    val FILE_REF_MARKER = '$'
+    val REFERENCE_MARKER = '$'
     val VARIABLE_MARKER = '@'
     val ASSIGNMENT_MARKER = '='
     val MEMBER_MARKER = '.'
@@ -29,7 +29,7 @@ object TokenSymbols {
     val END_ARRAY = ']'
     
     val TOKEN_MAP = mapOf(
-        FILE_REF_MARKER to Token.Type.REFERENCE_MARKER,
+        REFERENCE_MARKER to Token.Type.REFERENCE_MARKER,
         VARIABLE_MARKER to Token.Type.VARIABLE_MARKER,
         ASSIGNMENT_MARKER to Token.Type.ASSIGNMENT,
         END_STATEMENT to Token.Type.END_STATEMENT,

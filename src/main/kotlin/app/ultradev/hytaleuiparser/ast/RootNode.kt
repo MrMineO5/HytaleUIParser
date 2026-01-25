@@ -1,6 +1,8 @@
 package app.ultradev.hytaleuiparser.ast
 
-class RootNode(
+import app.ultradev.hytaleuiparser.validation.Scope
+
+data class RootNode(
     override val children: List<AstNode>
 ) : AstNode() {
     init {
@@ -16,4 +18,9 @@ class RootNode(
 
     lateinit var path: String
     lateinit var variableValues: Map<String, AstNode>
+
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        children.forEach { it.setScope(scope) }
+    }
 }

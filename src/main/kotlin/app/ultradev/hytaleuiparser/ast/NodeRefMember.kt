@@ -10,9 +10,8 @@ data class NodeRefMember(
     override val children: List<AstNode>
         get() = listOf(reference, memberMarker, member)
 
-    override lateinit var resolvedScope: Scope
-
-    override fun _initResolvedScope(scope: Scope) {
-        resolvedScope = scope
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        reference.setScope(scope)
     }
 }
