@@ -43,7 +43,9 @@ enum class ElementType {
     TabButton,
     FloatSliderNumberField,
     ActionButton,
-    
+    Panel,
+    LabeledCheckBox,
+    PlayerPreviewComponent,
     ;
 
     val properties: Map<String, TypeType>

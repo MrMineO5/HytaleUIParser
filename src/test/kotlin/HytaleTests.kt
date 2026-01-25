@@ -12,6 +12,11 @@ class HytaleTests {
     fun testFile() {
         val dir = hytaleAssetsDir.resolve("Common/UI/Test")
 
+        val testFile = dir.resolve("InGame/Hud/PortalPanel.ui")
+
+        val tokenizer = Tokenizer(testFile.reader())
+        tokenizer.forEach(::println)
+
         dir.walk().forEach {
             if (!it.isFile) return@forEach
             if (it.extension != "ui") return@forEach

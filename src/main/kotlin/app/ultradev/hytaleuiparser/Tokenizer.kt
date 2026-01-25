@@ -48,13 +48,29 @@ class Tokenizer(
         }
 
         // Comments
-        if (ch == '/' && peek() == '/') {
-            val sb = StringBuilder()
-            sb.append(ch)
-            sb.append(read())
-            while (peek() != '\n') sb.append(read())
-            read()
-            return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+        if (ch == '/') {
+            if (peek() == '/') {
+                val sb = StringBuilder()
+                sb.append(ch)
+                sb.append(read())
+                while (peek() != '\n') sb.append(read())
+                read()
+                return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+            }
+            if (peek() == '*') {
+                val sb = StringBuilder()
+                sb.append(ch)
+                sb.append(read())
+                while (true) {
+                    while (peek() != '*') sb.append(read())
+                    sb.append(read())
+                    if (peek() == '/') {
+                        sb.append(read())
+                        break
+                    }
+                }
+                return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+            }
         }
 
         // Basic single meaning symbols have static tokens
@@ -70,8 +86,10 @@ class Tokenizer(
         return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn)
     }
 
+    fun Char.customIsWhitespace(): Boolean = this.isWhitespace() || this == '﻿'
+
     private fun skipWhitespace() {
-        while (peek()?.isWhitespace() == true) read()
+        while (peek()?.customIsWhitespace() == true) read()
     }
 
     private fun skipLine() {
@@ -81,7 +99,7 @@ class Tokenizer(
 
     private fun readNWSP(): Char? {
         var ch = read()
-        while (ch?.isWhitespace() == true) ch = read()
+        while (ch?.customIsWhitespace() == true) ch = read()
         return ch
     }
 

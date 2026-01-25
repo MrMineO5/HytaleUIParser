@@ -9,6 +9,7 @@ import app.ultradev.hytaleuiparser.ast.NodeIdentifier
 import app.ultradev.hytaleuiparser.ast.NodeSelectorElement
 import app.ultradev.hytaleuiparser.ast.NodeToken
 import app.ultradev.hytaleuiparser.ast.NodeType
+import app.ultradev.hytaleuiparser.ast.NodeVariable
 import app.ultradev.hytaleuiparser.ast.RootNode
 import app.ultradev.hytaleuiparser.validation.ElementType
 
@@ -50,7 +51,11 @@ object Validator {
             }
 
             node.properties.find { it.identifier.identifier == "Anchor" }?.let {
-                val value = it.value as NodeType
+                val value = it.value
+                when (value) {
+                    is NodeType -> {}
+                    is NodeVariable -> {}
+                }
                 println(value)
             }
         }

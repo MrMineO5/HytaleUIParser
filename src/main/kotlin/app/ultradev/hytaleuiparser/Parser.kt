@@ -166,6 +166,16 @@ class Parser(tokens: Iterator<Token>) {
                 }
             }
 
+            Token.Type.MEMBER_MARKER -> {
+                var current = variable
+                while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
+                    val memberMarker = tokens.next()
+                    val member = parseIdentifier()
+                    current = NodeMemberField(current, NodeToken(memberMarker), member)
+                }
+                current
+            }
+
             else -> variable
         }
     }
