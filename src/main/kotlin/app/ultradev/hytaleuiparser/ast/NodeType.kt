@@ -11,7 +11,7 @@ data class NodeType(
 
     init {
         body.elements.forEach {
-            if (it is NodeField || it is NodeSpread) return@forEach
+            if (it is NodeField || it is NodeSpread || it is NodeRefMember) return@forEach
             error(
                 "Unexpected node in element body: $it. Expected NodeField or NodeSpread."
             )

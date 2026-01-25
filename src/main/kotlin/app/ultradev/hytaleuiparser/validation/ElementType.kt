@@ -20,6 +20,7 @@ enum class ElementType {
     FloatSlider,
     MultilineTextField,
     ColorPickerDropdownBox,
+    CircularProgressBar,
     ProgressBar,
     Slider,
     ItemSlotButton,
@@ -28,7 +29,14 @@ enum class ElementType {
     SceneBlur,
     ItemGrid,
     ItemIcon,
-    ColorPicker
+    ColorPicker,
+    
+    // CLIENT elements.
+    BackgroundImage,
+    TabNavigation,
+    ToggleButton,
+    ItemPreviewComponent,
+    
     ;
 
     val properties: Map<String, TypeType>

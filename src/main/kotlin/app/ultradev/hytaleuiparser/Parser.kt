@@ -131,6 +131,7 @@ class Parser(tokens: Iterator<Token>) {
             Token.Type.TRANSLATION_MARKER -> parseTranslation()
             Token.Type.START_TYPE -> parseType()
             Token.Type.SELECTOR_MARKER -> parseColor()
+            Token.Type.START_ARRAY -> parseArray()
             Token.Type.MATH_SUBTRACT -> {
                 val minus = tokens.next()
                 val value = parseVariableValue()
@@ -160,6 +161,36 @@ class Parser(tokens: Iterator<Token>) {
         }
     }
 
+    private fun parseArray(): NodeArray {
+        val start = tokens.next()
+        if (start.type != Token.Type.START_ARRAY) throw ParserException("Expected start array", start)
+
+        val elements = mutableListOf<AstNode>()
+        while (tokens.hasNext()) {
+            val next = tokens.peek()
+            if (next.type == Token.Type.END_ARRAY) {
+                return NodeArray(NodeToken(start), elements, NodeToken(tokens.next()))
+            }
+
+            val value = parseVariableValue()
+            elements.add(value)
+
+            val afterValue = tokens.peek()
+            when (afterValue.type) {
+                Token.Type.FIELD_DELIMITER -> {
+                    val delimiter = tokens.next()
+                    elements.add(NodeToken(delimiter))
+                }
+
+                Token.Type.END_ARRAY -> return NodeArray(NodeToken(start), elements, NodeToken(tokens.next()))
+
+                else -> throw ParserException("Expected array element delimiter or end array", afterValue)
+            }
+        }
+
+        throw ParserException("Unclosed array", start)
+    }
+
     private fun parseType(): NodeType {
         var start = tokens.peek()
 
@@ -179,7 +210,8 @@ class Parser(tokens: Iterator<Token>) {
             when (next.type) {
                 Token.Type.IDENTIFIER -> children.add(parseField())
                 Token.Type.SPREAD -> children.add(parseSpread())
-
+                Token.Type.REFERENCE_MARKER -> children.add(parseRefMember())
+                
                 Token.Type.END_TYPE -> return NodeType(
                     type, NodeBody(NodeToken(start), NodeToken(tokens.next()), children)
                 )

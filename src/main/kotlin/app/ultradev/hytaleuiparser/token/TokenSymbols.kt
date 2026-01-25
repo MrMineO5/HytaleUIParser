@@ -24,7 +24,10 @@ object TokenSymbols {
     val MATH_MULTIPLY = '*'
     val MATH_DIVIDE = '/'
 
-
+    val START_ARRAY = '['
+    
+    val END_ARRAY = ']'
+    
     val TOKEN_MAP = mapOf(
         FILE_REF_MARKER to Token.Type.REFERENCE_MARKER,
         VARIABLE_MARKER to Token.Type.VARIABLE_MARKER,
@@ -37,7 +40,10 @@ object TokenSymbols {
         FIELD_MARKER to Token.Type.FIELD_MARKER,
         SELECTOR_OR_COLOR to Token.Type.SELECTOR_MARKER,
         FIELD_DELIMITER to Token.Type.FIELD_DELIMITER,
-
+        
+        START_ARRAY to Token.Type.START_ARRAY,
+        END_ARRAY to Token.Type.END_ARRAY,
+        
         MATH_ADD to Token.Type.MATH_ADD,
         MATH_SUBTRACT to Token.Type.MATH_SUBTRACT,
         MATH_MULTIPLY to Token.Type.MATH_MULTIPLY,

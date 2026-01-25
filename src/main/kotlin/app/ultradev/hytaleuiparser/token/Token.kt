@@ -24,6 +24,9 @@ data class Token(
         FIELD_MARKER,
         FIELD_DELIMITER,
         COMMENT,
+        
+        START_ARRAY,
+        END_ARRAY,
 
         MATH_ADD,
         MATH_SUBTRACT,
