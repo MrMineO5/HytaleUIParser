@@ -10,6 +10,7 @@ data class NodeConstant(
         listOf(token),
         valueText
     )
+    constructor(token: Token) : this(NodeToken(token), token.text)
 
     companion object {
         fun quoted(valueText: String) = NodeConstant(NodeToken(Token(Token.Type.STRING, "\"$valueText\"")), valueText)

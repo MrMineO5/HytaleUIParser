@@ -10,6 +10,13 @@ object Elements {
         "FlexWeight" to TypeType.Integer,
         "HitTestVisible" to TypeType.Boolean,
         "Visible" to TypeType.Boolean,
-        
+        "LayoutMode" to TypeType.LayoutMode,
+        "TooltipText" to TypeType.String,
+        "TextTooltipStyle" to TypeType.TextTooltipStyle,
+        "TooltipTextSpans" to TypeType.String,
+    )
+
+    val BUTTON_PROPERTIES = mapOf(
+        "Disabled" to TypeType.Boolean,
     )
 }

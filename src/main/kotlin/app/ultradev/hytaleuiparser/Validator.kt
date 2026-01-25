@@ -60,7 +60,7 @@ class Validator(
         val elementType = findElementType(node)
         node.resolvedType = elementType
 
-        if (!elementType.allowsChildren() && node.children.isNotEmpty())
+        if (!elementType.allowsChildren() && node.childElements.isNotEmpty())
             throw ValidatorException("Element ${elementType.name} does not allow children", node)
 
         node.properties.forEach {
@@ -73,20 +73,19 @@ class Validator(
         node.selectorElements.forEach { validateSelectorElement(node, it) }
     }
 
-    private fun lookupSelectorElementSource(parent: NodeElement, selector: String): NodeElement {
+    private fun lookupSelectorElementSource(parent: NodeElement, selector: NodeSelectorElement): NodeElement {
         val parentDef = when (parent.type) {
             is NodeIdentifier -> throw ValidatorException("Cannot have selector elements inside plain elements", parent)
             is NodeVariable, is NodeRefMember -> deepLookupReference(parent.type) as NodeElement
             else -> throw ValidatorException("Unknown parent type: ${parent.type}", parent)
         }
         validateElement(parentDef)
-        val sel = parentDef.childElements.find { it.selector?.identifier?.identifier == selector }
+        val sel = parentDef.childElements.find { it.selector?.selector?.text == selector.selector?.selector?.text }
             ?: error("No selector element $selector on ${parentDef.type}") // TODO: Can selectors be transitive?
         return sel
     }
-
     fun validateSelectorElement(parent: NodeElement, node: NodeSelectorElement) {
-        val source = lookupSelectorElementSource(parent, node.selector.identifier.identifier)
+        val source = lookupSelectorElementSource(parent, node)
         validateElement(source)
         val elementType = source.resolvedType
 
@@ -166,18 +165,22 @@ class Validator(
         }
         node.fields.forEach { field ->
             val reqType = type.allowedFields[field.identifier.identifier]
-                ?: throw ValidatorException("Unknown field: ${field.identifier.identifier} on $type", field)
+                ?: throw ValidatorException("Unknown field ${field.identifier.identifier} on $type", field)
             validateProperty(field.value, reqType)
         }
     }
 
     fun lookupRefMember(ref: NodeRefMember): AstNode {
-        val reference = ref.resolvedScope.lookupReference(ref.reference.identifier.identifier)
-        validateRoot(reference)
-        val rootNode = files[reference]!!
-        return rootNode.variableValues[ref.member.identifier.identifier] ?: throw ValidatorException(
-            "No member ${ref.member.identifier.identifier} on ${ref.reference.identifier.identifier}", ref
-        )
+        try {
+            val reference = ref.resolvedScope.lookupReference(ref.reference.identifier.identifier)
+            validateRoot(reference)
+            val rootNode = files[reference]!!
+            return rootNode.variableValues[ref.member.identifier.identifier] ?: throw ValidatorException(
+                "No member ${ref.member.identifier.identifier} on ${ref.reference.identifier.identifier}", ref
+            )
+        } catch(e: UninitializedPropertyAccessException) {
+            throw ValidatorException("Variable reference lookup before scope init", ref)
+        }
     }
 
     fun deepLookupReference(reference: VariableReference): AstNode {

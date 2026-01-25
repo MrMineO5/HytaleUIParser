@@ -78,12 +78,24 @@ class Tokenizer(
             return Token(TokenSymbols.TOKEN_MAP[ch]!!, ch.toString(), startLine, startColumn)
         }
 
-        // Parse identifier
         val sb = StringBuilder()
         sb.append(ch)
 
-        while (peek()?.isLetterOrDigit() == true) sb.append(read())
-        return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn)
+        if (ch.isDigit()) {
+            // Identifiers cannot start with a digit, this must be a number
+            while (peek()?.isDigit() == true || peek() == '.') sb.append(read())
+            return Token(Token.Type.NUMBER, sb.toString(), startLine, startColumn)
+        } else if (ch.isLetter()) {
+            // Identifier
+            while (peek()?.isLetterOrDigit() == true) sb.append(read())
+            return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn)
+        } else if (ch == '#') {
+            // Selector or color
+            while (peek()?.isLetterOrDigit() == true) sb.append(read())
+            return Token(Token.Type.SELECTOR, sb.toString(), startLine, startColumn)
+        } else {
+            error("Unexpected character: $ch")
+        }
     }
 
     fun Char.customIsWhitespace(): Boolean = this.isWhitespace() || this == '﻿'

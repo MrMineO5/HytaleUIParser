@@ -10,7 +10,6 @@ enum class TypeType(
     Integer,
     Boolean,
     Float,
-    Double,
     Color,
 
     Sound(
@@ -72,9 +71,16 @@ enum class TypeType(
             "Full" to Integer,
         )
     ),
+
+    BarAlignment(listOf(
+        "Vertical", "Horizontal"
+    )),
+
+    Alignment(listOf(
+        "Top", "Bottom", "Left", "Right"
+    )),
     
-    // Center, Left, Right, Start, End
-    LabelAlignment(listOf(
+    Direction(listOf(
         "Center", "Start", "End"
     )),
     LabelStyle(
@@ -82,15 +88,15 @@ enum class TypeType(
         mapOf(
             "FontSize" to Integer,
             "FontName" to String, // "Primary", "Secondary"
-            "LetterSpacing" to Integer,
+            "LetterSpacing" to Float,
             "TextColor" to Color,
             "RenderBold" to Boolean,
             "RenderUppercase" to Boolean,
             "RenderItalics" to Boolean,
-            "Alignment" to LabelAlignment,
-            "HorizontalAlignment" to LabelAlignment,
-            "VerticalAlignment" to LabelAlignment,
-            "OutlineColor" to String,
+            "Alignment" to Direction,
+            "HorizontalAlignment" to Direction,
+            "VerticalAlignment" to Direction,
+            "OutlineColor" to Color,
             "Wrap" to Boolean,
         )
     ),
@@ -128,7 +134,7 @@ enum class TypeType(
             "ChangedSound" to Sound,
         )
     ),
-    CheckedStyleElement(
+    CheckBoxStyle(
         mapOf(
             "Checked" to CheckedStyleInnerElement,
             "Unchecked" to CheckedStyleInnerElement
@@ -136,9 +142,9 @@ enum class TypeType(
     ),
     CheckedStyle(
         mapOf(
-            "Default" to CheckedStyleElement,
-            "Hovered" to CheckedStyleElement,
-            "Pressed" to CheckedStyleElement,
+            "Default" to CheckBoxStyle,
+            "Hovered" to CheckBoxStyle,
+            "Pressed" to CheckBoxStyle,
             "Sounds" to SoundsStyle,
         )
     ),
@@ -172,7 +178,8 @@ enum class TypeType(
     // Text field styles - used by TextField, CompactTextField, MultilineTextField, NumberField, SliderNumberField, FloatSliderNumberField
     InputFieldStyle(
         mapOf(
-            "TextColor" to String,
+            "TextColor" to Color,
+            "FontSize" to Integer,
         )
     ),
     TextTooltipStyle(
@@ -209,12 +216,125 @@ enum class TypeType(
 
     ColorPickerFormat(listOf("Rgb")), // TODO: Find more formats?
 
-    ColorPickerDropdownBoxStyle(
+    ColorPickerDropdownBoxBackgroundThing(
+        mapOf(
+            "Default" to String
+        )
+    ),
+    ColorPickerDropdownBoxStyle( // TODO: Does this have *all* properties of DropdownBoxStyle? If so we can extend that one
         mapOf(
             "ColorPickerStyle" to ColorPickerStyle,
-
+            "Background" to ColorPickerDropdownBoxBackgroundThing,
+            "ArrowBackground" to ColorPickerDropdownBoxBackgroundThing,
+            "Overlay" to ColorPickerDropdownBoxBackgroundThing,
+            "PanelBackground" to PatchStyle,
+            "PanelPadding" to Padding,
+            "PanelOffset" to Integer,
+            "ArrowAnchor" to Anchor,
         )
-    )
+    ),
+
+    SpriteFrame(
+        mapOf(
+            "Width" to Integer,
+            "Height" to Integer,
+            "PerRow" to Integer,
+            "Count" to Integer,
+        )
+    ),
+
+    NumberFieldFormat(
+        mapOf(
+            "MaxDecimalPlaces" to Integer,
+            "Step" to Float,
+            "MinValue" to Float,
+            "MaxValue" to Float,
+        )
+    ),
+
+    ItemGridStyle(
+        mapOf(
+            "SlotSize" to Integer,
+            "SlotIconSize" to Integer,
+            "SlotSpacing" to Integer,
+            "SlotBackground" to PatchStyle,
+            "QuantityPopupSlotOverlay" to String, // TODO: No example of patch style use, check if they accept patch styles
+            "BrokenSlotBackgroundOverlay" to String,
+            "BrokenSlotIconOverlay" to String,
+            "DefaultItemIcon" to String,
+            "DurabilityBar" to String,
+            "DurabilityBarBackground" to String,
+            "DurabilityBarAnchor" to Anchor,
+            "DurabilityBarColorStart" to Color,
+            "DurabilityBarColorEnd" to Color,
+            "CursedIconPatch" to PatchStyle, // TODO: I assumed this is a patchstyle from the name, check this too
+            "CursedIconAnchor" to Anchor,
+            "ItemStackHoveredSound" to Sound,
+        )
+    ),
+
+    TabNavigationStyleState(
+        mapOf(
+            "LabelStyle" to LabelStyle,
+            "Padding" to Padding,
+            "Background" to Color, // TODO: Could be patchstyle
+        )
+    ),
+
+    TabNavigationStyleElement(
+        mapOf(
+            "Default" to TabNavigationStyleState,
+            "Hovered" to TabNavigationStyleState,
+            "Pressed" to TabNavigationStyleState,
+        )
+    ),
+
+    TabNavigationStyle(
+        mapOf(
+            "TabStyle" to TabNavigationStyleElement,
+            "SelectedTabStyle" to TabNavigationStyleElement,
+        )
+    ),
+
+    DropdownBoxSounds(
+        mapOf(
+            "Activate" to Sound,
+            "MouseHover" to Sound,
+            "Close" to Sound
+        )
+    ),
+    DropdownBoxStyle(
+        mapOf(
+            "DefaultBackground" to PatchStyle,
+            "HoveredBackground" to PatchStyle,
+            "PressedBackground" to PatchStyle,
+            "DefaultArrowTexturePath" to String,
+            "HoveredArrowTexturePath" to String,
+            "PressedArrowTexturePath" to String,
+            "ArrowWidth" to Integer,
+            "ArrowHeight" to Integer,
+            "LabelStyle" to LabelStyle,
+            "EntryLabelStyle" to LabelStyle,
+            "NoItemsLabelStyle" to LabelStyle,
+            "SelectedEntryLabelStyle" to LabelStyle,
+            "HorizontalPadding" to Integer,
+            "PanelScrollbarStyle" to ScrollbarStyle,
+            "PanelBackground" to PatchStyle,
+            "PanelPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
+            "PanelWidth" to Integer,
+            "PanelAlign" to Alignment,
+            "PanelOffset" to Integer,
+            "EntryHeight" to Integer,
+            "EntriesInViewport" to Integer,
+            "HorizontalEntryPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
+            "HoveredEntryBackground" to PatchStyle,
+            "PressedEntryBackground" to PatchStyle,
+            "Sounds" to DropdownBoxSounds,
+            "EntrySounds" to SoundsStyle,
+            "FocusOutlineSize" to Integer,
+            "FocusOutlineColor" to Color,
+        )
+    ),
     
     ;
 
@@ -222,5 +342,5 @@ enum class TypeType(
     constructor() : this(true, false, emptyMap(), emptyList())
     constructor(enum: List<String>) : this(false, true, emptyMap(), enum)
 
-    fun canNegate(): Boolean = this == Integer || this == Float || this == Double
+    fun canNegate(): Boolean = this == Integer || this == Float
 }

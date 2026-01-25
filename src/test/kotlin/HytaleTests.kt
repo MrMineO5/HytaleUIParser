@@ -1,5 +1,4 @@
 import app.ultradev.hytaleuiparser.Parser
-import app.ultradev.hytaleuiparser.TokenIterator
 import app.ultradev.hytaleuiparser.Tokenizer
 import app.ultradev.hytaleuiparser.Validator
 import java.io.File
@@ -13,41 +12,34 @@ import kotlin.io.path.walk
 import kotlin.test.Test
 
 class HytaleTests {
-    val hytaleAssetsDir = File(System.getenv("HYTALE_ASSETS"))
+    val hytaleAssetsDir = Path(System.getenv("HYTALE_ASSETS"))
 
     @Test
-    fun testFile() {
+    fun testClient() {
         val dir = hytaleAssetsDir.resolve("Common/UI/Test")
 
-        val testFile = dir.resolve("InGame/Hud/PortalPanel.ui")
+        val files = dir.walk().filter {
+            it.isRegularFile() && it.extension == "ui"
+        }.associate {
+            val value = try {
+                val tokenizer = Tokenizer(it.reader())
+                val parser = Parser(tokenizer)
+                parser.finish()
+            } catch(e: Exception) {
+                throw RuntimeException("Failed to parse ${it.name}", e)
+            }
+            it.relativeTo(dir).toString() to value
+        }
 
-        val tokenizer = Tokenizer(testFile.reader())
-        tokenizer.forEach(::println)
+        println("Parsed ${files.size} files")
+//        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
 
-//        dir.walk().forEach {
-//            if (!it.isFile) return@forEach
-//            if (it.extension != "ui") return@forEach
-//
-//            try {
-//                val tokenizer = Tokenizer(it.reader())
-//                val parser = Parser(TokenIterator(tokenizer))
-//                val root = parser.finish()
-//                Validator.validate(root)
-//            } catch(e: Exception) {
-//                throw RuntimeException("Failed to parse ${it.name}", e)
-//            }
-//        }
-//
-//        println(Validator.properties.entries.joinToString("\n") { "${it.key}: ${it.value}" })
-//        println(Validator.types)
-//
-//        println()
-//        println(Validator.typeProperties.entries.joinToString("\n") { "${it.key}: ${it.value}" })
+        Validator(files).validate()
     }
     
     @Test
     fun testCommon() {
-        val dir = hytaleAssetsDir.resolve("Common/UI/Custom").toPath()
+        val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
 
         val files = dir.walk().filter {
             it.isRegularFile() && it.extension == "ui"

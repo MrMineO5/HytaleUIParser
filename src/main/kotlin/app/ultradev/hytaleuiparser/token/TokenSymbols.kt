@@ -7,7 +7,6 @@ object TokenSymbols {
     val MEMBER_MARKER = '.'
     val TRANSLATION_MARKER = '%'
     val FIELD_MARKER = ':'
-    val SELECTOR_OR_COLOR = '#';
     val FIELD_DELIMITER = ','
 
     val END_STATEMENT = ';'
@@ -38,7 +37,6 @@ object TokenSymbols {
         START_TYPE to Token.Type.START_PARENTHESIS,
         END_TYPE to Token.Type.END_PARENTHESIS,
         FIELD_MARKER to Token.Type.FIELD_MARKER,
-        SELECTOR_OR_COLOR to Token.Type.SELECTOR_MARKER,
         FIELD_DELIMITER to Token.Type.FIELD_DELIMITER,
         
         START_ARRAY to Token.Type.START_ARRAY,
