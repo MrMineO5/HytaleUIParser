@@ -9,7 +9,7 @@ import java.nio.file.Path
 class Scope(
     val parent: Scope? = null,
     val variables: MutableMap<String, AstNode> = mutableMapOf(),
-    val references: MutableMap<String, Path> = mutableMapOf()
+    val references: MutableMap<String, String> = mutableMapOf()
 ) {
     constructor(parent: Scope?, variables: List<NodeAssignVariable>) : this(
         parent,
@@ -21,7 +21,7 @@ class Scope(
         if (variable is NodeVariable) return lookupVariable(variable.identifier.identifier)
         return variable
     }
-    fun lookupReference(name: String): Path = references[name] ?: parent?.lookupReference(name) ?: error("Reference $name not found")
+    fun lookupReference(name: String): String = references[name] ?: parent?.lookupReference(name) ?: error("Reference $name not found")
 
     private fun lookupVariable0(name: String): AstNode = variables[name] ?: parent?.lookupVariable(name) ?: error("Variable $name not found")
 }

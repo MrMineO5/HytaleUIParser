@@ -87,7 +87,7 @@ class Parser(tokens: Iterator<Token>) {
         val reference = parseReference()
         val assignment = tokens.next()
         if (assignment.type != Token.Type.ASSIGNMENT) throw ParserException("Expected assignment operator", assignment)
-        val filePath = parseStringConstant()
+        val filePath = parseQuotedStringConstant()
         val endStatement = parseEndStatement()
         return NodeAssignReference(reference, NodeToken(assignment), filePath, endStatement)
     }
@@ -98,10 +98,21 @@ class Parser(tokens: Iterator<Token>) {
         return NodeToken(endStatement)
     }
 
-    private fun parseStringConstant(): NodeConstant {
+    private fun parseQuotedStringConstant(): NodeConstant {
         val token = tokens.next()
-        if (token.type != Token.Type.STRING && token.type != Token.Type.IDENTIFIER) throw ParserException(
-            "Expected string constant", token
+        if (token.type != Token.Type.STRING) throw ParserException(
+            "Expected quoted string constant", token
+        )
+        if (token.text.first() != '"' || token.text.last() != '"') throw ParserException(
+            "Expected quoted string constant, found ${token.text}", token
+        )
+        return NodeConstant(listOf(NodeToken(token)), token.text.substring(1, token.text.length - 1))
+    }
+
+    private fun parseUnquotedStringConstant(): NodeConstant {
+        val token = tokens.next()
+        if (token.type != Token.Type.IDENTIFIER) throw ParserException(
+            "Expected identifier constant", token
         )
         return NodeConstant(listOf(NodeToken(token)), token.text)
     }
@@ -110,7 +121,7 @@ class Parser(tokens: Iterator<Token>) {
         val token = tokens.peek()
 
         val variable = when (token.type) {
-            Token.Type.STRING -> parseStringConstant()
+            Token.Type.STRING -> parseQuotedStringConstant()
             Token.Type.IDENTIFIER -> {
                 val next = tokens.peek(2)
                 when (next.type) {
@@ -118,7 +129,7 @@ class Parser(tokens: Iterator<Token>) {
                     Token.Type.START_PARENTHESIS -> parseType()
 
                     Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_PARENTHESIS,
-                    Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> parseStringConstant()
+                    Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> parseUnquotedStringConstant()
 
                     Token.Type.MEMBER_MARKER -> parseDecimalNumber()
 
@@ -339,7 +350,7 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseColor(): NodeColor {
         val colorMarker = tokens.next()
         if (colorMarker.type != Token.Type.SELECTOR_MARKER) throw ParserException("Expected color marker", colorMarker)
-        val value = parseStringConstant()
+        val value = parseUnquotedStringConstant()
 
         var opacity: NodeOpacity? = null
         val next = tokens.peek()

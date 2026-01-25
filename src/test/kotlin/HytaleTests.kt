@@ -59,10 +59,13 @@ class HytaleTests {
             } catch(e: Exception) {
                 throw RuntimeException("Failed to parse ${it.name}", e)
             }
-            it.relativeTo(dir) to value
+            it.relativeTo(dir).toString() to value
         }
 
         println("Parsed ${files.size} files")
+        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
+
+        println(files["Sounds.ui"])
 
         Validator(files).validate()
     }

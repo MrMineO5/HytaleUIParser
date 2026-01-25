@@ -1,5 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.validation.ElementType
+
 data class NodeElement(
     val type: AstNode,
     val body: NodeBody,
@@ -31,4 +33,6 @@ data class NodeElement(
     val properties: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
     val childElements: List<NodeElement> get() = body.elements.filterIsInstance<NodeElement>()
     val selectorElements: List<NodeSelectorElement> get() = body.elements.filterIsInstance<NodeSelectorElement>()
+
+    lateinit var resolvedType: ElementType
 }
