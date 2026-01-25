@@ -36,6 +36,13 @@ enum class ElementType {
     TabNavigation,
     ToggleButton,
     ItemPreviewComponent,
+    CharacterPreviewComponent,
+    SliderNumberField,
+    BlockSelector,
+    ReorderableListGrip,
+    TabButton,
+    FloatSliderNumberField,
+    ActionButton,
     
     ;
 

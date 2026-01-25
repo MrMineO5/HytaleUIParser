@@ -115,9 +115,9 @@ class Parser(tokens: Iterator<Token>) {
                 val next = tokens.peek(2)
                 when (next.type) {
                     Token.Type.START_ELEMENT, Token.Type.SELECTOR_MARKER -> parseElement()
-                    Token.Type.START_TYPE -> parseType()
+                    Token.Type.START_PARENTHESIS -> parseType()
 
-                    Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_TYPE,
+                    Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_PARENTHESIS,
                     Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> parseStringConstant()
 
                     Token.Type.MEMBER_MARKER -> parseDecimalNumber()
@@ -129,7 +129,16 @@ class Parser(tokens: Iterator<Token>) {
             Token.Type.VARIABLE_MARKER -> parseVariable()
             Token.Type.REFERENCE_MARKER -> parseRefMember()
             Token.Type.TRANSLATION_MARKER -> parseTranslation()
-            Token.Type.START_TYPE -> parseType()
+            Token.Type.START_PARENTHESIS -> {
+                val afterStart = tokens.peek(2)
+                val isType = when (afterStart.type) {
+                    Token.Type.SPREAD -> true
+                    Token.Type.END_PARENTHESIS -> true
+                    Token.Type.IDENTIFIER -> tokens.peek(3).type == Token.Type.FIELD_MARKER
+                    else -> false
+                }
+                if (isType) parseType() else parseMathParenthesis()
+            }
             Token.Type.SELECTOR_MARKER -> parseColor()
             Token.Type.START_ARRAY -> parseArray()
             Token.Type.MATH_SUBTRACT -> {
@@ -191,6 +200,15 @@ class Parser(tokens: Iterator<Token>) {
         throw ParserException("Unclosed array", start)
     }
 
+    private fun parseMathParenthesis(): AstNode {
+        val start = tokens.next()
+        if (start.type != Token.Type.START_PARENTHESIS) throw ParserException("Expected start parenthesis", start)
+        val value = parseVariableValue()
+        val end = tokens.next()
+        if (end.type != Token.Type.END_PARENTHESIS) throw ParserException("Expected end parenthesis", end)
+        return value
+    }
+
     private fun parseType(): NodeType {
         var start = tokens.peek()
 
@@ -201,7 +219,7 @@ class Parser(tokens: Iterator<Token>) {
 
         start = tokens.next()
 
-        if (start.type != Token.Type.START_TYPE) throw ParserException("Expected start type", start)
+        if (start.type != Token.Type.START_PARENTHESIS) throw ParserException("Expected start type", start)
 
         val children = mutableListOf<AstNode>()
         while (tokens.hasNext()) {
@@ -212,7 +230,7 @@ class Parser(tokens: Iterator<Token>) {
                 Token.Type.SPREAD -> children.add(parseSpread())
                 Token.Type.REFERENCE_MARKER -> children.add(parseRefMember())
                 
-                Token.Type.END_TYPE -> return NodeType(
+                Token.Type.END_PARENTHESIS -> return NodeType(
                     type, NodeBody(NodeToken(start), NodeToken(tokens.next()), children)
                 )
 
@@ -293,7 +311,7 @@ class Parser(tokens: Iterator<Token>) {
         val next = tokens.peek()
         val end = when (next.type) {
             Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT -> NodeToken(tokens.next())
-            Token.Type.END_TYPE -> null
+            Token.Type.END_PARENTHESIS -> null
 
             else -> throw ParserException("Expected field delimiter, end statement, or end type after field", next)
         }
@@ -315,7 +333,7 @@ class Parser(tokens: Iterator<Token>) {
 
         var opacity: NodeOpacity? = null
         val next = tokens.peek()
-        if (next.type == Token.Type.START_TYPE) {
+        if (next.type == Token.Type.START_PARENTHESIS) {
             opacity = parseOpacity()
         }
 
@@ -324,12 +342,12 @@ class Parser(tokens: Iterator<Token>) {
 
     private fun parseOpacity(): NodeOpacity {
         val start = tokens.next()
-        if (start.type != Token.Type.START_TYPE) throw ParserException("Expected start type marker", start)
+        if (start.type != Token.Type.START_PARENTHESIS) throw ParserException("Expected start type marker", start)
 
         val value = parseDecimalNumber()
 
         val end = tokens.next()
-        if (end.type != Token.Type.END_TYPE) throw ParserException("Expected end type marker", end)
+        if (end.type != Token.Type.END_PARENTHESIS) throw ParserException("Expected end type marker", end)
         return NodeOpacity(NodeToken(start), NodeToken(end), value)
     }
 
@@ -379,7 +397,7 @@ class Parser(tokens: Iterator<Token>) {
         val next = tokens.peek()
         val end = when (next.type) {
             Token.Type.FIELD_DELIMITER -> NodeToken(tokens.next())
-            Token.Type.END_TYPE -> null
+            Token.Type.END_PARENTHESIS -> null
 
             else -> throw ParserException("Expected field delimiter or end type after spread", next)
         }

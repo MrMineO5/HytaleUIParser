@@ -9,9 +9,34 @@ class HytaleTests {
     val hytaleAssetsDir = File(System.getenv("HYTALE_ASSETS"))
 
     @Test
+    fun testFile() {
+        val dir = hytaleAssetsDir.resolve("Common/UI/Test")
+
+        dir.walk().forEach {
+            if (!it.isFile) return@forEach
+            if (it.extension != "ui") return@forEach
+
+            try {
+                val tokenizer = Tokenizer(it.reader())
+                val parser = Parser(TokenIterator(tokenizer))
+                val root = parser.finish()
+                Validator.validate(root)
+            } catch(e: Exception) {
+                throw RuntimeException("Failed to parse ${it.name}", e)
+            }
+        }
+
+        println(Validator.properties.entries.joinToString("\n") { "${it.key}: ${it.value}" })
+        println(Validator.types)
+
+        println()
+        println(Validator.typeProperties.entries.joinToString("\n") { "${it.key}: ${it.value}" })
+    }
+    
+    @Test
     fun testCommon() {
         val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
-
+        
         dir.walk().forEach {
             if (!it.isFile) return@forEach
             if (it.extension != "ui") return@forEach
