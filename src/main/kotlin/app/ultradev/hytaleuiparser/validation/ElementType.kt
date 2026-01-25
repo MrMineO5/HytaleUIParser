@@ -44,16 +44,33 @@ enum class ElementType {
             "Style" to TypeType.ButtonStyle,
         )
     ),
-    CheckBox,
+    CheckBox(
+        mapOf(
+            "Value" to TypeType.Boolean,
+        )
+    ),
     TextField,
     NumberField,
     DropdownBox,
     Sprite,
     CompactTextField,
     BackButton,
-    FloatSlider,
+    FloatSlider(
+        mapOf(
+            "Style" to TypeType.SliderStyle,
+            "Min" to TypeType.Float,
+            "Max" to TypeType.Float,
+            "Step" to TypeType.Float,
+            "Value" to TypeType.Float,
+        )
+    ),
     MultilineTextField,
-    ColorPickerDropdownBox,
+    ColorPickerDropdownBox(
+        mapOf(
+            "Style" to TypeType.ColorPickerDropdownBoxStyle,
+            "Format" to TypeType.ColorPickerFormat,
+        )
+    ),
     CircularProgressBar(
         mapOf(
             "Value" to TypeType.Float,

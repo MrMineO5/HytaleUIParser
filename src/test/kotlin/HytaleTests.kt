@@ -63,9 +63,7 @@ class HytaleTests {
         }
 
         println("Parsed ${files.size} files")
-        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
-
-        println(files["Sounds.ui"])
+//        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
 
         Validator(files).validate()
     }

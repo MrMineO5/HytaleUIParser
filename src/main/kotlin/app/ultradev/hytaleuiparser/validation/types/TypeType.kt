@@ -11,28 +11,21 @@ enum class TypeType(
     Boolean,
     Float,
     Double,
-    ScrollbarStyle(
+
+    Sound(
         mapOf(
-            "OnlyVisibleWhenHovered" to Boolean,
-            "Spacing" to Integer, 
-            "Size" to Integer
-            // TODO: Check size/spacing data types.
-        )
-    ),
-    SoundsStyleElement(
-        mapOf(
-            "SoundPath" to TypeType.String,
-            "MinPitch" to TypeType.Float,
-            "MaxPitch" to TypeType.Float,
-            "Volume" to TypeType.Integer, // TODO: Confirm volume is not actually float with Set.
+            "SoundPath" to String,
+            "MinPitch" to Float,
+            "MaxPitch" to Float,
+            "Volume" to Integer, // TODO: Confirm volume is not actually float with Set.
         )
     ),
     SoundsStyle(
         mapOf(
-            "Activate" to TypeType.SoundsStyleElement,
-            "MouseHover" to TypeType.SoundsStyleElement,
-            "Close" to TypeType.SoundsStyleElement,
-            "Context" to TypeType.SoundsStyleElement, // TODO: Verify this appears on all sound styles.
+            "Activate" to Sound,
+            "MouseHover" to Sound,
+            "Close" to Sound,
+            "Context" to Sound, // TODO: Verify this appears on all sound styles.
         )
     ),
  
@@ -96,7 +89,8 @@ enum class TypeType(
             "Alignment" to LabelAlignment,
             "HorizontalAlignment" to LabelAlignment,
             "VerticalAlignment" to LabelAlignment,
-            "OutlineColor" to String, 
+            "OutlineColor" to String,
+            "Wrap" to Boolean,
         )
     ),
     PatchStyle(
@@ -110,27 +104,41 @@ enum class TypeType(
             "Anchor" to Anchor,
         )
     ),
+
+    ScrollbarStyle(
+        mapOf(
+            "OnlyVisibleWhenHovered" to Boolean,
+            "Spacing" to Integer,
+            "Size" to Integer,
+            "Background" to PatchStyle,
+            "Handle" to PatchStyle,
+            "HoveredHandle" to PatchStyle,
+            "DraggedHandle" to PatchStyle,
+            // TODO: Check size/spacing data types.
+        )
+    ),
+
     CheckedStyleInnerElement(
     mapOf(
-            "DefaultBackground" to TypeType.PatchStyle,
-            "HoveredBackground" to TypeType.PatchStyle,
-            "PressedBackground" to TypeType.PatchStyle,
-            "DisabledBackground" to TypeType.PatchStyle,
-            "ChangedSound" to TypeType.SoundsStyleElement,
+            "DefaultBackground" to PatchStyle,
+            "HoveredBackground" to PatchStyle,
+            "PressedBackground" to PatchStyle,
+            "DisabledBackground" to PatchStyle,
+            "ChangedSound" to Sound,
         )
     ),
     CheckedStyleElement(
         mapOf(
-            "Checked" to TypeType.CheckedStyleInnerElement,
-            "Unchecked" to TypeType.CheckedStyleInnerElement
+            "Checked" to CheckedStyleInnerElement,
+            "Unchecked" to CheckedStyleInnerElement
         )
     ),
     CheckedStyle(
         mapOf(
             "Default" to CheckedStyleElement,
             "Hovered" to CheckedStyleElement,
-            "Pressed" to TypeType.CheckedStyleElement,
-            "Sounds" to TypeType.SoundsStyle,
+            "Pressed" to CheckedStyleElement,
+            "Sounds" to SoundsStyle,
         )
     ),
     // Button styles - used by Button, TextButton, BackButton, ActionButton, ToggleButton, TabButton, ItemSlotButton
@@ -146,6 +154,16 @@ enum class TypeType(
             "Hovered" to ButtonStyleElement,
             "Pressed" to ButtonStyleElement,
             "Disabled" to ButtonStyleElement,
+            "Sounds" to SoundsStyle,
+        )
+    ),
+
+    SliderStyle(
+        mapOf(
+            "Background" to PatchStyle,
+            "Handle" to String,
+            "HandleWidth" to Integer,
+            "HandleHeight" to Integer,
             "Sounds" to SoundsStyle,
         )
     ),
@@ -165,6 +183,34 @@ enum class TypeType(
             "Padding" to Integer
         )
     ),
+
+    ColorPickerTextFieldDecorationElement( // TODO: Maybe this should actually correspond to a more commonly used structure
+        mapOf(
+            "Background" to String,
+        )
+    ),
+    ColorPickerTextFieldDecoration(
+        mapOf(
+            "Default" to ColorPickerTextFieldDecorationElement
+        )
+    ),
+
+    ColorPickerStyle(
+        mapOf(
+            "OpacitySelectorBackground" to String,
+            "ButtonBackground" to String,
+            "ButtonFill" to String,
+            "TextFieldDecoration" to ColorPickerTextFieldDecoration
+        )
+    ),
+
+    ColorPickerFormat(listOf("Rgb")), // TODO: Find more formats?
+
+    ColorPickerDropdownBoxStyle(
+        mapOf(
+            "ColorPickerStyle" to ColorPickerStyle,
+        )
+    )
     
     ;
 

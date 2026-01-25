@@ -43,15 +43,9 @@ class Validator(
     private fun findElementType(node: NodeElement, scope: Scope): ElementType {
         return when (val type = node.type) {
             is NodeIdentifier -> ElementType.valueOf(type.identifier)
-            is NodeVariable -> {
-                val element = scope.lookupVariable(type.identifier.identifier)
-                if (element !is NodeElement) error("Expected element, got ${element::class.simpleName}")
-                findElementType(element, scope)
-            }
-
-            is NodeRefMember -> {
-                val element = lookupRefMember(type, scope)
-                if (element !is NodeElement) error("Expected element, got ${element::class.simpleName}")
+            is NodeVariable, is NodeRefMember -> {
+                val element = deepLookupReference(type, scope)
+                if (element !is NodeElement) throw ValidatorException("Expected element, got ${element::class.simpleName}", type)
                 findElementType(element, scope)
             }
 
@@ -76,7 +70,7 @@ class Validator(
 
         node.properties.forEach {
             val typeType = elementType.properties[it.identifier.identifier]
-                ?: error("Unknown property ${it.identifier.identifier} on $elementType for node $node")
+                ?: throw ValidatorException("Unknown property ${it.identifier.identifier} on $elementType", it)
             validateProperty(it.value, typeType, childScope)
         }
 
@@ -126,11 +120,12 @@ class Validator(
                 val value = deepLookupReference(node, scope)
                 if (type.isPrimitive) {
                     when (value) {
-                        is NodeConstant -> {}
+                        is NodeConstant -> {
+                            validatePrimitive(type, value)
+                        }
                         is NodeMathOperation -> {
                             validateProperty(value.param1, type, scope)
                             validateProperty(value.param2, type, scope)
-                            // TODO: Validate allowed operations
                         }
 
                         else -> throw ValidatorException("Expected primitive value, got ${value::class.simpleName}", value)
@@ -172,9 +167,25 @@ class Validator(
 //        println("Looking up ${(reference as AstNode).text} in $scope")
         val result = when (reference) {
             is NodeRefMember -> lookupRefMember(reference, scope)
-            is NodeVariable -> scope.lookupVariable(reference.identifier.identifier)
+            is NodeVariable -> {
+                try {
+                    scope.lookupVariable(reference.identifier.identifier)
+                } catch(e: Exception) {
+                    throw ValidatorException("Failed to lookup variable ${reference.identifier.identifier} in $scope", reference, e)
+                }
+            }
         }
         if (result is VariableReference) return deepLookupReference(result, result.resolvedScope)
         return result
+    }
+
+    fun validatePrimitive(type: TypeType, value: NodeConstant) {
+        when (type) {
+            TypeType.String -> {} // All constants are strings
+            TypeType.Integer -> value.valueText.toIntOrNull() ?: throw ValidatorException("Invalid integer value: ${value.valueText}", value)
+            TypeType.Boolean -> value.valueText.toBooleanStrictOrNull() ?: throw ValidatorException("Invalid boolean value: ${value.valueText}", value)
+
+            else -> error("Unknown primitive type: $type")
+        }
     }
 }
