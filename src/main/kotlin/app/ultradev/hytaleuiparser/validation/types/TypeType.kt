@@ -96,6 +96,7 @@ enum class TypeType(
             "Alignment" to LabelAlignment,
             "HorizontalAlignment" to LabelAlignment,
             "VerticalAlignment" to LabelAlignment,
+            "OutlineColor" to String, 
         )
     ),
     PatchStyle(
@@ -142,9 +143,10 @@ enum class TypeType(
     ButtonStyle(
         mapOf(
             "Default" to ButtonStyleElement,
-            "Hover" to ButtonStyleElement,
+            "Hovered" to ButtonStyleElement,
             "Pressed" to ButtonStyleElement,
-            "Disabled" to ButtonStyleElement
+            "Disabled" to ButtonStyleElement,
+            "Sounds" to SoundsStyle,
         )
     ),
     
@@ -154,7 +156,16 @@ enum class TypeType(
             "TextColor" to String,
         )
     ),
-
+    TextTooltipStyle(
+        mapOf(
+            "Background" to PatchStyle,
+            "MaxWidth" to Integer,
+            "LabelStyle" to LabelStyle,
+            // This is actually an integer in examples.
+            "Padding" to Integer
+        )
+    ),
+    
     ;
 
     constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptyList())

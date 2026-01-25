@@ -19,10 +19,31 @@ enum class ElementType {
         mapOf(
             "Style" to TypeType.LabelStyle,
             "Text" to TypeType.String,
+            "MaskTexturePath" to TypeType.String,
+            "TextTooltipStyle" to TypeType.TextTooltipStyle,
+            "TooltipTextSpans" to TypeType.String,
+            "TextSpans" to TypeType.String,
         )
     ),
-    TextButton,
-    Button,
+    TextButton(
+        mapOf(
+            "Text" to TypeType.String,
+            "TooltipText" to TypeType.String,
+            "TextTooltipStyle" to TypeType.TextTooltipStyle,
+            "Disabled" to TypeType.Boolean,
+            "MaskTexturePath" to TypeType.String,
+            "Style" to TypeType.ButtonStyle,
+        )
+    ),
+    Button(
+        mapOf(
+            "TooltipText" to TypeType.String,
+            "TextTooltipStyle" to TypeType.TextTooltipStyle,
+            "Disabled" to TypeType.Boolean,
+            "MaskTexturePath" to TypeType.String,
+            "Style" to TypeType.ButtonStyle,
+        )
+    ),
     CheckBox,
     TextField,
     NumberField,
@@ -33,7 +54,14 @@ enum class ElementType {
     FloatSlider,
     MultilineTextField,
     ColorPickerDropdownBox,
-    CircularProgressBar,
+    CircularProgressBar(
+        mapOf(
+            "Value" to TypeType.Float,
+            // Path to texture for background of circular pg.
+            "MaskTexturePath" to TypeType.String,
+            "Color" to TypeType.String,
+        )
+    ),
     ProgressBar,
     Slider,
     ItemSlotButton,
@@ -45,7 +73,14 @@ enum class ElementType {
     ColorPicker,
     
     // CLIENT elements.
-    BackgroundImage,
+    BackgroundImage(
+        mapOf(
+            // Image is a path.
+            "Image" to TypeType.String,
+            // Ultrawide image is a path.
+            "ImageUW" to TypeType.String
+        )
+    ),
     TabNavigation,
     ToggleButton,
     ItemPreviewComponent,
