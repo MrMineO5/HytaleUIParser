@@ -36,6 +36,29 @@ class HytaleTests {
 
         Validator(files).validate()
     }
+
+    @Test
+    fun testFile() {
+        val dir = hytaleAssetsDir.resolve("Common/UI/Test")
+
+        val files = dir.walk().filter {
+            it.isRegularFile() && it.extension == "ui"
+        }.associate {
+            val value = try {
+                val tokenizer = Tokenizer(it.reader())
+                val parser = Parser(tokenizer)
+                parser.finish()
+            } catch(e: Exception) {
+                throw RuntimeException("Failed to parse ${it.name}", e)
+            }
+            it.relativeTo(dir).toString() to value
+        }
+
+        println("Parsed ${files.size} files")
+//        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
+
+        Validator(files).validateRoot("MainMenu/Adventure/WorldList.ui")
+    }
     
     @Test
     fun testCommon() {

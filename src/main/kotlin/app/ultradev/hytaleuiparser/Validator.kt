@@ -5,6 +5,7 @@ import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.resolveNeighbour
 import app.ultradev.hytaleuiparser.validation.types.TypeType
+import java.util.Stack
 
 class Validator(
     val files: Map<String, RootNode>
@@ -134,8 +135,7 @@ class Validator(
                 is NodeTranslation -> {
                     if (type != TypeType.String) throw ValidatorException("Expected $type, got ${value::class.simpleName}", value)
                 }
-                // Throws: @MainWidth = ($WorldTile.@TileWidth + $WorldTile.@TileSpacing) * $WorldTile.@WorldsPerRow + $Common.@DefaultScrollbarStyle.Size;
-                // WorldList.ui:6:93                                                                                   ^^^   
+
                 else -> throw ValidatorException("Expected primitive value, got ${value::class.simpleName}", value)
             }
         } else if (type.isEnum) {
@@ -197,6 +197,28 @@ class Validator(
                     throw ValidatorException("Failed to lookup variable ${reference.identifier.identifier} in ${reference.resolvedScope}", reference, e)
                 }
             }
+            is NodeMemberField -> {
+                var stack = Stack<NodeMemberField>()
+                var curr: AstNode = reference
+                while (curr is NodeMemberField) {
+                    stack.push(curr)
+                    curr = curr.parent
+                }
+
+                val ownerValue = if (curr is VariableReference) deepLookupReference(curr) else curr
+                if (ownerValue !is NodeType)
+                    throw ValidatorException("Expected type, got ${ownerValue::class.simpleName}", ownerValue)
+
+                var currentType: AstNode = ownerValue
+                while (stack.isNotEmpty()) {
+                    if (currentType !is NodeType)
+                        throw ValidatorException("Tried to look up field on non-type", currentType)
+                    val fieldName = stack.pop().member.identifier
+                    currentType = lookupTypeField(currentType, fieldName)
+                        ?: throw ValidatorException("No field $fieldName", currentType)
+                }
+                currentType
+            }
         }
         if (result is VariableReference) return deepLookupReference(result)
         return result
@@ -212,5 +234,18 @@ class Validator(
 
             else -> error("Unknown primitive type: $type")
         }
+    }
+
+    fun lookupTypeField(type: NodeType, fieldName: String): AstNode? {
+        val declaredField = type.fields.find { it.identifier.identifier == fieldName }
+        if (declaredField != null) return declaredField.value
+
+        val inheritedField = type.spreads.mapNotNull {
+            val source = deepLookupReference(it.variableAsReference)
+            if (source !is NodeType)
+                throw ValidatorException("Cannot spread non-type, got ${source::class.simpleName}", source)
+            lookupTypeField(source, fieldName)
+        }
+        return inheritedField.firstOrNull()
     }
 }
