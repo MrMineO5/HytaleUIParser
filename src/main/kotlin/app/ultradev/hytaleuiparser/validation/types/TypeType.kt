@@ -1,8 +1,5 @@
 package app.ultradev.hytaleuiparser.validation.types
 
-import java.lang.classfile.Label
-import javax.sound.midi.Patch
-
 enum class TypeType(
     val isPrimitive: Boolean,
     val isEnum: Boolean,
@@ -194,6 +191,8 @@ enum class TypeType(
             "TextColor" to Color,
             "FontSize" to Integer,
             "RenderBold" to Boolean,
+            "RenderItalics" to Boolean,
+            "RenderUppercase" to Boolean,
         )
     ),
     TextTooltipStyle(
@@ -207,15 +206,33 @@ enum class TypeType(
             "Alignment" to Alignment
         )
     ),
-
-    ColorPickerTextFieldDecorationElement( // TODO: Maybe this should actually correspond to a more commonly used structure
+    Side(
+        listOf("Left", "Right")
+    ),
+    // Icon is a really weird type. It appears on a TextField in FileSelector.ui under Icon, and a "ClearButtonStyle".
+    // TODO: Should the Icon and ClearButtonStyle be separated, they are very similar.
+    Icon(
         mapOf(
-            "Background" to Color,
+            "Texture" to PatchStyle, // Can be patchstyle.
+            "Width" to Integer,
+            "Height" to Integer,
+            "Offset" to Integer,
+            // Only appears on the ClearButtonStyle so far.
+            "HoveredTexture" to PatchStyle,
+            "PressedTexture" to PatchStyle,
+            "Side" to Side,
         )
     ),
-    ColorPickerTextFieldDecoration(
+    TextFieldDecorationElement(
         mapOf(
-            "Default" to ColorPickerTextFieldDecorationElement
+            "Background" to PatchStyle,
+            "Icon" to Icon,
+            "ClearButtonStyle" to Icon
+        )
+    ),
+    TextFieldDecoration(
+        mapOf(
+            "Default" to TextFieldDecorationElement
         )
     ),
 
@@ -224,7 +241,7 @@ enum class TypeType(
             "OpacitySelectorBackground" to String, // TODO: Are these PatchStyles?
             "ButtonBackground" to String,
             "ButtonFill" to String,
-            "TextFieldDecoration" to ColorPickerTextFieldDecoration,
+            "TextFieldDecoration" to TextFieldDecoration,
             "TextFieldPadding" to Padding,
             "TextFieldHeight" to Integer,
         )
@@ -365,6 +382,9 @@ enum class TypeType(
             "FocusOutlineColor" to Color,
             "PanelTitleLabelStyle" to LabelStyle,
             "SelectedEntryIconBackground" to PatchStyle,
+            "IconTexturePath" to String,
+            "IconWidth" to Integer,
+            "IconHeight" to Integer,
         )
     ),
     
@@ -393,6 +413,24 @@ enum class TypeType(
             "SlotDropIcon" to PatchStyle,
             "SlotDeleteIcon" to PatchStyle,
             "SlotHoverOverlay" to PatchStyle,
+        )
+    ),
+    LabeledCheckBoxStyleElement(
+        mapOf(
+            "DefaultBackground" to PatchStyle,
+            "HoveredBackground" to PatchStyle,
+            "PressedBackground" to PatchStyle,
+            "Text" to String,
+            "DefaultLabelStyle" to LabelStyle,
+            "HoveredLabelStyle" to LabelStyle,
+            "PressedLabelStyle" to LabelStyle,
+            "ChangedSound" to Sound,
+        )
+    ),
+    LabeledCheckBoxStyle(
+        mapOf(
+            "Checked" to LabeledCheckBoxStyleElement,
+            "Unchecked" to LabeledCheckBoxStyleElement,
         )
     )
     ;

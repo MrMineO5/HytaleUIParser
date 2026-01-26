@@ -52,6 +52,7 @@ enum class ElementType {
             "MaxLength" to TypeType.Integer,
             "IsReadOnly" to TypeType.Boolean,
             "PasswordChar" to TypeType.String,
+            "Decoration" to TypeType.TextFieldDecoration
         )
     ),
     NumberField(
@@ -253,8 +254,17 @@ enum class ElementType {
         )
     ),
     Panel,
-    LabeledCheckBox,
-    PlayerPreviewComponent,
+    LabeledCheckBox(
+        mapOf(
+            "Style" to TypeType.LabeledCheckBoxStyle,
+            
+        )
+    ),
+    PlayerPreviewComponent(
+        mapOf(
+            "Scale" to TypeType.Float, // TODO: Confirm float, not double for .set.
+        )
+    ),
     HotkeyLabel(mapOf(
         "InputBindingKey" to TypeType.String,
         "InputBindingKeyPrefix" to TypeType.String,
