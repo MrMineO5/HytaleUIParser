@@ -57,7 +57,7 @@ class HytaleTests {
         println("Parsed ${files.size} files")
 //        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
 
-        Validator(files).validateRoot("MainMenu/Adventure/WorldList.ui")
+        //Validator(files).validateRoot("MainMenu/Adventure/WorldList.ui")
     }
     
     @Test

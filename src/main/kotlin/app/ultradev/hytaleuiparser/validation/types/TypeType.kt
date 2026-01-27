@@ -19,7 +19,7 @@ enum class TypeType(
             "SoundPath" to String,
             "MinPitch" to Float,
             "MaxPitch" to Float,
-            "Volume" to Integer, // TODO: Confirm volume is not actually float with Set.
+            "Volume" to Float, // TODO: Confirm volume is not actually float with Set.
         )
     ),
     SoundsStyle(

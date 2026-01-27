@@ -80,6 +80,7 @@ enum class ElementType {
         mapOf(
             "TexturePath" to TypeType.String,
             "Frame" to TypeType.SpriteFrame,
+            "FramesPerSecond" to TypeType.Integer,
         )
     ),
     CompactTextField,
@@ -144,15 +145,22 @@ enum class ElementType {
     ItemSlotButton(
         mapOf(
             "Style" to TypeType.ButtonStyle,
+            "ItemId" to TypeType.String,
         )
     ),
     ItemSlot(
         mapOf(
             "ShowQualityBackground" to TypeType.Boolean,
             "ShowQuantity" to TypeType.Boolean,
+            "ItemId" to TypeType.String,
         )
     ),
-    AssetImage,
+    AssetImage(
+        mapOf(
+            "LayoutMode" to TypeType.LayoutMode,
+            "AssetPath" to TypeType.String,
+        )
+    ),
     SceneBlur,
     ItemGrid(
         mapOf(
@@ -166,7 +174,11 @@ enum class ElementType {
             "InfoDisplay" to TypeType.InfoDisplay,
         )
     ),
-    ItemIcon,
+    ItemIcon(
+        mapOf(
+            "ItemId" to TypeType.String,
+        )
+    ),
     ColorPicker(
         mapOf(
             "Style" to TypeType.ColorPickerStyle,
