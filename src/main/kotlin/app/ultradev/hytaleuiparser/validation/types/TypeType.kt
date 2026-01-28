@@ -116,7 +116,6 @@ enum class TypeType(
             "HorizontalBorder" to Integer,
             "Border" to Integer,
             "Color" to Color,
-            "LabelStyle" to LabelStyle,
             "Anchor" to Anchor,
         )
     ),
