@@ -198,7 +198,7 @@ class Validator(
                 }
             }
             is NodeMemberField -> {
-                var stack = Stack<NodeMemberField>()
+                val stack = Stack<NodeMemberField>()
                 var curr: AstNode = reference
                 while (curr is NodeMemberField) {
                     stack.push(curr)
