@@ -41,6 +41,9 @@ class Scope(
     fun lookupVariable(name: String): AstNode = lookupVariableAssignment(name)?.value ?: error("Variable $name not found, scope: $this")
     fun lookupReference(name: String): String = lookupReferenceAssignment(name)?.resolvedFilePath ?: error("Reference $name not found, scope: ")
 
+    fun variableKeys(): Set<String> = variableAssignments.keys + (parent?.variableKeys() ?: emptySet())
+    fun referenceKeys(): Set<String> = referenceAssignments.keys + (parent?.referenceKeys() ?: emptySet())
+
     override fun toString(): String {
         return "Scope(\n" +
                 "${parent.toString().prependIndent("  ")},\n" +

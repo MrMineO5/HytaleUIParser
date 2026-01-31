@@ -172,7 +172,7 @@ class Validator(
         }
         node.fields.forEach { field ->
             val reqType = type.allowedFields[field.identifier.identifier]
-                ?: throw ValidatorException("Unknown field ${field.identifier.identifier} on $type", field)
+                ?: throw ValidatorException("Unknown field ${field.identifier.identifier} on $type, allowed fields: ${type.allowedFields.keys.joinToString(", ")}", field)
             validateProperty(field.value, reqType)
         }
     }
