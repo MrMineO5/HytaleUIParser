@@ -1,5 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.ValidatorException
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
 
@@ -11,21 +12,21 @@ data class NodeElement(
     override val children: List<AstNode>
         get() = listOf(type) + listOfNotNull(selector) + listOf(body)
 
-    init {
-        // TODO: Maybe write this in a cleaner way?
+    fun validate() {
         body.elements.zipWithNext().forEach { (prev, curr) ->
             if (curr is NodeAssignVariable) {
-                if (prev !is NodeAssignVariable) error("Variables must come first")
+                if (prev !is NodeAssignVariable) throw ValidatorException("Variables must come first", curr)
                 return@forEach
             }
             if (curr is NodeField) {
-                if (prev is NodeElement || prev is NodeSelectorElement) error("Fields must come before elements")
+                if (prev is NodeElement || prev is NodeSelectorElement) throw ValidatorException("Fields must come before elements", curr)
                 return@forEach
             }
             if (curr is NodeElement || curr is NodeSelectorElement) return@forEach
 
-            error(
-                "Unexpected node in element body: $curr. Expected NodeField, NodeElement, or NodeSelectorElement."
+            throw ValidatorException(
+                "Unexpected node in element body. Expected NodeAssignVariable, NodeField, NodeElement, or NodeSelectorElement.",
+                curr
             )
         }
     }

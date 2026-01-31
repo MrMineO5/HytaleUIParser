@@ -2,17 +2,17 @@ package app.ultradev.hytaleuiparser.validation
 
 import app.ultradev.hytaleuiparser.ValidatorException
 import app.ultradev.hytaleuiparser.ast.AstNode
+import app.ultradev.hytaleuiparser.ast.NodeAssignReference
 import app.ultradev.hytaleuiparser.ast.NodeAssignVariable
-import app.ultradev.hytaleuiparser.ast.NodeVariable
 
 class Scope(
     val parent: Scope? = null,
-    val variables: MutableMap<String, AstNode> = mutableMapOf(),
-    val references: Map<String, String> = emptyMap()
+    val variableAssignments: Map<String, NodeAssignVariable> = emptyMap(),
+    val referenceAssignments: Map<String, NodeAssignReference> = emptyMap()
 ) {
     constructor(parent: Scope?, variables: List<NodeAssignVariable>) : this(
         parent,
-        variables.associate { it.variable.identifier.identifier to it.value }.toMutableMap()
+        variables.associateBy { it.variable.identifier.identifier }
     ) {
         val seenKeys = mutableSetOf<String>()
         variables.forEach {
@@ -22,10 +22,10 @@ class Scope(
         }
     }
 
-    constructor(references: Map<String, String>, variables: List<NodeAssignVariable>) : this(
+    constructor(references: List<NodeAssignReference>, variables: List<NodeAssignVariable>) : this(
         null,
-        variables.associate { it.variable.identifier.identifier to it.value }.toMutableMap(),
-        references
+        variables.associateBy { it.variable.identifier.identifier },
+        references.associateBy { it.variable.identifier.identifier }
     ) {
         val seenKeys = mutableSetOf<String>()
         variables.forEach {
@@ -35,14 +35,17 @@ class Scope(
         }
     }
 
-    fun lookupVariable(name: String): AstNode = variables[name] ?: parent?.lookupVariable(name) ?: error("Variable $name not found, scope: $this")
-    fun lookupReference(name: String): String = references[name] ?: parent?.lookupReference(name) ?: error("Reference $name not found, scope: ")
+    fun lookupVariableAssignment(name: String): NodeAssignVariable? = variableAssignments[name] ?: parent?.lookupVariableAssignment(name)
+    fun lookupReferenceAssignment(name: String): NodeAssignReference? = referenceAssignments[name] ?: parent?.lookupReferenceAssignment(name)
+
+    fun lookupVariable(name: String): AstNode = lookupVariableAssignment(name)?.value ?: error("Variable $name not found, scope: $this")
+    fun lookupReference(name: String): String = lookupReferenceAssignment(name)?.resolvedFilePath ?: error("Reference $name not found, scope: ")
 
     override fun toString(): String {
         return "Scope(\n" +
                 "${parent.toString().prependIndent("  ")},\n" +
-                "  variables=[${variables.keys.joinToString(", ")}],\n" +
-                "  references=${references}\n" +
+                "  variables=[${variableAssignments.keys.joinToString(", ")}],\n" +
+                "  references=${referenceAssignments}\n" +
                 ")"
     }
 }

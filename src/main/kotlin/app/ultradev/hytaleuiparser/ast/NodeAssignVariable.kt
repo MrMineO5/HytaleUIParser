@@ -24,6 +24,7 @@ data class NodeAssignVariable(
 
     override fun setScope(scope: Scope) {
         super.setScope(scope)
+        variable.setScope(scope)
         value.setScope(scope)
     }
 }

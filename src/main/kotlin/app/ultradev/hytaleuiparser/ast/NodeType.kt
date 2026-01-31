@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.ValidatorException
 import app.ultradev.hytaleuiparser.validation.Scope
-import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 data class NodeType(
     val type: NodeIdentifier?,
@@ -10,11 +10,12 @@ data class NodeType(
     override val children: List<AstNode>
         get() = listOfNotNull(type) + listOf(body)
 
-    init {
+    fun validate() {
         body.elements.forEach {
             if (it is NodeField || it is NodeSpread) return@forEach
-            error(
-                "Unexpected node in element body: $it. Expected NodeField or NodeSpread."
+            throw ValidatorException(
+                "Unexpected node in element body. Expected NodeField or NodeSpread.",
+                it
             )
         }
     }

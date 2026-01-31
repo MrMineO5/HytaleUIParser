@@ -3,7 +3,6 @@ package app.ultradev.hytaleuiparser
 import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
-import app.ultradev.hytaleuiparser.validation.resolveNeighbour
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 import java.util.Stack
 
@@ -16,34 +15,38 @@ class Validator(
         files.keys.forEach(::validateRoot)
     }
 
-    fun validateRoot(path: String) {
-        if (validated.contains(path)) return
+    fun validateRoot(path: String, revalidate: Boolean = false): RootNode? {
+        if (validated.contains(path) && !revalidate) return files[path]!!
         validated.add(path)
 
-        val root = files[path] ?: error("No root node for $path")
+        val root = files[path] ?: return null
+        root.validate()
         root.path = path
         root.initFile(root)
-        try {
-            val scope = Scope(
-                root.references.associate {
-                    it.variable.identifier.identifier to path.resolveNeighbour(it.filePath.valueText)
-                }.toMutableMap(), root.variables
-            )
-            root.setScope(scope)
 
-            root.variableValues = scope.variables
+        val scope = Scope(
+            root.references, root.variables
+        )
+        root.setScope(scope)
 
-            root.elements.forEach {
-                validateElement(it)
-            }
-        } catch (e: Exception) {
-            throw ValidatorException("Failed to validate $path", root, e)
+        root.variableValues = scope.variableAssignments.mapValues { it.value.value }
+
+        root.elements.forEach {
+            validateElement(it)
         }
+
+        return root
     }
 
     private fun findElementType(node: NodeElement): ElementType {
         return when (val type = node.type) {
-            is NodeIdentifier -> ElementType.valueOf(type.identifier)
+            is NodeIdentifier -> {
+                try {
+                    ElementType.valueOf(type.identifier)
+                } catch(_: IllegalArgumentException) {
+                    throw ValidatorException("Unknown element type: ${type.identifier}", type)
+                }
+            }
             is NodeVariable, is NodeRefMember -> {
                 val element = deepLookupReference(type)
                 if (element !is NodeElement) throw ValidatorException("Expected element, got ${element::class.simpleName}", type)
@@ -55,6 +58,8 @@ class Validator(
     }
 
     fun validateElement(node: NodeElement) {
+        node.validate()
+
         val childScope = Scope(node.resolvedScope, node.localVariables)
         node.body.setScope(childScope)
 
@@ -159,6 +164,7 @@ class Validator(
     }
 
     fun validateType(node: NodeType, type: TypeType) {
+        node.validate()
         node.spreads.forEach { spread ->
             val value = deepLookupReference(spread.variableAsReference)
             if (value !is NodeType) throw ValidatorException("Expected type, got ${value::class.simpleName}", value)
@@ -173,10 +179,12 @@ class Validator(
 
     fun lookupRefMember(ref: NodeRefMember): AstNode {
         try {
-            val reference = ref.resolvedScope.lookupReference(ref.reference.identifier.identifier)
-            validateRoot(reference)
-            val rootNode = files[reference]!!
-            return rootNode.variableValues[ref.member.identifier.identifier] ?: throw ValidatorException(
+            val referenceAssignment = ref.resolvedScope.lookupReferenceAssignment(ref.reference.identifier.identifier)
+                ?: throw ValidatorException("No reference ${ref.reference.identifier.identifier} found", ref)
+            val reference = referenceAssignment.resolvedFilePath
+            val rootNode = validateRoot(reference) ?: throw ValidatorException("Failed to resolve reference $reference", referenceAssignment)
+            ref.member.setScope(rootNode.resolvedScope)
+            return ref.member.resolvedValue ?: throw ValidatorException(
                 "No member ${ref.member.identifier.identifier} on ${ref.reference.identifier.identifier}", ref
             )
         } catch(e: UninitializedPropertyAccessException) {
@@ -202,7 +210,7 @@ class Validator(
                 var curr: AstNode = reference
                 while (curr is NodeMemberField) {
                     stack.push(curr)
-                    curr = curr.parent
+                    curr = curr.owner
                 }
 
                 val ownerValue = if (curr is VariableReference) deepLookupReference(curr) else curr

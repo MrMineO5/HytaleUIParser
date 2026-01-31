@@ -9,4 +9,6 @@ data class NodeReference(
         get() = listOf(refMarker, identifier)
 
     constructor(identifier: NodeIdentifier) : this(GeneratedTokens.referenceMarker(), identifier)
+
+    val resolvedAssignment: NodeAssignReference? get() = resolvedScope.lookupReferenceAssignment(identifier.identifier)
 }

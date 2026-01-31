@@ -5,7 +5,8 @@ data class Token(
     val text: String,
 
     val startLine: Int = -1,
-    val startColumn: Int = -1
+    val startColumn: Int = -1,
+    val startOffset: Int = -1,
 ) {
     enum class Type {
         IDENTIFIER,
@@ -35,5 +36,8 @@ data class Token(
         MATH_DIVIDE,
 
         TRANSLATION_MARKER,
+
+        WHITESPACE,
+        UNKNOWN,
     }
 }

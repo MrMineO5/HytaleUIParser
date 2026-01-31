@@ -1,11 +1,12 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
-
 data class NodeVariable(
     val variableMarker: NodeToken,
     val identifier: NodeIdentifier
 ) : AstNode(), VariableReference {
     override val children: List<AstNode>
         get() = listOf(variableMarker, identifier)
+
+    val resolvedAssignment: NodeAssignVariable? get() = resolvedScope.lookupVariableAssignment(identifier.identifier)
+    val resolvedValue: AstNode? get() = resolvedAssignment?.value
 }

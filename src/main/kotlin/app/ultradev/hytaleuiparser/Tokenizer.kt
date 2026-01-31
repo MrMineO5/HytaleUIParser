@@ -12,26 +12,30 @@ class Tokenizer(
 
     var line = 0
     var column = 0
+    var offset = 0
 
     override fun hasNext(): Boolean {
-        skipWhitespace()
         return peek() != null
     }
 
     override fun next(): Token {
-        val ch = readNWSP()!!
+        val ch = read() ?: error("next was called on an empty tokenizer")
+        if (ch.customIsWhitespace()) {
+            return Token(Token.Type.WHITESPACE, ch.toString(), line, column, offset - 1)
+        }
 
         val startLine = line
         val startColumn = column - 1
+        val startOffset = offset - 1
 
 
         // Dots can be either a member or a spread operator
         if (ch == '.') {
-            if (peek() != '.') return Token(Token.Type.MEMBER_MARKER, ch.toString(), startLine, startColumn)
+            if (peek() != '.') return Token(Token.Type.MEMBER_MARKER, ch.toString(), startLine, startColumn, startOffset)
             read()
-            if (peek() != '.') error("Found two dots, maybe a typo in spread operator?")
+            if (peek() != '.') return Token(Token.Type.UNKNOWN, "..", startLine, startColumn, startOffset)
             read()
-            return Token(Token.Type.SPREAD, "...", startLine, startColumn)
+            return Token(Token.Type.SPREAD, "...", startLine, startColumn, startOffset)
         }
 
         // Quotes strings
@@ -42,9 +46,10 @@ class Tokenizer(
                 sb.append(read())
                 peek = peek()
             }
-            val ch = read() ?: error("Unterminated string") // Skips quote, does nothing if EOF
+            val ch = read()  // Skips quote, does nothing if EOF
+                ?: return Token(Token.Type.UNKNOWN, sb.toString(), startLine, startColumn, startOffset)
             sb.append(ch)
-            return Token(Token.Type.STRING, sb.toString(), startLine, startColumn)
+            return Token(Token.Type.STRING, sb.toString(), startLine, startColumn, startOffset)
         }
 
         // Comments
@@ -55,7 +60,7 @@ class Tokenizer(
                 sb.append(read())
                 while (peek() != '\n') sb.append(read())
                 read()
-                return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+                return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn, startOffset)
             }
             if (peek() == '*') {
                 val sb = StringBuilder()
@@ -69,13 +74,13 @@ class Tokenizer(
                         break
                     }
                 }
-                return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn)
+                return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn, startOffset)
             }
         }
 
         // Basic single meaning symbols have static tokens
         if (ch in TokenSymbols.TOKEN_MAP.keys) {
-            return Token(TokenSymbols.TOKEN_MAP[ch]!!, ch.toString(), startLine, startColumn)
+            return Token(TokenSymbols.TOKEN_MAP[ch]!!, ch.toString(), startLine, startColumn, startOffset)
         }
 
         val sb = StringBuilder()
@@ -84,35 +89,25 @@ class Tokenizer(
         if (ch.isDigit()) {
             // Identifiers cannot start with a digit, this must be a number
             while (peek()?.isDigit() == true || peek() == '.') sb.append(read())
-            return Token(Token.Type.NUMBER, sb.toString(), startLine, startColumn)
+            return Token(Token.Type.NUMBER, sb.toString(), startLine, startColumn, startOffset)
         } else if (ch.isLetter()) {
             // Identifier
             while (peek()?.isLetterOrDigit() == true) sb.append(read())
-            return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn)
+            return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn, startOffset)
         } else if (ch == '#') {
             // Selector or color
             while (peek()?.isLetterOrDigit() == true) sb.append(read())
-            return Token(Token.Type.SELECTOR, sb.toString(), startLine, startColumn)
+            return Token(Token.Type.SELECTOR, sb.toString(), startLine, startColumn, startOffset)
         } else {
-            error("Unexpected character: $ch")
+            return Token(Token.Type.UNKNOWN, sb.toString(), startLine, startColumn, startOffset)
         }
     }
 
     fun Char.customIsWhitespace(): Boolean = this.isWhitespace() || this == '﻿'
 
-    private fun skipWhitespace() {
-        while (peek()?.customIsWhitespace() == true) read()
-    }
-
     private fun skipLine() {
         while (peek() != '\n') read()
         read()
-    }
-
-    private fun readNWSP(): Char? {
-        var ch = read()
-        while (ch?.customIsWhitespace() == true) ch = read()
-        return ch
     }
 
     private fun read(): Char? {
@@ -125,6 +120,7 @@ class Tokenizer(
         } else {
             column++
         }
+        offset++
         return ch.toChar()
     }
 

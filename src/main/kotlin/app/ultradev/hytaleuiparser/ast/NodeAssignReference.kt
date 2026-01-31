@@ -1,6 +1,8 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.token.GeneratedTokens
+import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.validation.resolveNeighbour
 
 data class NodeAssignReference(
     val variable: NodeReference,
@@ -20,4 +22,11 @@ data class NodeAssignReference(
         filePath,
         GeneratedTokens.endStatement()
     )
+
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        variable.setScope(scope)
+    }
+
+    val resolvedFilePath: String get() = file.path.resolveNeighbour(filePath.valueText)
 }

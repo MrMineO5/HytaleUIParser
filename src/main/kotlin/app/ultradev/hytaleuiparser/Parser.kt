@@ -11,10 +11,10 @@ class Parser(tokens: Iterator<Token>) {
 
     fun finish(): RootNode {
         parseCompletely()
-        return RootNode(nodes)
+        val root = RootNode(nodes)
+        root.applyParent(root)
+        return root
     }
-
-    fun hasNext() = tokens.hasNext()
 
     private fun parseCompletely() {
         while (tokens.hasNext()) {
@@ -22,7 +22,7 @@ class Parser(tokens: Iterator<Token>) {
         }
     }
 
-    fun parseRoot(): AstNode {
+    private fun parseRoot(): AstNode {
         val node = tokens.peek()
 
         return when (node.type) {
@@ -420,11 +420,16 @@ class Parser(tokens: Iterator<Token>) {
         val next = tokens.peek()
         if (next.type != Token.Type.VARIABLE_MARKER) throw ParserException("Expected variable marker", next)
         // peek(2) would be the variable identifier
-        val nextNextNext = tokens.peek(3)
+        val nextNextNext = safePeek(next, 3)
         return when (nextNextNext.type) {
             Token.Type.ASSIGNMENT -> parseVariableAssignment()
             Token.Type.START_ELEMENT, Token.Type.SELECTOR -> parseElement()
             else -> throw ParserException("Expected variable assignment or element", nextNextNext)
         }
+    }
+
+    private fun safePeek(current: Token, count: Int = 1): Token {
+        if (!tokens.hasNextMany(count)) throw ParserException("Unexpected end of file", current)
+        return tokens.peek(count)
     }
 }
