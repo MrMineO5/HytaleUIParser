@@ -12,26 +12,26 @@ class Scope(
 ) {
     constructor(parent: Scope?, variables: List<NodeAssignVariable>) : this(
         parent,
-        variables.associateBy { it.variable.identifier.identifier }
+        variables.associateBy { it.variable.identifier }
     ) {
         val seenKeys = mutableSetOf<String>()
         variables.forEach {
-            if (seenKeys.contains(it.variable.identifier.identifier))
-                throw ValidatorException("Duplicate variable: ${it.variable.identifier.identifier}", it)
-            seenKeys.add(it.variable.identifier.identifier)
+            if (seenKeys.contains(it.variable.identifier))
+                throw ValidatorException("Duplicate variable: ${it.variable.identifier}", it)
+            seenKeys.add(it.variable.identifier)
         }
     }
 
     constructor(references: List<NodeAssignReference>, variables: List<NodeAssignVariable>) : this(
         null,
-        variables.associateBy { it.variable.identifier.identifier },
-        references.associateBy { it.variable.identifier.identifier }
+        variables.associateBy { it.variable.identifier },
+        references.associateBy { it.variable.identifier }
     ) {
         val seenKeys = mutableSetOf<String>()
         variables.forEach {
-            if (seenKeys.contains(it.variable.identifier.identifier))
-                throw ValidatorException("Duplicate variable: ${it.variable.identifier.identifier}", it)
-            seenKeys.add(it.variable.identifier.identifier)
+            if (seenKeys.contains(it.variable.identifier))
+                throw ValidatorException("Duplicate variable: ${it.variable.identifier}", it)
+            seenKeys.add(it.variable.identifier)
         }
     }
 

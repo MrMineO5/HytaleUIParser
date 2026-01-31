@@ -6,7 +6,7 @@ import app.ultradev.hytaleuiparser.validation.Scope
 data class RootNode(
     override val children: List<AstNode>
 ) : AstNode() {
-    fun validate() {
+    override fun validate() {
         children.forEach {
             if (it is NodeAssignReference || it is NodeAssignVariable || it is NodeElement) return@forEach
             throw ValidatorException("Unexpected node in file root. Expected NodeAssignReference, NodeAssignVariable, or NodeElement.", it)

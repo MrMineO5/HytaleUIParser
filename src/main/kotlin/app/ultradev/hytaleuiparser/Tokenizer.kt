@@ -59,7 +59,6 @@ class Tokenizer(
                 sb.append(ch)
                 sb.append(read())
                 while (peek() != '\n') sb.append(read())
-                read()
                 return Token(Token.Type.COMMENT, sb.toString(), startLine, startColumn, startOffset)
             }
             if (peek() == '*') {
@@ -94,10 +93,18 @@ class Tokenizer(
             // Identifier
             while (peek()?.isLetterOrDigit() == true) sb.append(read())
             return Token(Token.Type.IDENTIFIER, sb.toString(), startLine, startColumn, startOffset)
-        } else if (ch == '#') {
+        } else if (ch == '#' || ch == '@' || ch == '$') {
             // Selector or color
             while (peek()?.isLetterOrDigit() == true) sb.append(read())
-            return Token(Token.Type.SELECTOR, sb.toString(), startLine, startColumn, startOffset)
+
+            val type = when (ch) {
+                '#' -> Token.Type.SELECTOR
+                '@' -> Token.Type.VARIABLE
+                '$' -> Token.Type.REFERENCE
+                else -> error("Unknown token type")
+            }
+
+            return Token(type, sb.toString(), startLine, startColumn, startOffset)
         } else {
             return Token(Token.Type.UNKNOWN, sb.toString(), startLine, startColumn, startOffset)
         }

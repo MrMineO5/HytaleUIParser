@@ -20,7 +20,7 @@ class Validator(
         validated.add(path)
 
         val root = files[path] ?: return null
-        root.validate()
+        root.validate0()
         root.path = path
         root.initFile(root)
 
@@ -53,13 +53,11 @@ class Validator(
                 findElementType(element)
             }
 
-            else -> error("Unknown element type: $type")
+            else -> throw ValidatorException("Unknown element type: $type", type)
         }
     }
 
     fun validateElement(node: NodeElement) {
-        node.validate()
-
         val childScope = Scope(node.resolvedScope, node.localVariables)
         node.body.setScope(childScope)
 
@@ -164,7 +162,7 @@ class Validator(
     }
 
     fun validateType(node: NodeType, type: TypeType) {
-        node.validate()
+        node.resolvedType = type
         node.spreads.forEach { spread ->
             val value = deepLookupReference(spread.variableAsReference)
             if (value !is NodeType) throw ValidatorException("Expected type, got ${value::class.simpleName}", value)
@@ -179,13 +177,13 @@ class Validator(
 
     fun lookupRefMember(ref: NodeRefMember): AstNode {
         try {
-            val referenceAssignment = ref.resolvedScope.lookupReferenceAssignment(ref.reference.identifier.identifier)
-                ?: throw ValidatorException("No reference ${ref.reference.identifier.identifier} found", ref)
+            val referenceAssignment = ref.resolvedScope.lookupReferenceAssignment(ref.reference.identifier)
+                ?: throw ValidatorException("No reference ${ref.reference.identifier} found", ref)
             val reference = referenceAssignment.resolvedFilePath
             val rootNode = validateRoot(reference) ?: throw ValidatorException("Failed to resolve reference $reference", referenceAssignment)
             ref.member.setScope(rootNode.resolvedScope)
             return ref.member.resolvedValue ?: throw ValidatorException(
-                "No member ${ref.member.identifier.identifier} on ${ref.reference.identifier.identifier}", ref
+                "No member ${ref.member.identifier} on ${ref.reference.identifier}", ref
             )
         } catch(e: UninitializedPropertyAccessException) {
             throw ValidatorException("Variable reference lookup before scope init", ref)
@@ -198,11 +196,11 @@ class Validator(
             is NodeRefMember -> lookupRefMember(reference)
             is NodeVariable -> {
                 try {
-                    reference.resolvedScope.lookupVariable(reference.identifier.identifier)
+                    reference.resolvedScope.lookupVariable(reference.identifier)
                 } catch (e: UninitializedPropertyAccessException) {
                     throw ValidatorException("Variable reference lookup before scope init", reference)
                 } catch(e: Exception) {
-                    throw ValidatorException("Failed to lookup variable ${reference.identifier.identifier} in ${reference.resolvedScope}", reference, e)
+                    throw ValidatorException("Failed to lookup variable ${reference.identifier} in ${reference.resolvedScope}", reference, e)
                 }
             }
             is NodeMemberField -> {

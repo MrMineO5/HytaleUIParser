@@ -12,7 +12,7 @@ data class NodeElement(
     override val children: List<AstNode>
         get() = listOf(type) + listOfNotNull(selector) + listOf(body)
 
-    fun validate() {
+    protected override fun validate() {
         body.elements.zipWithNext().forEach { (prev, curr) ->
             if (curr is NodeAssignVariable) {
                 if (prev !is NodeAssignVariable) throw ValidatorException("Variables must come first", curr)

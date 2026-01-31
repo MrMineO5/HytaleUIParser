@@ -7,6 +7,7 @@ import app.ultradev.hytaleuiparser.ast.NodeIdentifier
 import app.ultradev.hytaleuiparser.ast.NodeOpacity
 import app.ultradev.hytaleuiparser.ast.NodeSelector
 import app.ultradev.hytaleuiparser.ast.NodeToken
+import java.io.StringReader
 import kotlin.io.path.*
 import kotlin.test.Test
 
@@ -101,6 +102,25 @@ class HytaleTests {
 //        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
 
         Validator(files).validate()
+    }
+
+
+    @Test
+    fun testTokenizerOutputsValidTokens() {
+        val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
+
+        dir.walk().filter {
+            it.isRegularFile() && it.extension == "ui"
+        }.forEach {
+            val text = it.readText()
+            val tokenizer = Tokenizer(StringReader(text))
+            val allTokens = tokenizer.asSequence().toList()
+
+            for ((prev, curr) in allTokens.zipWithNext()) {
+                if (prev.startOffset + prev.text.length != curr.startOffset) error("Tokens overlap or contain gaps: $prev, $curr")
+            }
+            assert(allTokens.joinToString("") { it.text } == text) { "Tokenizer output does not match input for ${it.name}" }
+        }
     }
 
 

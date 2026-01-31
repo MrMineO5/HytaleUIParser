@@ -28,8 +28,6 @@ object TokenSymbols {
     val END_ARRAY = ']'
     
     val TOKEN_MAP = mapOf(
-        REFERENCE_MARKER to Token.Type.REFERENCE_MARKER,
-        VARIABLE_MARKER to Token.Type.VARIABLE_MARKER,
         ASSIGNMENT_MARKER to Token.Type.ASSIGNMENT,
         END_STATEMENT to Token.Type.END_STATEMENT,
         START_ELEMENT to Token.Type.START_ELEMENT,

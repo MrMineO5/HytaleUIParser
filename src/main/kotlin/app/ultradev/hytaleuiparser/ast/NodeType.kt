@@ -2,6 +2,7 @@ package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.ValidatorException
 import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 data class NodeType(
     val type: NodeIdentifier?,
@@ -10,7 +11,7 @@ data class NodeType(
     override val children: List<AstNode>
         get() = listOfNotNull(type) + listOf(body)
 
-    fun validate() {
+    override fun validate() {
         body.elements.forEach {
             if (it is NodeField || it is NodeSpread) return@forEach
             throw ValidatorException(
@@ -27,4 +28,6 @@ data class NodeType(
         super.setScope(scope)
         body.setScope(scope)
     }
+
+    lateinit var resolvedType: TypeType // TODO: Could there be multiple? Wonder what the Hytale client would say about that
 }

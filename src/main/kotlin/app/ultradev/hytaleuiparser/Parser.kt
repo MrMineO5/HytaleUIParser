@@ -26,8 +26,8 @@ class Parser(tokens: Iterator<Token>) {
         val node = tokens.peek()
 
         return when (node.type) {
-            Token.Type.VARIABLE_MARKER -> parseVariableAssignmentOrElement()
-            Token.Type.REFERENCE_MARKER -> parseRefAssignmentOrElement()
+            Token.Type.VARIABLE -> parseVariableAssignmentOrElement()
+            Token.Type.REFERENCE -> parseRefAssignmentOrElement()
             Token.Type.IDENTIFIER -> parseElement()
 
             else -> throw ParserException("Unsupported root node type found: ${node.type}", node)
@@ -37,17 +37,16 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseVariableOrRefMember(): AstNode {
         val next = tokens.peek()
         return when (next.type) {
-            Token.Type.VARIABLE_MARKER -> parseVariable()
-            Token.Type.REFERENCE_MARKER -> parseRefMember()
+            Token.Type.VARIABLE -> parseVariable()
+            Token.Type.REFERENCE -> parseRefMember()
             else -> throw ParserException("Expected variable or reference", next)
         }
     }
 
     private fun parseVariable(): NodeVariable {
-        val marker = tokens.next()
-        if (marker.type != Token.Type.VARIABLE_MARKER) throw ParserException("Expected variable marker", marker)
-        val identifier = parseIdentifier()
-        return NodeVariable(NodeToken(marker), identifier)
+        val reference = tokens.next()
+        if (reference.type != Token.Type.VARIABLE) throw ParserException("Expected variable marker", reference)
+        return NodeVariable(NodeToken(reference))
     }
 
     private fun parseIdentifier(): NodeIdentifier {
@@ -69,10 +68,9 @@ class Parser(tokens: Iterator<Token>) {
     }
 
     private fun parseReference(): NodeReference {
-        val marker = tokens.next()
-        if (marker.type != Token.Type.REFERENCE_MARKER) throw ParserException("Expected reference marker", marker)
-        val identifier = parseIdentifier()
-        return NodeReference(NodeToken(marker), identifier)
+        val reference = tokens.next()
+        if (reference.type != Token.Type.REFERENCE) throw ParserException("Expected reference marker", reference)
+        return NodeReference(NodeToken(reference))
     }
 
     private fun parseReferenceAssignment(): NodeAssignReference {
@@ -129,8 +127,8 @@ class Parser(tokens: Iterator<Token>) {
                 }
             }
 
-            Token.Type.VARIABLE_MARKER -> parseVariable()
-            Token.Type.REFERENCE_MARKER -> parseRefMember()
+            Token.Type.VARIABLE -> parseVariable()
+            Token.Type.REFERENCE -> parseRefMember()
             Token.Type.TRANSLATION_MARKER -> parseTranslation()
             Token.Type.START_PARENTHESIS -> {
                 val afterStart = tokens.peek(2)
@@ -241,10 +239,10 @@ class Parser(tokens: Iterator<Token>) {
             when (next.type) {
                 Token.Type.IDENTIFIER -> children.add(parseField())
                 Token.Type.SPREAD -> children.add(parseSpread())
-                Token.Type.REFERENCE_MARKER -> children.add(parseRefMember())
+                Token.Type.REFERENCE -> children.add(parseRefMember())
                 
                 Token.Type.END_PARENTHESIS -> return NodeType(
-                    type, NodeBody(NodeToken(start), NodeToken(tokens.next()), children)
+                    type, NodeBody(NodeToken(start), children, NodeToken(tokens.next()))
                 )
 
                 else -> throw ParserException("Expected spread, field, or end type", next)
@@ -259,8 +257,8 @@ class Parser(tokens: Iterator<Token>) {
 
         val identifier = when (ident.type) {
             Token.Type.IDENTIFIER -> parseIdentifier()
-            Token.Type.VARIABLE_MARKER -> parseVariable()
-            Token.Type.REFERENCE_MARKER -> parseRefMember()
+            Token.Type.VARIABLE -> parseVariable()
+            Token.Type.REFERENCE -> parseRefMember()
             else -> throw ParserException("Expected identifier or variable", ident)
         }
 
@@ -290,10 +288,10 @@ class Parser(tokens: Iterator<Token>) {
             val next = tokens.peek()
 
             when (next.type) {
-                Token.Type.END_ELEMENT -> return NodeBody(NodeToken(start), NodeToken(tokens.next()), children)
+                Token.Type.END_ELEMENT -> return NodeBody(NodeToken(start), children, NodeToken(tokens.next()))
 
-                Token.Type.VARIABLE_MARKER -> children.add(parseVariableAssignmentOrElement())
-                Token.Type.REFERENCE_MARKER -> children.add(parseRefAssignmentOrElement())
+                Token.Type.VARIABLE -> children.add(parseVariableAssignmentOrElement())
+                Token.Type.REFERENCE -> children.add(parseRefAssignmentOrElement())
                 Token.Type.SELECTOR -> children.add(parseSelectorElement())
 
                 Token.Type.IDENTIFIER -> {
@@ -373,13 +371,12 @@ class Parser(tokens: Iterator<Token>) {
 
     private fun parseRefAssignmentOrElement(): AstNode {
         val next = tokens.peek()
-        if (next.type != Token.Type.REFERENCE_MARKER) throw ParserException("Expected reference marker", next)
-        // peek(2) would be the reference identifier
-        val nextNextNext = tokens.peek(3)
-        return when (nextNextNext.type) {
+        if (next.type != Token.Type.REFERENCE) throw ParserException("Expected reference marker", next)
+        val nextNext = tokens.peek(2)
+        return when (nextNext.type) {
             Token.Type.ASSIGNMENT -> parseReferenceAssignment()
             Token.Type.MEMBER_MARKER -> parseElement()
-            else -> throw ParserException("Expected reference assignment or member", nextNextNext)
+            else -> throw ParserException("Expected reference assignment or member", nextNext)
         }
     }
 
@@ -418,13 +415,12 @@ class Parser(tokens: Iterator<Token>) {
 
     private fun parseVariableAssignmentOrElement(): AstNode {
         val next = tokens.peek()
-        if (next.type != Token.Type.VARIABLE_MARKER) throw ParserException("Expected variable marker", next)
-        // peek(2) would be the variable identifier
-        val nextNextNext = safePeek(next, 3)
-        return when (nextNextNext.type) {
+        if (next.type != Token.Type.VARIABLE) throw ParserException("Expected variable marker", next)
+        val nextNext = safePeek(next, 2)
+        return when (nextNext.type) {
             Token.Type.ASSIGNMENT -> parseVariableAssignment()
             Token.Type.START_ELEMENT, Token.Type.SELECTOR -> parseElement()
-            else -> throw ParserException("Expected variable assignment or element", nextNextNext)
+            else -> throw ParserException("Expected variable assignment or element", nextNext)
         }
     }
 

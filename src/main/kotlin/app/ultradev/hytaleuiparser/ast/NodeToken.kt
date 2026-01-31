@@ -8,4 +8,6 @@ data class NodeToken(
     override val children: List<AstNode> get() = emptyList()
     override val tokens: List<Token>
         get() = listOf(token)
+    override val textRange: Pair<Int, Int>
+        get() = token.startOffset to (token.startOffset + token.text.length)
 }

@@ -1,14 +1,18 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.token.GeneratedTokens
+import app.ultradev.hytaleuiparser.ValidatorException
 
 data class NodeReference(
-    val refMarker: NodeToken, val identifier: NodeIdentifier
+    val reference: NodeToken
 ) : AstNode() {
     override val children: List<AstNode>
-        get() = listOf(refMarker, identifier)
+        get() = listOf(reference)
 
-    constructor(identifier: NodeIdentifier) : this(GeneratedTokens.referenceMarker(), identifier)
+    val identifier get() = reference.text
 
-    val resolvedAssignment: NodeAssignReference? get() = resolvedScope.lookupReferenceAssignment(identifier.identifier)
+    override fun validate() {
+        if (identifier == "$") throw ValidatorException("Reference name cannot be empty", this)
+    }
+
+    val resolvedAssignment: NodeAssignReference? get() = resolvedScope.lookupReferenceAssignment(identifier)
 }

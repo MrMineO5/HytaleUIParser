@@ -439,4 +439,21 @@ enum class TypeType(
     constructor(enum: List<String>) : this(false, true, emptyMap(), enum)
 
     fun canNegate(): Boolean = this == Integer || this == Float
+
+    fun default(): String {
+        if (this.isPrimitive) {
+            return when (this) {
+                Boolean -> "false"
+                Integer -> "0"
+                Float -> "0.0"
+                String -> "\"\""
+                Color -> "#000000(1.0)"
+                else -> throw IllegalStateException("No default value for primitive type: $this")
+            }
+        } else if (this.isEnum) {
+            return enum.first()
+        } else {
+            return "()"
+        }
+    }
 }

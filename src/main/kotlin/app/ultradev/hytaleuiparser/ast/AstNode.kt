@@ -10,9 +10,7 @@ sealed class AstNode {
         get() = children.flatMap { it.tokens }
 
     val text: String get() = tokens.joinToString("") { it.text }
-    val textRange: Pair<Int, Int> get() = tokens.let { tokens ->
-        tokens.first().startOffset to (tokens.last().let { it.startOffset + it.text.length })
-    }
+    open val textRange: Pair<Int, Int> get() = children.first().textRange.first to children.last().textRange.second
 
     lateinit var parent: AstNode
     lateinit var file: RootNode
@@ -40,4 +38,12 @@ sealed class AstNode {
         visitor.visit(this)
         children.forEach { it.walk(visitor) }
     }
+
+
+    internal fun validate0() {
+        validate()
+        children.forEach { it.validate0() }
+    }
+
+    protected open fun validate() {}
 }

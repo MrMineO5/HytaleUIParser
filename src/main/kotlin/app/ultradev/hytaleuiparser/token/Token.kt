@@ -10,8 +10,8 @@ data class Token(
 ) {
     enum class Type {
         IDENTIFIER,
-        VARIABLE_MARKER,
-        REFERENCE_MARKER,
+        VARIABLE,
+        REFERENCE,
         ASSIGNMENT,
         MEMBER_MARKER,
         END_STATEMENT,
