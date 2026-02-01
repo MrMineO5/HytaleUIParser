@@ -3,6 +3,7 @@ package app.ultradev.hytaleuiparser.ast
 import app.ultradev.hytaleuiparser.ValidatorError
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 data class NodeElement(
     val type: AstNode,
@@ -38,8 +39,13 @@ data class NodeElement(
 
     lateinit var resolvedType: ElementType
 
+    override val resolvedTypes: Set<TypeType>
+        get() = TODO() // TODO: We need to somehow convert ElementType into TypeType, or have a common interface?
+
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         type.setScope(scope)
     }
+
+    override fun computePath(): String = super.computePath() + "/${type.text}"
 }

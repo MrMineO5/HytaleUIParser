@@ -1,6 +1,8 @@
 package app.ultradev.hytaleuiparser.validation
 
 import app.ultradev.hytaleuiparser.validation.types.TypeType
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 enum class ElementType {
     Group(
@@ -306,5 +308,10 @@ enum class ElementType {
             SceneBlur -> false
             else -> true
         }
+    }
+
+
+    fun displayFullStructure(): String {
+        return "element " + this.name + " {\n" + properties.map { (key, value) -> "   $key: ${value.name}\n" }.joinToString("") + "}"
     }
 }

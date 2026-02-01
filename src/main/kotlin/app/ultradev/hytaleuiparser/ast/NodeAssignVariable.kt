@@ -2,6 +2,7 @@ package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.token.GeneratedTokens
 import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 data class NodeAssignVariable(
     val variable: NodeVariable,
@@ -27,4 +28,6 @@ data class NodeAssignVariable(
         variable.setScope(scope)
         value.setScope(scope)
     }
+
+    override fun computePath(): String = super.computePath() + ":${variable.identifier}"
 }

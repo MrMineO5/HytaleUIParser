@@ -1,6 +1,9 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.token.Token
+import app.ultradev.hytaleuiparser.validation.types.TypeType
+import java.util.EnumSet
+import kotlin.math.floor
 
 data class NodeConstant(
     override val children: List<NodeToken>,
@@ -16,4 +19,19 @@ data class NodeConstant(
         fun quoted(valueText: String) = NodeConstant(NodeToken(Token(Token.Type.STRING, "\"$valueText\"")), valueText)
 
     }
+
+    fun getAllowedTypes(): Set<TypeType> {
+        if (children.first().text.startsWith("\"")) return setOf(TypeType.String)
+        if (valueText == "true" || valueText == "false") return setOf(TypeType.Boolean)
+        val parsed = valueText.toDoubleOrNull() ?: return TypeType.entries.filter { it.enum.contains(valueText) }.toSet()
+        if (floor(parsed) == parsed) return setOf(
+            TypeType.Integer,
+            TypeType.Float,
+            TypeType.Double
+        )
+
+        return setOf(TypeType.Float, TypeType.Double)
+    }
+
+    override val resolvedTypes: Set<TypeType> get() = getAllowedTypes()
 }

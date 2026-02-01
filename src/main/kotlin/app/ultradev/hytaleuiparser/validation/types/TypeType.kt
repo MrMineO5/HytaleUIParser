@@ -51,17 +51,17 @@ enum class TypeType(
         // These can actually all be floats...?
         // ItemLibraryPanel.ui -> Use of math operators with non-integer values. Does it round? Cast?
         mapOf(
-            "Left" to Float,
-            "Right" to Float,
-            "Top" to Float,
-            "Bottom" to Float,
-            "Width" to Float,
-            "Height" to Float,
-            "MinWidth" to Float,
-            "MaxWidth" to Float,
-            "Full" to Float,
-            "Horizontal" to Float,
-            "Vertical" to Float,
+            "Left" to Integer,
+            "Right" to Integer,
+            "Top" to Integer,
+            "Bottom" to Integer,
+            "Width" to Integer,
+            "Height" to Integer,
+            "MinWidth" to Integer,
+            "MaxWidth" to Integer,
+            "Full" to Integer,
+            "Horizontal" to Integer,
+            "Vertical" to Integer,
         )
     ),
     Padding(
@@ -467,5 +467,11 @@ enum class TypeType(
         } else {
             return "()"
         }
+    }
+
+    fun displayFullStructure(): String {
+        if (this.isPrimitive) return this.name
+        if (this.isEnum) return "enum " + this.name + " (" + enum.joinToString(", ") + ")"
+        return "type " + this.name + " {\n" + allowedFields.map { (key, value) -> "   $key: ${value.name}\n" }.joinToString("") + "}"
     }
 }

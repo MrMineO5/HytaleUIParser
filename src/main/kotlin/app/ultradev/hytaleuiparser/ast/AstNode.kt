@@ -52,4 +52,7 @@ sealed class AstNode {
         children.forEach { it.startValidation0() }
     }
     protected open fun startValidation() {}
+
+
+    open fun computePath(): String = parent.computePath()
 }

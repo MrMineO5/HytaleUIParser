@@ -15,5 +15,5 @@ data class NodeVariable(
     }
 
     val resolvedAssignment: NodeAssignVariable? get() = resolvedScope.lookupVariableAssignment(identifier)
-    val resolvedValue: AstNode? get() = resolvedAssignment?.value
+    override val resolvedValue: VariableValue? get() = resolvedAssignment?.valueAsVariable
 }

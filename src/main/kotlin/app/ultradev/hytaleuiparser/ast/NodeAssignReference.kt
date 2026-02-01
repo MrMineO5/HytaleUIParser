@@ -29,4 +29,7 @@ data class NodeAssignReference(
     }
 
     val resolvedFilePath: String get() = file.path.resolveNeighbour(filePath.valueText)
+
+
+    override fun computePath(): String = super.computePath() + variable.identifier
 }

@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 data class NodeColor(
     val value: NodeConstant,
@@ -14,4 +15,7 @@ data class NodeColor(
         value.setScope(scope)
         opacity?.setScope(scope)
     }
+
+    override val resolvedTypes: Set<TypeType>
+        get() = setOf(TypeType.Color)
 }

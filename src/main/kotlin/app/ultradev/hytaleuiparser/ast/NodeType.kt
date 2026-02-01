@@ -28,9 +28,24 @@ data class NodeType(
         body.setScope(scope)
     }
 
-    val resolvedTypes = mutableListOf<TypeType>()
+    override val resolvedTypes = mutableSetOf<TypeType>()
 
     override fun startValidation() {
         resolvedTypes.clear()
+    }
+
+    fun resolveValue(deep: Boolean = false): Map<String, VariableValue> {
+        val output = mutableMapOf<String, VariableValue>()
+        spreads.forEach {
+            val res = it.variableAsReference.resolvedValue ?: return@forEach
+            if (res !is NodeType) error("Spread resolved to non-type: $res")
+            output.putAll(res.resolveValue(deep))
+        }
+        fields.forEach {
+            var value = it.valueAsVariableValue
+            if (value is VariableReference && deep) value = value.deepResolve() ?: return@forEach
+            output[it.identifier.identifier] = value
+        }
+        return output
     }
 }

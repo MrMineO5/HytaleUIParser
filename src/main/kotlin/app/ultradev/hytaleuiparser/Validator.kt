@@ -231,7 +231,7 @@ class Validator(
                 )
                 return null
             }
-            return ref.member.resolvedValue 
+            return ref.member.resolvedValue!!.asAstNode
         } catch(e: UninitializedPropertyAccessException) {
             validationError("Variable reference lookup before scope init", ref)
             return null

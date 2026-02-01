@@ -24,4 +24,6 @@ data class RootNode(
         super.setScope(scope)
         children.forEach { it.setScope(scope) }
     }
+
+    override fun computePath(): String = path
 }

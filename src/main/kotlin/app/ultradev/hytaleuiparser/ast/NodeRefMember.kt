@@ -14,4 +14,6 @@ data class NodeRefMember(
         super.setScope(scope)
         reference.setScope(scope)
     }
+
+    override val resolvedValue get() = member.resolvedValue
 }

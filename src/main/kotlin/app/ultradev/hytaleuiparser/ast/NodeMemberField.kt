@@ -10,8 +10,21 @@ data class NodeMemberField(
     override val children: List<AstNode>
         get() = listOf(owner, memberMarker, member)
 
+    override fun validate(validationError: (String, AstNode) -> Unit) {
+        if (owner !is VariableReference) validationError("Expected variable reference before member field", owner)
+    }
+
+    val ownerAsVariableReference: VariableReference = owner as VariableReference
+
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         owner.setScope(scope)
     }
+
+    override val resolvedValue: VariableValue?
+        get() {
+            val owner = ownerAsVariableReference.resolvedValue
+            if (owner !is NodeType) error("Member marker used on non-type")
+            return owner.resolveValue()[member.identifier]
+        }
 }
