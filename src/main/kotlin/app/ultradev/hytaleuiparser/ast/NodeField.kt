@@ -1,6 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorException
+import app.ultradev.hytaleuiparser.ValidatorError
 import app.ultradev.hytaleuiparser.validation.Scope
 
 data class NodeField(
@@ -9,8 +9,8 @@ data class NodeField(
     val value: AstNode,
     val endStatement: NodeToken? = null
 ) : AstNode() {
-    override fun validate() {
-        if (value !is VariableValue) throw ValidatorException("Expected variable value after assignment operator", value)
+    override fun validate(validationError: (String, AstNode) -> Unit) {
+        if (value !is VariableValue) validationError("Expected variable value after assignment operator", value)
     }
 
     override val children: List<AstNode>

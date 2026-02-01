@@ -1,6 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorException
+import app.ultradev.hytaleuiparser.ValidatorError
 
 data class NodeVariable(
     val variable: NodeToken
@@ -10,8 +10,8 @@ data class NodeVariable(
 
     val identifier get() = variable.text
 
-    override fun validate() {
-        if (identifier == "@") throw ValidatorException("Variable name cannot be empty", this)
+    override fun validate(validationError: (String, AstNode) -> Unit) {
+        if (identifier == "@") validationError("Variable name cannot be empty", this)
     }
 
     val resolvedAssignment: NodeAssignVariable? get() = resolvedScope.lookupVariableAssignment(identifier)

@@ -40,10 +40,10 @@ sealed class AstNode {
     }
 
 
-    internal fun validate0() {
-        validate()
-        children.forEach { it.validate0() }
+    internal fun validate0(validationError: (String, AstNode) -> Unit) {
+        validate(validationError)
+        children.forEach { it.validate0(validationError) }
     }
 
-    protected open fun validate() {}
+    protected open fun validate(validationError: (String, AstNode) -> Unit) {}
 }

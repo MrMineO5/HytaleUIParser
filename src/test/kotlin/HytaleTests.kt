@@ -102,6 +102,9 @@ class HytaleTests {
 //        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
 
         Validator(files).validate()
+        val validator = Validator(files)
+        validator.validate()
+        validator.validationErrors.forEach { throw RuntimeException(it.toString()) }
     }
 
 

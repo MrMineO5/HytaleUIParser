@@ -1,15 +1,15 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorException
+import app.ultradev.hytaleuiparser.ValidatorError
 import app.ultradev.hytaleuiparser.validation.Scope
 
 data class RootNode(
     override val children: List<AstNode>
 ) : AstNode() {
-    override fun validate() {
+    override fun validate(validationError: (String, AstNode) -> Unit) {
         children.forEach {
             if (it is NodeAssignReference || it is NodeAssignVariable || it is NodeElement) return@forEach
-            throw ValidatorException("Unexpected node in file root. Expected NodeAssignReference, NodeAssignVariable, or NodeElement.", it)
+            validationError("Unexpected node in file root. Expected NodeAssignReference, NodeAssignVariable, or NodeElement.", it)
         }
     }
 
