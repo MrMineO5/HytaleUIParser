@@ -36,4 +36,6 @@ data class NodeAssignReference(
 
 
     override fun computePath(): String = super.computePath() + variable.identifier
+
+    override fun clone() = NodeAssignReference(variable.clone(), assignMarker.clone(), filePath.clone(), endStatement.clone())
 }

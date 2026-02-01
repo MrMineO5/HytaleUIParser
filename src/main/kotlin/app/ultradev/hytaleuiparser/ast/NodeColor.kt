@@ -18,4 +18,6 @@ data class NodeColor(
 
     override val resolvedTypes: Set<TypeType>
         get() = setOf(TypeType.Color)
+
+    override fun clone() = NodeColor(value.clone(), opacity?.clone())
 }

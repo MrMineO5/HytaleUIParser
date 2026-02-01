@@ -58,7 +58,7 @@ class Validator(
                     ElementType.valueOf(type.identifier)
                 } catch (_: IllegalArgumentException) {
                     validationError("Unknown element type: ${type.identifier}", type)
-                    null
+                    return null
                 }
             }
 
@@ -79,7 +79,36 @@ class Validator(
     }
 
     fun validateElement(node: NodeElement, isInVariable: Boolean = false) {
-        val childScope = node.resolvedScope.childScope(node.localVariables, ::validationError, allowMissingVariables = isInVariable)
+        if (node.type is NodeVariable) {
+            val variable = deepLookupReference(node.type) ?: return
+
+            if (variable is NodeVariable) {
+//                val presentProperties = node.properties.map { it.identifier.identifier }.toSet()
+//                val possibleElements = ElementType.entries
+//                    .filter { el -> presentProperties.all { it in el.properties } }
+//                    .toSet()
+//
+//                variable.resolvedScope.addMissingElementVariable(
+//                    variable.identifier,
+//                    possibleElements
+//                )
+                return
+            } else {
+                if (variable !is NodeElement) {
+                    validationError("Expected element, got ${variable::class.simpleName}", variable)
+                    return
+                }
+
+
+            }
+        }
+        // TODO: If this element is an @Variable {} element, we need to validate both its own properties and the parent's
+        // The parent may have undefined variables, we need to add our local variables to the parent's scope for the parent's element validation
+        // This is currently not possible since each element can have only one scope
+        // We'll see how we do this at some point
+
+        val childScope =
+            node.resolvedScope.childScope(node.localVariables, ::validationError, allowMissingVariables = isInVariable)
         node.body.setScope(childScope)
 
         if (validateUnusedVariables) {
@@ -98,9 +127,12 @@ class Validator(
 
         node.resolvedType = elementType
 
+        val seenProperties = mutableSetOf<String>()
         node.properties.forEach {
             val typeType = elementType.properties[it.identifier.identifier]
                 ?: return@forEach validationError("Unknown property ${it.identifier.identifier} on $elementType", it)
+            if (!seenProperties.add(it.identifier.identifier))
+                return@forEach validationError("Duplicate property ${it.identifier.identifier} on $elementType", it)
             validateProperty(it.value, typeType)
         }
     }
@@ -144,6 +176,11 @@ class Validator(
         }
 
         if (value == null) {
+            return
+        }
+
+        if (value is NodeVariable) {
+//            value.resolvedScope.addMissingTypeVariable(value.identifier, type)
             return
         }
 
@@ -205,57 +242,6 @@ class Validator(
             if (value !is NodeType) return validationError("Expected type, got ${value::class.simpleName}", value)
             validateType(value, type, node)
         }
-    }
-
-    fun validateAssignVariable(node: NodeAssignVariable) {
-        if (node.value is NodeElement) { // TODO: Should we have a separate PropertyValue since elements are the only thing that doesn't have a type
-            validateElement(node.value, isInVariable = true)
-        } else {
-            validateUnknownProperty(node.valueAsVariable)
-        }
-    }
-
-    fun validateUnknownProperty(node: VariableValue) {
-        if (node is VariableReference) {
-            deepLookupReference(node)
-        }
-
-        if (node is NodeType) {
-            validateUnknownType(node)
-        }
-    }
-
-    fun validateUnknownType(node: NodeType) {
-        if (node.type != null) {
-            val referredType = try {
-                TypeType.valueOf(node.type.identifier)
-            } catch (_: IllegalArgumentException) {
-                return validationError("Unknown type ${node.type.identifier}", node.type)
-            }
-            return validateType(node, referredType, node)
-        }
-
-        val allFields = node.resolveValue()
-        val matchingTypes = TypeType.entries.filter { type ->
-            allFields.keys.all { it in type.allowedFields }
-        }
-        if (matchingTypes.isEmpty()) {
-            return validationError("No type matches all fields", node)
-        }
-
-        if (matchingTypes.size == 1) {
-            validateType(node, matchingTypes.first(), node)
-            return
-        }
-
-        val types = matchingTypes.toMutableSet()
-        for ((key, value) in allFields) {
-            validateUnknownProperty(value)
-            types.removeIf {
-                it.allowedFields[key] !in value.resolvedTypes
-            }
-        }
-        node.resolvedTypes.addAll(types)
     }
 
     fun validateType(node: NodeType, type: TypeType, usagePoint: AstNode) {
@@ -320,8 +306,12 @@ class Validator(
             is NodeRefMember -> lookupRefMember(reference)
             is NodeVariable -> {
                 val something = reference.resolvedScope.lookupVariable(reference.identifier)
-                if (something == null && !reference.resolvedScope.isAllowMissingVariables())
+                if (something == null) {
+                    if (reference.resolvedScope.isAllowMissingVariables()) {
+                        return reference
+                    }
                     validationError("Variable not found in local scope", reference)
+                }
                 something
             }
 
@@ -390,5 +380,57 @@ class Validator(
             lookupTypeField(source, fieldName)
         }
         return inheritedField.firstOrNull()
+    }
+
+
+    fun validateAssignVariable(node: NodeAssignVariable) {
+        if (node.value is NodeElement) { // TODO: Should we have a separate PropertyValue since elements are the only thing that doesn't have a type
+            validateElement(node.value, isInVariable = true)
+        } else {
+            validateUnknownProperty(node.valueAsVariable)
+        }
+    }
+
+    fun validateUnknownProperty(node: VariableValue) {
+        if (node is VariableReference) {
+            deepLookupReference(node)
+        }
+
+        if (node is NodeType) {
+            validateUnknownType(node)
+        }
+    }
+
+    fun validateUnknownType(node: NodeType) {
+        if (node.type != null) {
+            val referredType = try {
+                TypeType.valueOf(node.type.identifier)
+            } catch (_: IllegalArgumentException) {
+                return validationError("Unknown type ${node.type.identifier}", node.type)
+            }
+            return validateType(node, referredType, node)
+        }
+
+        val allFields = node.resolveValue()
+        val matchingTypes = TypeType.entries.filter { type ->
+            allFields.keys.all { it in type.allowedFields }
+        }
+        if (matchingTypes.isEmpty()) {
+            return validationError("No type matches all fields", node)
+        }
+
+        if (matchingTypes.size == 1) {
+            validateType(node, matchingTypes.first(), node)
+            return
+        }
+
+        val types = matchingTypes.toMutableSet()
+        for ((key, value) in allFields) {
+            validateUnknownProperty(value)
+            types.removeIf {
+                it.allowedFields[key] !in value.resolvedTypes
+            }
+        }
+        node.resolvedTypes.addAll(types)
     }
 }

@@ -44,4 +44,6 @@ data class NodeField(
         }
 
     override fun computePath(): String = super.computePath() + "." + identifier.identifier
+
+    override fun clone() = NodeField(identifier.clone(), fieldMarker.clone(), value.clone(), endStatement?.clone())
 }

@@ -14,4 +14,6 @@ data class NodeArray(
 
     // Skip delimiters
     val entries: List<AstNode> get() = elements.filter { it !is NodeToken }
+
+    override fun clone() = NodeArray(startToken.clone(), elements.map { it.clone() }, endToken.clone())
 }

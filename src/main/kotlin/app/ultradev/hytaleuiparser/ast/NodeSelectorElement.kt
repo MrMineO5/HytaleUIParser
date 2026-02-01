@@ -27,4 +27,6 @@ data class NodeSelectorElement(
     val localVariables: List<NodeAssignVariable> = body.elements.filterIsInstance<NodeAssignVariable>()
     val properties: List<NodeField> = body.elements.filterIsInstance<NodeField>()
     val childElements: List<NodeElement> = body.elements.filterIsInstance<NodeElement>()
+
+    override fun clone() = NodeSelectorElement(selector.clone(), body.clone())
 }

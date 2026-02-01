@@ -49,4 +49,6 @@ data class NodeType(
         }
         return output
     }
+
+    override fun clone() = NodeType(type?.clone(), body.clone())
 }

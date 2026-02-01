@@ -26,4 +26,6 @@ data class RootNode(
     }
 
     override fun computePath(): String = path
+
+    override fun clone() = RootNode(children.map { it.clone() })
 }

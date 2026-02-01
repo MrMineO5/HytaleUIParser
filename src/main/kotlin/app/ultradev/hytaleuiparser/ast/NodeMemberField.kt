@@ -27,4 +27,6 @@ data class NodeMemberField(
             if (owner !is NodeType) error("Member marker used on non-type")
             return owner.resolveValue()[member.identifier]
         }
+
+    override fun clone() = NodeMemberField(owner.clone(), memberMarker.clone(), member.clone())
 }

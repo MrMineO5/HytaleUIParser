@@ -52,7 +52,7 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseIdentifier(): NodeIdentifier {
         val token = tokens.next()
         if (token.type != Token.Type.IDENTIFIER) throw ParserException("Expected identifier", token)
-        return NodeIdentifier(NodeToken(token), token.text)
+        return NodeIdentifier(NodeToken(token))
     }
 
     private fun parseVariableAssignment(): NodeAssignVariable {

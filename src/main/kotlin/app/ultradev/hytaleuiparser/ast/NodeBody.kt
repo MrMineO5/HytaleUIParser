@@ -14,4 +14,6 @@ data class NodeBody(
         super.setScope(scope)
         children.forEach { it.setScope(scope) }
     }
+
+    override fun clone() = NodeBody(startToken.clone(), elements.map { it.clone() }, endToken.clone())
 }

@@ -18,4 +18,6 @@ data class NodeTranslation(
         translationMarker.setScope(scope)
         value.setScope(scope)
     }
+
+    override fun clone() = NodeTranslation(translationMarker.clone(), value.clone())
 }

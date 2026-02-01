@@ -3,6 +3,7 @@ package app.ultradev.hytaleuiparser.validation
 import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.ast.NodeAssignReference
 import app.ultradev.hytaleuiparser.ast.NodeAssignVariable
+import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 class Scope private constructor(
     private val parent: Scope? = null,
@@ -10,6 +11,9 @@ class Scope private constructor(
     val referenceAssignments: Map<String, NodeAssignReference> = emptyMap(),
     private val allowMissingVariables: Boolean = false, // In variable elements, we can have a missing variable that must be defined in the implementation
 ) {
+//    private val missingTypeVariables: MutableMap<String, MutableSet<TypeType>>? = if (allowMissingVariables) mutableMapOf() else null
+//    private val missingElementVariables: MutableMap<String, MutableSet<ElementType>>? = if (allowMissingVariables) mutableMapOf() else null
+
     companion object {
         fun root(
             references: List<NodeAssignReference>,
@@ -56,6 +60,35 @@ class Scope private constructor(
     fun referenceKeys(): Set<String> = referenceAssignments.keys + (parent?.referenceKeys() ?: emptySet())
 
     fun isAllowMissingVariables(): Boolean = allowMissingVariables || parent?.isAllowMissingVariables() ?: false
+//    fun addMissingTypeVariable(name: String, type: TypeType) {
+//        if (allowMissingVariables) {
+//            this.missingTypeVariables!!.computeIfAbsent(name) { mutableSetOf() }.add(type)
+//        } else {
+//            if (parent == null) error("Could not find scope that allows missing variables")
+//            parent.addMissingTypeVariable(name, type)
+//        }
+//    }
+//    fun addMissingElementVariable(name: String, allowed: Set<ElementType>) {
+//        if (allowMissingVariables) {
+//            val set = this.missingElementVariables!![name]
+//            if (set == null) {
+//                this.missingElementVariables[name] = allowed.toMutableSet()
+//            } else {
+//                set.removeIf { it !in allowed }
+//            }
+//        } else {
+//            if (parent == null) error("Could not find scope that allows missing variables")
+//            parent.addMissingElementVariable(name, allowed)
+//        }
+//    }
+
+    fun flatten(): Scope {
+        if (parent == null) return this
+        val pf = parent.flatten()
+        val varAsns = pf.variableAssignments + variableAssignments
+        val refAsns = pf.referenceAssignments + referenceAssignments
+        return Scope(null, varAsns, refAsns)
+    }
 
     override fun toString(): String {
         return "Scope(\n" +

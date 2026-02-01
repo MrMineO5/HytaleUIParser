@@ -33,4 +33,6 @@ data class NodeAssignVariable(
     }
 
     override fun computePath(): String = super.computePath() + ":${variable.identifier}"
+
+    override fun clone() = NodeAssignVariable(variable.clone(), assignment.clone(), value.clone(), endStatement.clone())
 }

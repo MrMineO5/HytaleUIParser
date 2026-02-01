@@ -10,4 +10,6 @@ data class NodeToken(
         get() = listOf(token)
     override val textRange: Pair<Int, Int>
         get() = token.startOffset to (token.startOffset + token.text.length)
+
+    override fun clone(): NodeToken = NodeToken(token)
 }

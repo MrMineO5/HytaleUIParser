@@ -25,4 +25,6 @@ data class NodeSpread(
         spreadMarker.setScope(scope)
         endStatement?.setScope(scope)
     }
+
+    override fun clone() = NodeSpread(spreadMarker.clone(), variable.clone(), endStatement?.clone())
 }

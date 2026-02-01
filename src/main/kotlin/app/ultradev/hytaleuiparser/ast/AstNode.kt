@@ -61,4 +61,11 @@ sealed class AstNode {
         if (parent == this) return ""
         return parent.getAstPath() + "." + javaClass.simpleName
     }
+
+    /**
+     * Create a deep copy of this subtree
+     *
+     * Does **NOT** clone validation data
+     */
+    abstract fun clone(): AstNode
 }

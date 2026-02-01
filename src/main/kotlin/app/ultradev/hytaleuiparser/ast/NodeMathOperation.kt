@@ -17,4 +17,6 @@ data class NodeMathOperation(
 
         operator.setScope(scope)
     }
+
+    override fun clone() = NodeMathOperation(param1.clone(), operator.clone(), param2.clone())
 }

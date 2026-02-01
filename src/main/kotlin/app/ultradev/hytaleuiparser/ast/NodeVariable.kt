@@ -21,4 +21,6 @@ data class NodeVariable(
 
     val resolvedAssignment: NodeAssignVariable? get() = resolvedScope.lookupVariableAssignment(identifier)
     override val resolvedValue: VariableValue? get() = resolvedAssignment?.valueAsVariable
+
+    override fun clone() = NodeVariable(variable.clone())
 }

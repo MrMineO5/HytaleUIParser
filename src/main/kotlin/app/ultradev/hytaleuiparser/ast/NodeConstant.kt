@@ -39,4 +39,6 @@ data class NodeConstant(
     }
 
     override val resolvedTypes: Set<TypeType> get() = getAllowedTypes()
+
+    override fun clone() = NodeConstant(children.map { it.clone() }, valueText)
 }

@@ -40,7 +40,7 @@ data class NodeElement(
     lateinit var resolvedType: ElementType
 
     override val resolvedTypes: Set<TypeType>
-        get() = TODO() // TODO: We need to somehow convert ElementType into TypeType, or have a common interface?
+        get() = error("Elements can be variable values, but do not allow resolution as a TypeType, use resolvedType instead")
 
     override fun setScope(scope: Scope) {
         super.setScope(scope)
@@ -49,4 +49,6 @@ data class NodeElement(
     }
 
     override fun computePath(): String = super.computePath() + "/${type.text}"
+
+    override fun clone() = NodeElement(type.clone(), body.clone(), selector?.clone())
 }

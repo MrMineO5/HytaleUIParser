@@ -12,4 +12,6 @@ data class NodeSelector(
         super.setScope(scope)
         selector.setScope(scope)
     }
+
+    override fun clone() = NodeSelector(selector.clone())
 }

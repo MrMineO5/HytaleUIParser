@@ -14,4 +14,6 @@ data class NodeOpacity(
         super.setScope(scope)
         children.forEach { it.setScope(scope) }
     }
+
+    override fun clone() = NodeOpacity(start.clone(), end.clone(), value.clone())
 }

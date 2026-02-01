@@ -18,4 +18,6 @@ data class NodeRefMember(
     }
 
     override val resolvedValue get() = member.resolvedValue
+
+    override fun clone() = NodeRefMember(reference.clone(), memberMarker.clone(), member.clone())
 }

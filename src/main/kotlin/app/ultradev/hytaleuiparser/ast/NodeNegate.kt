@@ -15,4 +15,6 @@ data class NodeNegate(
 
         minus.setScope(scope)
     }
+
+    override fun clone() = NodeNegate(minus.clone(), param.clone())
 }
