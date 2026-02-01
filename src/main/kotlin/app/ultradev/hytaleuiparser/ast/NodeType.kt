@@ -26,6 +26,7 @@ data class NodeType(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         body.setScope(scope)
+        type?.setScope(scope)
     }
 
     override val resolvedTypes = mutableSetOf<TypeType>()

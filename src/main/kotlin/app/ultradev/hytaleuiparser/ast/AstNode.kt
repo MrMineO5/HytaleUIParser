@@ -55,4 +55,10 @@ sealed class AstNode {
 
 
     open fun computePath(): String = parent.computePath()
+
+
+    fun getAstPath(): String {
+        if (parent == this) return ""
+        return parent.getAstPath() + "." + javaClass.simpleName
+    }
 }

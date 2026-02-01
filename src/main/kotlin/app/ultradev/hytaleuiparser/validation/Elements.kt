@@ -14,6 +14,7 @@ object Elements {
         "TooltipText" to TypeType.String,
         "TextTooltipStyle" to TypeType.TextTooltipStyle,
         "TooltipTextSpans" to TypeType.String,
+        "TextTooltipShowDelay" to TypeType.Float,
     )
 
     val BUTTON_PROPERTIES = mapOf(

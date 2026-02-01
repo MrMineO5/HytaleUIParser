@@ -27,6 +27,9 @@ data class NodeAssignVariable(
         super.setScope(scope)
         variable.setScope(scope)
         value.setScope(scope)
+
+        assignment.setScope(scope)
+        endStatement.setScope(scope)
     }
 
     override fun computePath(): String = super.computePath() + ":${variable.identifier}"

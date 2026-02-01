@@ -21,6 +21,10 @@ data class NodeField(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         value.setScope(scope)
+
+        identifier.setScope(scope)
+        fieldMarker.setScope(scope)
+        endStatement?.setScope(scope)
     }
 
     val valueAsVariableValue: VariableValue = value as VariableValue

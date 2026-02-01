@@ -140,7 +140,6 @@ class Parser(tokens: Iterator<Token>) {
                 }
                 if (isType) parseType() else parseMathParenthesis()
             }
-            Token.Type.SELECTOR -> parseColor()
             Token.Type.START_ARRAY -> parseArray()
             Token.Type.MATH_SUBTRACT -> {
                 val minus = tokens.next()

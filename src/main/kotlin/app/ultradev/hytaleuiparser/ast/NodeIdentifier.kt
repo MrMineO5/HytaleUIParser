@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.token.Token
+import app.ultradev.hytaleuiparser.validation.Scope
 
 data class NodeIdentifier(
     val token: NodeToken,
@@ -13,4 +14,9 @@ data class NodeIdentifier(
         NodeToken(Token(Token.Type.IDENTIFIER, identifier)),
         identifier
     )
+
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        token.setScope(scope)
+    }
 }

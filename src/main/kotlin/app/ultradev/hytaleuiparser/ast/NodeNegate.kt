@@ -12,5 +12,7 @@ data class NodeNegate(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         param.setScope(scope)
+
+        minus.setScope(scope)
     }
 }

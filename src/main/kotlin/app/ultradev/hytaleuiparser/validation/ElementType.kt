@@ -85,7 +85,16 @@ enum class ElementType {
             "FramesPerSecond" to TypeType.Integer,
         )
     ),
-    CompactTextField,
+    CompactTextField(
+        mapOf(
+            "CollapsedWidth" to TypeType.Integer,
+            "ExpandedWidth" to TypeType.Integer,
+            "PlaceholderText" to TypeType.String,
+            "Style" to TypeType.InputFieldStyle,
+            "PlaceholderStyle" to TypeType.InputFieldStyle,
+            "Decoration" to TypeType.TextFieldDecoration,
+        )
+    ),
     BackButton,
     FloatSlider(
         mapOf(
@@ -105,6 +114,7 @@ enum class ElementType {
             "MaxLength" to TypeType.Integer,
             "AutoGrow" to TypeType.Boolean,
             "ContentPadding" to TypeType.Padding,
+            "ScrollbarStyle" to TypeType.ScrollbarStyle,
         )
     ),
     ColorPickerDropdownBox(
@@ -286,7 +296,6 @@ enum class ElementType {
     MenuItem(
         mapOf(
             "Text" to TypeType.String,
-            "TextTooltipStyle" to TypeType.TextTooltipStyle,
             "PopupStyle" to TypeType.PopupStyle,
             "Style" to TypeType.MenuItemStyle,
             "SelectedStyle" to TypeType.MenuItemStyle,

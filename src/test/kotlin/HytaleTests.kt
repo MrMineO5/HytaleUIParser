@@ -7,17 +7,19 @@ import app.ultradev.hytaleuiparser.ast.NodeIdentifier
 import app.ultradev.hytaleuiparser.ast.NodeOpacity
 import app.ultradev.hytaleuiparser.ast.NodeSelector
 import app.ultradev.hytaleuiparser.ast.NodeToken
+import app.ultradev.hytaleuiparser.ast.RootNode
 import java.io.StringReader
 import kotlin.io.path.*
+import kotlin.reflect.KProperty
 import kotlin.test.Test
 
 class HytaleTests {
     val hytaleAssetsDir = Path(System.getenv("HYTALE_ASSETS"))
 
-    private fun validatedServerAssets(): Validator {
+    private fun parseServerAssets(): Map<String, RootNode> {
         val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
 
-        val files = dir.walk().filter {
+        return dir.walk().filter {
             it.isRegularFile() && it.extension == "ui"
         }.associate {
             val value = try {
@@ -29,56 +31,28 @@ class HytaleTests {
             }
             it.relativeTo(dir).toString() to value
         }
+    }
 
+    @Test
+    fun testServerValidate() {
+        val files = parseServerAssets()
         val validator = Validator(files)
         validator.validate()
-        return validator
+        validator.validationErrors.forEach {
+            System.err.println(it)
+        }
+        assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
     }
 
     @Test
-    fun testClient() {
-        val dir = hytaleAssetsDir.resolve("Common/UI/Test")
-
-        val files = dir.walk().filter {
-            it.isRegularFile() && it.extension == "ui"
-        }.associate {
-            val value = try {
-                val tokenizer = Tokenizer(it.reader())
-                val parser = Parser(tokenizer)
-                parser.finish()
-            } catch (e: Exception) {
-                throw RuntimeException("Failed to parse ${it.name}", e)
-            }
-            it.relativeTo(dir).toString() to value
+    fun testServerValidateVariables() {
+        val files = parseServerAssets()
+        val validator = Validator(files, validateUnusedVariables = true)
+        validator.validate()
+        validator.validationErrors.forEach {
+            System.err.println(it)
         }
-
-        println("Parsed ${files.size} files")
-//        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
-
-        Validator(files).validate()
-    }
-
-    @Test
-    fun testFile() {
-        val dir = hytaleAssetsDir.resolve("Common/UI/Test")
-
-        val files = dir.walk().filter {
-            it.isRegularFile() && it.extension == "ui"
-        }.associate {
-            val value = try {
-                val tokenizer = Tokenizer(it.reader())
-                val parser = Parser(tokenizer)
-                parser.finish()
-            } catch (e: Exception) {
-                throw RuntimeException("Failed to parse ${it.name}", e)
-            }
-            it.relativeTo(dir).toString() to value
-        }
-
-        println("Parsed ${files.size} files")
-//        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
-
-        //Validator(files).validateRoot("MainMenu/Adventure/WorldList.ui")
+        assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
     }
 
     @Test
@@ -126,29 +100,31 @@ class HytaleTests {
         }
     }
 
-
     @Test
-    fun testAllScopesResolved() {
-        return // Skip
+    fun testAllLateinitPropertiesInitialized() {
+        val files = parseServerAssets()
+        val validator = Validator(files, validateUnusedVariables = true)
+        validator.validate()
+        assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
 
-        fun check(node: AstNode) {
-            try {
-                // TODO: It is up to debate whether these *should* have a scope, their scope isn't required for any type of validation, but might be more consistent to have one?
-                if (node !is NodeToken &&
-                    node !is NodeIdentifier &&
-                    node !is NodeSelector &&
-                    node !is NodeConstant &&
-                    node !is NodeOpacity
-                    ) node.resolvedScope
-            } catch(e: UninitializedPropertyAccessException) {
-                throw RuntimeException("Scope not initialized for ${node.javaClass.simpleName} ${node.text}")
-            }
-            node.children.forEach { check(it) }
+        fun checkLateinitProps(node: AstNode) {
+            node::class.members
+                .filterIsInstance<KProperty<*>>()
+                .filter { it.isLateinit }
+                .forEach {
+                    try {
+                        it.getter.call(node)
+                    } catch(e: Exception) {
+                        throw java.lang.RuntimeException(
+                            "Lateinit property ${it.name} on ${node.getAstPath()} not initialized in ${node.file.path}",
+                            e
+                        )
+                    }
+                }
+            node.children.forEach { checkLateinitProps(it) }
         }
-
-        val validator = validatedServerAssets()
-        validator.files.values.forEach {
-            check(it)
+        validator.files.values.forEach { root ->
+            checkLateinitProps(root)
         }
     }
 }

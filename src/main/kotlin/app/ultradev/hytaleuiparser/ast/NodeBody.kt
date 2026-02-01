@@ -12,6 +12,6 @@ data class NodeBody(
 
     override fun setScope(scope: Scope) {
         super.setScope(scope)
-        elements.forEach { it.setScope(scope) }
+        children.forEach { it.setScope(scope) }
     }
 }

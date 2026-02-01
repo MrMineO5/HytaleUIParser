@@ -10,6 +10,7 @@ enum class TypeType(
     Integer,
     Boolean,
     Float,
+
     // This is used for SliderNumberField
     Double,
     Color,
@@ -30,7 +31,7 @@ enum class TypeType(
             "Context" to Sound, // TODO: Verify this appears on all sound styles.
         )
     ),
- 
+
     LayoutMode(
         setOf(
             "TopScrolling",
@@ -76,22 +77,30 @@ enum class TypeType(
         )
     ),
 
-    BarAlignment(setOf(
-        "Vertical", "Horizontal"
-    )),
+    BarAlignment(
+        setOf(
+            "Vertical", "Horizontal"
+        )
+    ),
 
-    Alignment(setOf(
-        // BenchInfoPane.ui - use of "TopLeft"
-        "Top", "Bottom", "Left", "Right", "TopLeft"
-    )),
-    
-    Direction(setOf(
-        "Center", "Start", "End"
-    )),
-    InfoDisplay(setOf(
-       // TODO: Confirm how this works, if it is just a list of valid states...
-        "None"
-    )),
+    Alignment(
+        setOf(
+            // BenchInfoPane.ui - use of "TopLeft"
+            "Top", "Bottom", "Left", "Right", "TopLeft"
+        )
+    ),
+
+    Direction(
+        setOf(
+            "Center", "Start", "End"
+        )
+    ),
+    InfoDisplay(
+        setOf(
+            // TODO: Confirm how this works, if it is just a list of valid states...
+            "None"
+        )
+    ),
     LabelStyle(
         // TODO: move this to styles? Inherit from styles?
         mapOf(
@@ -134,7 +143,7 @@ enum class TypeType(
     ),
 
     CheckedStyleInnerElement(
-    mapOf(
+        mapOf(
             "DefaultBackground" to PatchStyle,
             "HoveredBackground" to PatchStyle,
             "PressedBackground" to PatchStyle,
@@ -156,6 +165,7 @@ enum class TypeType(
             "Sounds" to SoundsStyle,
         )
     ),
+
     // Button styles - used by Button, TextButton, BackButton, ActionButton, ToggleButton, TabButton, ItemSlotButton
     ButtonStyleState(
         mapOf(
@@ -195,7 +205,7 @@ enum class TypeType(
             "Sounds" to SoundsStyle,
         )
     ),
-    
+
     // Text field styles - used by TextField, CompactTextField, MultilineTextField, NumberField, SliderNumberField, FloatSliderNumberField
     InputFieldStyle(
         mapOf(
@@ -220,6 +230,7 @@ enum class TypeType(
     Side(
         setOf("Left", "Right")
     ),
+
     // Icon is a really weird type. It appears on a TextField in FileSelector.ui under Icon, and a "ClearButtonStyle".
     // TODO: Should the Icon and ClearButtonStyle be separated, they are very similar.
     Icon(
@@ -320,7 +331,7 @@ enum class TypeType(
         )
     ),
 
-    TabNavigationStyleState(
+    TabStateStyle(
         mapOf(
             "LabelStyle" to LabelStyle,
             "Padding" to Padding,
@@ -332,15 +343,15 @@ enum class TypeType(
             // TODO: VERIFY - is it double or float?
             "IconOpacity" to Float,
             "ContentMaskTexturePath" to String,
-            
-        )
+
+            )
     ),
 
     TabNavigationStyleElement(
         mapOf(
-            "Default" to TabNavigationStyleState,
-            "Hovered" to TabNavigationStyleState,
-            "Pressed" to TabNavigationStyleState,
+            "Default" to TabStateStyle,
+            "Hovered" to TabStateStyle,
+            "Pressed" to TabStateStyle,
         )
     ),
 
@@ -348,7 +359,9 @@ enum class TypeType(
         mapOf(
             "TabStyle" to TabNavigationStyleElement,
             "SelectedTabStyle" to TabNavigationStyleElement,
-            "TabSounds" to SoundsStyle
+            "TabSounds" to SoundsStyle,
+            "SeparatorAnchor" to Anchor,
+            "SeparatorBackground" to String, // TODO: Is this a PatchStyle?
         )
     ),
 
@@ -398,7 +411,7 @@ enum class TypeType(
             "IconHeight" to Integer,
         )
     ),
-    
+
     PopupStyle(
         mapOf(
             "Background" to Color,
@@ -443,7 +456,45 @@ enum class TypeType(
             "Checked" to LabeledCheckBoxStyleElement,
             "Unchecked" to LabeledCheckBoxStyleElement,
         )
-    )
+    ),
+
+    FileDropdownBoxStyle(
+        mapOf(
+            "DefaultBackground" to PatchStyle,
+            "HoveredBackground" to PatchStyle,
+            "PressedBackground" to PatchStyle,
+            "DefaultArrowTexturePath" to String,
+            "HoveredArrowTexturePath" to String,
+            "PressedArrowTexturePath" to String,
+            "ArrowWidth" to Integer,
+            "ArrowHeight" to Integer,
+            "LabelStyle" to LabelStyle,
+            "HorizontalPadding" to Integer,
+            "PanelAlign" to Alignment,
+            "PanelOffset" to Integer,
+            "Sounds" to DropdownBoxSounds,
+        )
+    ),
+
+    PopupMenuLayerStyle(
+        mapOf(
+            "Background" to PatchStyle,
+            "Padding" to Integer, // TODO: Check this actually supports full padding, not just integer
+            "BaseHeight" to Integer,
+            "MaxWidth" to Integer,
+            "TitleStyle" to LabelStyle,
+            "TitleBackground" to PatchStyle,
+            "RowHeight" to Integer,
+            "ItemLabelStyle" to LabelStyle,
+            "ItemPadding" to Padding,
+            "ItemBackground" to PatchStyle,
+            "ItemIconSize" to Integer,
+            "HoveredItemBackground" to PatchStyle,
+            "PressedItemBackground" to PatchStyle,
+            "ItemSounds" to SoundsStyle,
+        )
+    ),
+
     ;
 
     constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptySet())
@@ -472,6 +523,7 @@ enum class TypeType(
     fun displayFullStructure(): String {
         if (this.isPrimitive) return this.name
         if (this.isEnum) return "enum " + this.name + " (" + enum.joinToString(", ") + ")"
-        return "type " + this.name + " {\n" + allowedFields.map { (key, value) -> "   $key: ${value.name}\n" }.joinToString("") + "}"
+        return "type " + this.name + " {\n" + allowedFields.map { (key, value) -> "   $key: ${value.name}\n" }
+            .joinToString("") + "}"
     }
 }

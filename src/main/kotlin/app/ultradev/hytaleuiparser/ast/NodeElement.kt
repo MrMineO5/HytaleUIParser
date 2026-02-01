@@ -45,6 +45,7 @@ data class NodeElement(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         type.setScope(scope)
+        selector?.setScope(scope)
     }
 
     override fun computePath(): String = super.computePath() + "/${type.text}"

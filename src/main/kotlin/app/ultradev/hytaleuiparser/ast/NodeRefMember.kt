@@ -13,6 +13,8 @@ data class NodeRefMember(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         reference.setScope(scope)
+
+        memberMarker.setScope(scope)
     }
 
     override val resolvedValue get() = member.resolvedValue

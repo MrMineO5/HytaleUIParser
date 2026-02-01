@@ -1,6 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorError
+import app.ultradev.hytaleuiparser.validation.Scope
 
 data class NodeReference(
     val reference: NodeToken
@@ -12,6 +12,11 @@ data class NodeReference(
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
         if (identifier == "$") validationError("Reference name cannot be empty", this)
+    }
+
+    override fun setScope(scope: Scope) {
+        super.setScope(scope)
+        reference.setScope(scope)
     }
 
     val resolvedAssignment: NodeAssignReference? get() = resolvedScope.lookupReferenceAssignment(identifier)

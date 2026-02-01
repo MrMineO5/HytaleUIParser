@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("reflect"))
 }
 
 tasks.test {

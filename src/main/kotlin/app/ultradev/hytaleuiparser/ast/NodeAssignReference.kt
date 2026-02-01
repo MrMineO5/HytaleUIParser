@@ -26,6 +26,10 @@ data class NodeAssignReference(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         variable.setScope(scope)
+
+        assignMarker.setScope(scope)
+        endStatement.setScope(scope)
+        filePath.setScope(scope)
     }
 
     val resolvedFilePath: String get() = file.path.resolveNeighbour(filePath.valueText)

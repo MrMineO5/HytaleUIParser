@@ -21,5 +21,8 @@ data class NodeSpread(
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         variable.setScope(scope)
+
+        spreadMarker.setScope(scope)
+        endStatement?.setScope(scope)
     }
 }

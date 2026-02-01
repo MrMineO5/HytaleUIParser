@@ -14,5 +14,7 @@ data class NodeMathOperation(
         super.setScope(scope)
         param1.setScope(scope)
         param2.setScope(scope)
+
+        operator.setScope(scope)
     }
 }
