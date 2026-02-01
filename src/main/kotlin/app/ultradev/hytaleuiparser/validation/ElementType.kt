@@ -29,7 +29,7 @@ enum class ElementType {
         Elements.BUTTON_PROPERTIES + mapOf(
             "Text" to TypeType.String,
             "MaskTexturePath" to TypeType.String,
-            "Style" to TypeType.ButtonStyle,
+            "Style" to TypeType.TextButtonStyle,
         )
     ),
     Button(
@@ -108,7 +108,7 @@ enum class ElementType {
     ColorPickerDropdownBox(
         mapOf(
             "Style" to TypeType.ColorPickerDropdownBoxStyle,
-            "Format" to TypeType.ColorPickerFormat,
+            "Format" to TypeType.ColorFormat,
             "DisplayTextField" to TypeType.Boolean,
         )
     ),
@@ -182,7 +182,7 @@ enum class ElementType {
     ColorPicker(
         mapOf(
             "Style" to TypeType.ColorPickerStyle,
-            "Format" to TypeType.ColorPickerFormat,
+            "Format" to TypeType.ColorFormat,
         )
     ),
 

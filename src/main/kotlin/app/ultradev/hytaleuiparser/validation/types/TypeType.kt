@@ -4,7 +4,7 @@ enum class TypeType(
     val isPrimitive: Boolean,
     val isEnum: Boolean,
     val allowedFields: Map<String, TypeType>,
-    val enum: List<String>,
+    val enum: Set<String>,
 ) {
     String,
     Integer,
@@ -32,7 +32,7 @@ enum class TypeType(
     ),
  
     LayoutMode(
-        listOf(
+        setOf(
             "TopScrolling",
             "MiddleCenter",
             "Left",
@@ -76,19 +76,19 @@ enum class TypeType(
         )
     ),
 
-    BarAlignment(listOf(
+    BarAlignment(setOf(
         "Vertical", "Horizontal"
     )),
 
-    Alignment(listOf(
+    Alignment(setOf(
         // BenchInfoPane.ui - use of "TopLeft"
         "Top", "Bottom", "Left", "Right", "TopLeft"
     )),
     
-    Direction(listOf(
+    Direction(setOf(
         "Center", "Start", "End"
     )),
-    InfoDisplay(listOf(
+    InfoDisplay(setOf(
        // TODO: Confirm how this works, if it is just a list of valid states...
         "None"
     )),
@@ -157,7 +157,7 @@ enum class TypeType(
         )
     ),
     // Button styles - used by Button, TextButton, BackButton, ActionButton, ToggleButton, TabButton, ItemSlotButton
-    ButtonStyleElement(
+    ButtonStyleState(
         mapOf(
             "Background" to PatchStyle,
             "LabelStyle" to LabelStyle,
@@ -166,10 +166,22 @@ enum class TypeType(
     ),
     ButtonStyle(
         mapOf(
-            "Default" to ButtonStyleElement,
-            "Hovered" to ButtonStyleElement,
-            "Pressed" to ButtonStyleElement,
-            "Disabled" to ButtonStyleElement,
+            "Default" to ButtonStyleState,
+            "Hovered" to ButtonStyleState,
+            "Pressed" to ButtonStyleState,
+            "Disabled" to ButtonStyleState,
+            "Sounds" to SoundsStyle,
+        )
+    ),
+    TextButtonStyleState(
+        ButtonStyleState.allowedFields
+    ),
+    TextButtonStyle(
+        mapOf(
+            "Default" to TextButtonStyleState,
+            "Hovered" to TextButtonStyleState,
+            "Pressed" to TextButtonStyleState,
+            "Disabled" to TextButtonStyleState,
             "Sounds" to SoundsStyle,
         )
     ),
@@ -206,7 +218,7 @@ enum class TypeType(
         )
     ),
     Side(
-        listOf("Left", "Right")
+        setOf("Left", "Right")
     ),
     // Icon is a really weird type. It appears on a TextField in FileSelector.ui under Icon, and a "ClearButtonStyle".
     // TODO: Should the Icon and ClearButtonStyle be separated, they are very similar.
@@ -246,7 +258,7 @@ enum class TypeType(
         )
     ),
 
-    ColorPickerFormat(listOf("Rgb")), // TODO: Find more formats?
+    ColorFormat(setOf("Rgb", "Rgba")), // TODO: Find more formats?
 
     ColorPickerDropdownBoxBackgroundThing(
         mapOf(
@@ -434,9 +446,9 @@ enum class TypeType(
     )
     ;
 
-    constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptyList())
-    constructor() : this(true, false, emptyMap(), emptyList())
-    constructor(enum: List<String>) : this(false, true, emptyMap(), enum)
+    constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptySet())
+    constructor() : this(true, false, emptyMap(), emptySet())
+    constructor(enum: Set<String>) : this(false, true, emptyMap(), enum)
 
     fun canNegate(): Boolean = this == Integer || this == Float
 

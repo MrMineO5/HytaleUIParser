@@ -1,6 +1,5 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorError
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
@@ -29,5 +28,9 @@ data class NodeType(
         body.setScope(scope)
     }
 
-    lateinit var resolvedType: TypeType // TODO: Could there be multiple? Wonder what the Hytale client would say about that
+    val resolvedTypes = mutableListOf<TypeType>()
+
+    override fun startValidation() {
+        resolvedTypes.clear()
+    }
 }

@@ -172,7 +172,7 @@ class Validator(
         } else {
             if (type == TypeType.PatchStyle) {
                 // Special case for patch styles, they can be replaced by a color or texture path
-                if (value is NodeType) return validateType(value, type)
+                if (value is NodeType) return validateType(value, type, node)
                 if (value is NodeColor || value is NodeConstant) return
                 return validationError("Expected PatchStyle, color or texture path, got ${value::class.simpleName}", value)
             }
@@ -182,16 +182,26 @@ class Validator(
             }
 
             if (value !is NodeType) return validationError("Expected type, got ${value::class.simpleName}", value)
-            validateType(value, type)
+            validateType(value, type, node)
         }
     }
 
-    fun validateType(node: NodeType, type: TypeType) {
-        node.resolvedType = type
+    fun validateType(node: NodeType, type: TypeType, usagePoint: AstNode) {
+        if (node.type != null) {
+            val referredType = try {
+                TypeType.valueOf(node.type.identifier)
+            } catch(_: IllegalArgumentException) {
+                return validationError("Unknown type ${node.type.identifier}", node.type)
+            }
+
+            if (referredType != type)
+                return validationError("Expected type ${type.name}, got ${node.type.identifier}", usagePoint)
+        }
+        node.resolvedTypes.add(type)
         node.spreads.forEach { spread ->
             val value = deepLookupReference(spread.variableAsReference) ?: return@forEach
             if (value !is NodeType) return@forEach validationError("Expected type, got ${value::class.simpleName}", value)
-            validateType(value, type)
+            validateType(value, type, usagePoint)
         }
         node.fields.forEach { field ->
             val reqType = type.allowedFields[field.identifier.identifier]

@@ -44,6 +44,12 @@ sealed class AstNode {
         validate(validationError)
         children.forEach { it.validate0(validationError) }
     }
-
     protected open fun validate(validationError: (String, AstNode) -> Unit) {}
+
+
+    internal fun startValidation0()  {
+        startValidation()
+        children.forEach { it.startValidation0() }
+    }
+    protected open fun startValidation() {}
 }
