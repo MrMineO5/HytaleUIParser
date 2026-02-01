@@ -106,25 +106,6 @@ class HytaleTests {
         val validator = Validator(files, validateUnusedVariables = true)
         validator.validate()
         assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
-
-        fun checkLateinitProps(node: AstNode) {
-            node::class.members
-                .filterIsInstance<KProperty<*>>()
-                .filter { it.isLateinit }
-                .forEach {
-                    try {
-                        it.getter.call(node)
-                    } catch(e: Exception) {
-                        throw java.lang.RuntimeException(
-                            "Lateinit property ${it.name} on ${node.getAstPath()} not initialized in ${node.file.path}",
-                            e
-                        )
-                    }
-                }
-            node.children.forEach { checkLateinitProps(it) }
-        }
-        validator.files.values.forEach { root ->
-            checkLateinitProps(root)
-        }
+        TestUtils.checkAllPropertiesInitialized(validator.files.values)
     }
 }

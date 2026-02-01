@@ -7,12 +7,9 @@ enum class TypeType(
     val enum: Set<String>,
 ) {
     String,
-    Integer,
-    Boolean,
+    Int32,
     Float,
-
-    // This is used for SliderNumberField
-    Double,
+    Boolean,
     Color,
 
     Sound(
@@ -52,28 +49,28 @@ enum class TypeType(
         // These can actually all be floats...?
         // ItemLibraryPanel.ui -> Use of math operators with non-integer values. Does it round? Cast?
         mapOf(
-            "Left" to Integer,
-            "Right" to Integer,
-            "Top" to Integer,
-            "Bottom" to Integer,
-            "Width" to Integer,
-            "Height" to Integer,
-            "MinWidth" to Integer,
-            "MaxWidth" to Integer,
-            "Full" to Integer,
-            "Horizontal" to Integer,
-            "Vertical" to Integer,
+            "Left" to Int32,
+            "Right" to Int32,
+            "Top" to Int32,
+            "Bottom" to Int32,
+            "Width" to Int32,
+            "Height" to Int32,
+            "MinWidth" to Int32,
+            "MaxWidth" to Int32,
+            "Full" to Int32,
+            "Horizontal" to Int32,
+            "Vertical" to Int32,
         )
     ),
     Padding(
         mapOf(
-            "Left" to Integer,
-            "Right" to Integer,
-            "Top" to Integer,
-            "Bottom" to Integer,
-            "Horizontal" to Integer,
-            "Vertical" to Integer,
-            "Full" to Integer,
+            "Left" to Int32,
+            "Right" to Int32,
+            "Top" to Int32,
+            "Bottom" to Int32,
+            "Horizontal" to Int32,
+            "Vertical" to Int32,
+            "Full" to Int32,
         )
     ),
 
@@ -104,7 +101,7 @@ enum class TypeType(
     LabelStyle(
         // TODO: move this to styles? Inherit from styles?
         mapOf(
-            "FontSize" to Integer,
+            "FontSize" to Int32,
             "FontName" to String, // "Primary", "Secondary"
             "LetterSpacing" to Float,
             "TextColor" to Color,
@@ -121,9 +118,9 @@ enum class TypeType(
     PatchStyle(
         mapOf(
             "TexturePath" to String,
-            "VerticalBorder" to Integer,
-            "HorizontalBorder" to Integer,
-            "Border" to Integer,
+            "VerticalBorder" to Int32,
+            "HorizontalBorder" to Int32,
+            "Border" to Int32,
             "Color" to Color,
             "Anchor" to Anchor,
         )
@@ -132,8 +129,8 @@ enum class TypeType(
     ScrollbarStyle(
         mapOf(
             "OnlyVisibleWhenHovered" to Boolean,
-            "Spacing" to Integer,
-            "Size" to Integer,
+            "Spacing" to Int32,
+            "Size" to Int32,
             "Background" to PatchStyle,
             "Handle" to PatchStyle,
             "HoveredHandle" to PatchStyle,
@@ -200,8 +197,8 @@ enum class TypeType(
         mapOf(
             "Background" to PatchStyle,
             "Handle" to String,
-            "HandleWidth" to Integer,
-            "HandleHeight" to Integer,
+            "HandleWidth" to Int32,
+            "HandleHeight" to Int32,
             "Sounds" to SoundsStyle,
         )
     ),
@@ -210,7 +207,7 @@ enum class TypeType(
     InputFieldStyle(
         mapOf(
             "TextColor" to Color,
-            "FontSize" to Integer,
+            "FontSize" to Int32,
             "RenderBold" to Boolean,
             "RenderItalics" to Boolean,
             "RenderUppercase" to Boolean,
@@ -219,10 +216,10 @@ enum class TypeType(
     TextTooltipStyle(
         mapOf(
             "Background" to PatchStyle,
-            "MaxWidth" to Integer,
+            "MaxWidth" to Int32,
             "LabelStyle" to LabelStyle,
             // This is actually an integer in examples.
-            "Padding" to Integer,
+            "Padding" to Int32,
             // ALIGNMENT??? Is this the exact same?
             "Alignment" to Alignment
         )
@@ -236,9 +233,9 @@ enum class TypeType(
     Icon(
         mapOf(
             "Texture" to PatchStyle, // Can be patchstyle.
-            "Width" to Integer,
-            "Height" to Integer,
-            "Offset" to Integer,
+            "Width" to Int32,
+            "Height" to Int32,
+            "Offset" to Int32,
             // Only appears on the ClearButtonStyle so far.
             "HoveredTexture" to PatchStyle,
             "PressedTexture" to PatchStyle,
@@ -265,7 +262,7 @@ enum class TypeType(
             "ButtonFill" to String,
             "TextFieldDecoration" to TextFieldDecoration,
             "TextFieldPadding" to Padding,
-            "TextFieldHeight" to Integer,
+            "TextFieldHeight" to Int32,
         )
     ),
 
@@ -284,23 +281,23 @@ enum class TypeType(
             "Overlay" to ColorPickerDropdownBoxBackgroundThing,
             "PanelBackground" to PatchStyle,
             "PanelPadding" to Padding,
-            "PanelOffset" to Integer,
+            "PanelOffset" to Int32,
             "ArrowAnchor" to Anchor,
         )
     ),
 
     SpriteFrame(
         mapOf(
-            "Width" to Integer,
-            "Height" to Integer,
-            "PerRow" to Integer,
-            "Count" to Integer,
+            "Width" to Int32,
+            "Height" to Int32,
+            "PerRow" to Int32,
+            "Count" to Int32,
         )
     ),
 
     NumberFieldFormat(
         mapOf(
-            "MaxDecimalPlaces" to Integer,
+            "MaxDecimalPlaces" to Int32,
             "Step" to Float,
             "MinValue" to Float,
             "MaxValue" to Float,
@@ -309,9 +306,9 @@ enum class TypeType(
 
     ItemGridStyle(
         mapOf(
-            "SlotSize" to Integer,
-            "SlotIconSize" to Integer,
-            "SlotSpacing" to Integer,
+            "SlotSize" to Int32,
+            "SlotIconSize" to Int32,
+            "SlotSpacing" to Int32,
             "SlotBackground" to PatchStyle,
             "QuantityPopupSlotOverlay" to String, // TODO: No example of patch style use, check if they accept patch styles
             "BrokenSlotBackgroundOverlay" to String,
@@ -380,35 +377,35 @@ enum class TypeType(
             "DefaultArrowTexturePath" to String,
             "HoveredArrowTexturePath" to String,
             "PressedArrowTexturePath" to String,
-            "ArrowWidth" to Integer,
-            "ArrowHeight" to Integer,
+            "ArrowWidth" to Int32,
+            "ArrowHeight" to Int32,
             "LabelStyle" to LabelStyle,
             "EntryLabelStyle" to LabelStyle,
             "NoItemsLabelStyle" to LabelStyle,
             "SelectedEntryLabelStyle" to LabelStyle,
-            "HorizontalPadding" to Integer,
+            "HorizontalPadding" to Int32,
             "PanelScrollbarStyle" to ScrollbarStyle,
             "PanelBackground" to PatchStyle,
             "PanelPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
-            "PanelWidth" to Integer,
+            "PanelWidth" to Int32,
             "PanelAlign" to Alignment,
-            "PanelOffset" to Integer,
-            "EntryHeight" to Integer,
-            "EntryIconWidth" to Integer,
-            "EntryIconHeight" to Integer,
-            "EntriesInViewport" to Integer,
+            "PanelOffset" to Int32,
+            "EntryHeight" to Int32,
+            "EntryIconWidth" to Int32,
+            "EntryIconHeight" to Int32,
+            "EntriesInViewport" to Int32,
             "HorizontalEntryPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
             "HoveredEntryBackground" to PatchStyle,
             "PressedEntryBackground" to PatchStyle,
             "Sounds" to DropdownBoxSounds,
             "EntrySounds" to SoundsStyle,
-            "FocusOutlineSize" to Integer,
+            "FocusOutlineSize" to Int32,
             "FocusOutlineColor" to Color,
             "PanelTitleLabelStyle" to LabelStyle,
             "SelectedEntryIconBackground" to PatchStyle,
             "IconTexturePath" to String,
-            "IconWidth" to Integer,
-            "IconHeight" to Integer,
+            "IconWidth" to Int32,
+            "IconHeight" to Int32,
         )
     ),
 
@@ -466,12 +463,12 @@ enum class TypeType(
             "DefaultArrowTexturePath" to String,
             "HoveredArrowTexturePath" to String,
             "PressedArrowTexturePath" to String,
-            "ArrowWidth" to Integer,
-            "ArrowHeight" to Integer,
+            "ArrowWidth" to Int32,
+            "ArrowHeight" to Int32,
             "LabelStyle" to LabelStyle,
-            "HorizontalPadding" to Integer,
+            "HorizontalPadding" to Int32,
             "PanelAlign" to Alignment,
-            "PanelOffset" to Integer,
+            "PanelOffset" to Int32,
             "Sounds" to DropdownBoxSounds,
         )
     ),
@@ -479,16 +476,16 @@ enum class TypeType(
     PopupMenuLayerStyle(
         mapOf(
             "Background" to PatchStyle,
-            "Padding" to Integer, // TODO: Check this actually supports full padding, not just integer
-            "BaseHeight" to Integer,
-            "MaxWidth" to Integer,
+            "Padding" to Int32, // TODO: Check this actually supports full padding, not just integer
+            "BaseHeight" to Int32,
+            "MaxWidth" to Int32,
             "TitleStyle" to LabelStyle,
             "TitleBackground" to PatchStyle,
-            "RowHeight" to Integer,
+            "RowHeight" to Int32,
             "ItemLabelStyle" to LabelStyle,
             "ItemPadding" to Padding,
             "ItemBackground" to PatchStyle,
-            "ItemIconSize" to Integer,
+            "ItemIconSize" to Int32,
             "HoveredItemBackground" to PatchStyle,
             "PressedItemBackground" to PatchStyle,
             "ItemSounds" to SoundsStyle,
@@ -501,13 +498,13 @@ enum class TypeType(
     constructor() : this(true, false, emptyMap(), emptySet())
     constructor(enum: Set<String>) : this(false, true, emptyMap(), enum)
 
-    fun canNegate(): Boolean = this == Integer || this == Float
+    fun canNegate(): Boolean = this == Int32 || this == Float
 
     fun default(): String {
         if (this.isPrimitive) {
             return when (this) {
                 Boolean -> "false"
-                Integer -> "0"
+                Int32 -> "0"
                 Float -> "0.0"
                 String -> "\"\""
                 Color -> "#000000(1.0)"

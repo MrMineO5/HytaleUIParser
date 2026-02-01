@@ -1,14 +1,11 @@
 package app.ultradev.hytaleuiparser.validation
 
 import app.ultradev.hytaleuiparser.ast.AstNode
-import app.ultradev.hytaleuiparser.ast.NodeAssignReference
 import app.ultradev.hytaleuiparser.ast.NodeAssignVariable
-import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 class Scope private constructor(
     private val parent: Scope? = null,
     val variableAssignments: Map<String, NodeAssignVariable> = emptyMap(),
-    val referenceAssignments: Map<String, NodeAssignReference> = emptyMap(),
     private val allowMissingVariables: Boolean = false, // In variable elements, we can have a missing variable that must be defined in the implementation
 ) {
 //    private val missingTypeVariables: MutableMap<String, MutableSet<TypeType>>? = if (allowMissingVariables) mutableMapOf() else null
@@ -16,7 +13,6 @@ class Scope private constructor(
 
     companion object {
         fun root(
-            references: List<NodeAssignReference>,
             variables: List<NodeAssignVariable>,
             validationError: (String, AstNode) -> Unit
         ): Scope {
@@ -28,14 +24,13 @@ class Scope private constructor(
             }
             return Scope(
                 null,
-                variables.associateBy { it.variable.identifier },
-                references.associateBy { it.variable.identifier }
+                variables.associateBy { it.variable.identifier }
             )
         }
     }
 
     fun childScope(
-        variables: List<NodeAssignVariable>,
+        variables: Iterable<NodeAssignVariable>,
         validationError: (String, AstNode) -> Unit,
         allowMissingVariables: Boolean = false
     ): Scope {
@@ -45,19 +40,19 @@ class Scope private constructor(
                 return@forEach validationError("Duplicate variable: ${it.variable.identifier}", it)
             seenKeys.add(it.variable.identifier)
         }
-        return Scope(this, variables.associateBy { it.variable.identifier }, emptyMap(), allowMissingVariables)
+        return Scope(this, variables.associateBy { it.variable.identifier }, allowMissingVariables)
+    }
+
+    fun childScope(other: Scope): Scope {
+        return Scope(this, other.flatten().variableAssignments)
     }
 
     fun lookupVariableAssignment(name: String): NodeAssignVariable? =
         variableAssignments[name] ?: parent?.lookupVariableAssignment(name)
 
-    fun lookupReferenceAssignment(name: String): NodeAssignReference? =
-        referenceAssignments[name] ?: parent?.lookupReferenceAssignment(name)
-
     fun lookupVariable(name: String): AstNode? = lookupVariableAssignment(name)?.value
 
     fun variableKeys(): Set<String> = variableAssignments.keys + (parent?.variableKeys() ?: emptySet())
-    fun referenceKeys(): Set<String> = referenceAssignments.keys + (parent?.referenceKeys() ?: emptySet())
 
     fun isAllowMissingVariables(): Boolean = allowMissingVariables || parent?.isAllowMissingVariables() ?: false
 //    fun addMissingTypeVariable(name: String, type: TypeType) {
@@ -86,15 +81,13 @@ class Scope private constructor(
         if (parent == null) return this
         val pf = parent.flatten()
         val varAsns = pf.variableAssignments + variableAssignments
-        val refAsns = pf.referenceAssignments + referenceAssignments
-        return Scope(null, varAsns, refAsns)
+        return Scope(null, varAsns, isAllowMissingVariables())
     }
 
     override fun toString(): String {
         return "Scope(\n" +
                 "${parent.toString().prependIndent("  ")},\n" +
                 "  variables=[${variableAssignments.keys.joinToString(", ")}],\n" +
-                "  references=${referenceAssignments}\n" +
                 ")"
     }
 }

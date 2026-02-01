@@ -19,7 +19,7 @@ data class NodeReference(
         reference.setScope(scope)
     }
 
-    val resolvedAssignment: NodeAssignReference? get() = resolvedScope.lookupReferenceAssignment(identifier)
+    val resolvedAssignment: NodeAssignReference? get() = file.referenceMap[identifier]
 
     override fun clone() = NodeReference(reference.clone())
 }

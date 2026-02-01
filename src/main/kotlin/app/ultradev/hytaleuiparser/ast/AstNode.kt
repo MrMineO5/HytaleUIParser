@@ -14,10 +14,8 @@ sealed class AstNode {
 
     lateinit var parent: AstNode
     lateinit var file: RootNode
-    lateinit var resolvedScope: Scope
+    var resolvedScope: Scope? = null
         private set
-
-    val isResolved get() = ::resolvedScope.isInitialized
 
     open fun setScope(scope: Scope) {
         resolvedScope = scope

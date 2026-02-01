@@ -16,7 +16,7 @@ enum class ElementType {
     TimerLabel(
         mapOf(
             "Style" to TypeType.LabelStyle,
-            "Seconds" to TypeType.Integer
+            "Seconds" to TypeType.Int32
         )
     ),
     Label(
@@ -51,7 +51,7 @@ enum class ElementType {
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
             "PlaceholderText" to TypeType.String,
-            "MaxLength" to TypeType.Integer,
+            "MaxLength" to TypeType.Int32,
             "IsReadOnly" to TypeType.Boolean,
             "PasswordChar" to TypeType.String,
             "Decoration" to TypeType.TextFieldDecoration
@@ -60,11 +60,10 @@ enum class ElementType {
     NumberField(
         mapOf(
             "Format" to TypeType.NumberFieldFormat,
-            // TODO: Ellie uses Double's in Hyui for value/step/min/max. Confirm if float possible.
-            "Value" to TypeType.Double,
-            "Min" to TypeType.Double,
-            "Max" to TypeType.Double,
-            "Step" to TypeType.Double,
+            "Value" to TypeType.Float,
+            "Min" to TypeType.Float,
+            "Max" to TypeType.Float,
+            "Step" to TypeType.Float,
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
         )
@@ -74,7 +73,7 @@ enum class ElementType {
             "Style" to TypeType.DropdownBoxStyle,
             "NoItemsText" to TypeType.String,
             "PanelTitleText" to TypeType.String,
-            "MaxSelection" to TypeType.Integer,
+            "MaxSelection" to TypeType.Int32,
             "ShowLabel" to TypeType.Boolean,
         )
     ),
@@ -82,13 +81,13 @@ enum class ElementType {
         mapOf(
             "TexturePath" to TypeType.String,
             "Frame" to TypeType.SpriteFrame,
-            "FramesPerSecond" to TypeType.Integer,
+            "FramesPerSecond" to TypeType.Int32,
         )
     ),
     CompactTextField(
         mapOf(
-            "CollapsedWidth" to TypeType.Integer,
-            "ExpandedWidth" to TypeType.Integer,
+            "CollapsedWidth" to TypeType.Int32,
+            "ExpandedWidth" to TypeType.Int32,
             "PlaceholderText" to TypeType.String,
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
@@ -110,8 +109,8 @@ enum class ElementType {
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
             "PlaceholderText" to TypeType.String,
-            "MaxVisibleLines" to TypeType.Integer,
-            "MaxLength" to TypeType.Integer,
+            "MaxVisibleLines" to TypeType.Int32,
+            "MaxLength" to TypeType.Int32,
             "AutoGrow" to TypeType.Boolean,
             "ContentPadding" to TypeType.Padding,
             "ScrollbarStyle" to TypeType.ScrollbarStyle,
@@ -138,9 +137,9 @@ enum class ElementType {
             "Bar" to TypeType.PatchStyle,
             "BarTexturePath" to TypeType.String, // TODO: Why is this a thing? PatchStyle has a texture path...?
             "EffectTexturePath" to TypeType.String,
-            "EffectWidth" to TypeType.Integer,
-            "EffectHeight" to TypeType.Integer,
-            "EffectOffset" to TypeType.Integer,
+            "EffectWidth" to TypeType.Int32,
+            "EffectHeight" to TypeType.Int32,
+            "EffectOffset" to TypeType.Int32,
             "Direction" to TypeType.Direction,
             "Alignment" to TypeType.BarAlignment,
         )
@@ -148,10 +147,10 @@ enum class ElementType {
     Slider(
         mapOf(
             "Style" to TypeType.SliderStyle,
-            "Min" to TypeType.Integer,
-            "Max" to TypeType.Integer,
+            "Min" to TypeType.Int32,
+            "Max" to TypeType.Int32,
             "Step" to TypeType.Float, // TODO: How can an integer slider have a float step???
-            "Value" to TypeType.Integer,
+            "Value" to TypeType.Int32,
         )
     ),
     ItemSlotButton(
@@ -177,7 +176,7 @@ enum class ElementType {
     ItemGrid(
         mapOf(
             "Style" to TypeType.ItemGridStyle,
-            "SlotsPerRow" to TypeType.Integer,
+            "SlotsPerRow" to TypeType.Int32,
             "RenderItemQualityBackground" to TypeType.Boolean,
             "AreItemsDraggable" to TypeType.Boolean,
             "KeepScrollPosition" to TypeType.Boolean,
@@ -233,17 +232,17 @@ enum class ElementType {
             "Style" to TypeType.InputFieldStyle,
             "NumberFieldContainerAnchor" to TypeType.Anchor,
             "NumberFieldStyle" to TypeType.InputFieldStyle,
-            "Min" to TypeType.Double,
-            "Max" to TypeType.Double,
+            "Min" to TypeType.Float,
+            "Max" to TypeType.Float,
             // TODO: Confirm step valid on slider number field.
-            "Step" to TypeType.Double,
-            "Value" to TypeType.Double,
+            "Step" to TypeType.Float,
+            "Value" to TypeType.Float,
             
         )
     ),
     BlockSelector(
         mapOf(
-            "Capacity" to TypeType.Integer,
+            "Capacity" to TypeType.Int32,
             "Style" to TypeType.BlockSelectorStyle,
         )
     ),
@@ -263,7 +262,7 @@ enum class ElementType {
             "Style" to TypeType.InputFieldStyle,
             "NumberFieldContainerAnchor" to TypeType.Anchor,
             "NumberFieldStyle" to TypeType.InputFieldStyle,
-            "NumberFieldMaxDecimalPlaces" to TypeType.Integer,
+            "NumberFieldMaxDecimalPlaces" to TypeType.Int32,
             "Min" to TypeType.Float,
             "Max" to TypeType.Float,
             "Step" to TypeType.Float,

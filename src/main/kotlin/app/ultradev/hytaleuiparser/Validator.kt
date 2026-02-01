@@ -29,21 +29,32 @@ class Validator(
 
         val root = files[path] ?: return null
 
+        // Recursively run static validations on all children
         root.validate0(::validationError)
+        // Initialize the file path
         root.path = path
+        // Initialize the file pointer in all children
         root.initFile(root)
 
+        // Ensure no duplicate references
+        val seenReferences = mutableSetOf<String>()
+        root.references.forEach {
+            if (!seenReferences.add(it.variable.identifier))
+                validationError("Duplicate reference: ${it.variable.identifier}", it)
+        }
+
+        // Create root variable scope
         val scope = Scope.root(
-            root.references, root.variables, ::validationError
+            root.variables, ::validationError
         )
         root.setScope(scope)
 
         if (validateUnusedVariables) {
+            // Validate all variables
             root.variables.forEach { validateAssignVariable(it) }
         }
 
-        root.variableValues = scope.variableAssignments.mapValues { it.value.value }
-
+        // Validate elements
         root.elements.forEach {
             validateElement(it)
         }
@@ -83,15 +94,7 @@ class Validator(
             val variable = deepLookupReference(node.type) ?: return
 
             if (variable is NodeVariable) {
-//                val presentProperties = node.properties.map { it.identifier.identifier }.toSet()
-//                val possibleElements = ElementType.entries
-//                    .filter { el -> presentProperties.all { it in el.properties } }
-//                    .toSet()
-//
-//                variable.resolvedScope.addMissingElementVariable(
-//                    variable.identifier,
-//                    possibleElements
-//                )
+
                 return
             } else {
                 if (variable !is NodeElement) {
@@ -99,7 +102,38 @@ class Validator(
                     return
                 }
 
+                val type = findElementType(variable)!!
+                node.resolvedType = type
 
+                val definitionCopy = variable.clone()
+                definitionCopy.initFile(variable.file)
+                definitionCopy.applyParent(variable.parent)
+
+                val internalVariables = (definitionCopy.localVariables + node.localVariables)
+                    .associateBy { it.variable.identifier }
+                    .values
+
+                val variableScope = node.resolvedScope!!.childScope(variable.resolvedScope!!)
+                    .childScope(internalVariables, ::validationError)
+
+                definitionCopy.body.setScope(variableScope)
+                node.body.setScope(variableScope)
+
+                definitionCopy.childElements.forEach { validateElement(it) }
+                definitionCopy.selectorElements.forEach { validateSelectorElement(node, it) }
+
+                node.childElements.forEach { validateElement(it) }
+                node.selectorElements.forEach { validateSelectorElement(node, it) }
+
+                definitionCopy.properties.forEach {
+                    validateProperty(
+                        it.value,
+                        type.properties[it.identifier.identifier]!!
+                    )
+                }
+                node.properties.forEach { validateProperty(it.value, type.properties[it.identifier.identifier]!!) }
+
+                return
             }
         }
         // TODO: If this element is an @Variable {} element, we need to validate both its own properties and the parent's
@@ -108,7 +142,11 @@ class Validator(
         // We'll see how we do this at some point
 
         val childScope =
-            node.resolvedScope.childScope(node.localVariables, ::validationError, allowMissingVariables = isInVariable)
+            node.resolvedScope!!.childScope(
+                node.localVariables,
+                ::validationError,
+                allowMissingVariables = isInVariable
+            )
         node.body.setScope(childScope)
 
         if (validateUnusedVariables) {
@@ -152,7 +190,7 @@ class Validator(
         validateElement(source)
         val elementType = source.resolvedType
 
-        val childScope = node.resolvedScope.childScope(node.localVariables, ::validationError)
+        val childScope = node.resolvedScope!!.childScope(node.localVariables, ::validationError)
         node.body.setScope(childScope)
 
         if (!elementType.allowsChildren()) assert(node.childElements.isEmpty()) {
@@ -205,7 +243,7 @@ class Validator(
                 }
 
                 is NodeNegate -> {
-                    if (!type.canNegate()) return validationError("Got negation for non-negatable type $type", value)
+                    if (!type.canNegate()) return validationError("Got negation for non-negatable type $type", node)
                     validateProperty(value.param, type)
                 }
 
@@ -216,7 +254,7 @@ class Validator(
                     )
                 }
 
-                else -> return validationError("Expected primitive value, got ${value::class.simpleName}", value)
+                else -> return validationError("Expected ${type}, got ${value::class.simpleName}", node)
             }
         } else if (type.isEnum) {
             if (value !is NodeConstant) return validationError(
@@ -278,7 +316,7 @@ class Validator(
     }
 
     fun lookupRefMember(ref: NodeRefMember): AstNode? {
-        val referenceAssignment = ref.resolvedScope.lookupReferenceAssignment(ref.reference.identifier)
+        val referenceAssignment = ref.file.referenceMap[ref.reference.identifier]
         if (referenceAssignment == null) {
             validationError("No reference ${ref.reference.identifier} found", ref)
             return null
@@ -290,7 +328,7 @@ class Validator(
             validationError("Failed to resolve reference $reference", referenceAssignment)
             return null
         }
-        ref.member.setScope(rootNode.resolvedScope)
+        ref.member.setScope(rootNode.resolvedScope!!)
         if (ref.member.resolvedValue == null) {
             validationError(
                 "No member ${ref.member.identifier} on ${ref.reference.identifier}", ref
@@ -305,10 +343,11 @@ class Validator(
         val result = when (reference) {
             is NodeRefMember -> lookupRefMember(reference)
             is NodeVariable -> {
-                val something = reference.resolvedScope.lookupVariable(reference.identifier)
+                val something = reference.resolvedScope!!.lookupVariable(reference.identifier)
                 if (something == null) {
-                    if (reference.resolvedScope.isAllowMissingVariables()) {
-                        return reference
+                    if (reference.resolvedScope!!.isAllowMissingVariables()) {
+//                        return reference
+                        return null
                     }
                     validationError("Variable not found in local scope", reference)
                 }
@@ -350,18 +389,21 @@ class Validator(
 
     fun validatePrimitive(type: TypeType, value: NodeConstant) {
         when (type) {
-            TypeType.String -> {} // All constants are strings
-            TypeType.Integer -> value.valueText.toIntOrNull()
-                ?: validationError("Invalid integer value: ${value.valueText}", value)
+            TypeType.String -> {
+                if (!value.isQuoted) validationError("Expected string to be quoted", value)
+            } // All constants are strings
 
-            TypeType.Float -> value.valueText.toFloatOrNull()
-                ?: validationError("Invalid float value: ${value.valueText}", value)
+            TypeType.Int32, TypeType.Float -> {
+                if (value.isQuoted) validationError("$type cannot be quoted", value)
+                value.valueText.toFloatOrNull()
+                    ?: validationError("Invalid number value: ${value.valueText}", value)
+            }
 
-            TypeType.Double -> value.valueText.toDoubleOrNull()
-                ?: validationError("Invalid double value: ${value.valueText}", value)
-
-            TypeType.Boolean -> value.valueText.toBooleanStrictOrNull()
-                ?: validationError("Invalid boolean value: ${value.valueText}", value)
+            TypeType.Boolean -> {
+                if (value.isQuoted) validationError("$type cannot be quoted", value)
+                value.valueText.toBooleanStrictOrNull()
+                    ?: validationError("Invalid boolean value: ${value.valueText}", value)
+            }
 
             else -> validationError("Unknown primitive type: $type", value)
         }

@@ -1,6 +1,5 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorError
 import app.ultradev.hytaleuiparser.validation.Scope
 
 data class RootNode(
@@ -17,8 +16,11 @@ data class RootNode(
     val variables: List<NodeAssignVariable> get() = children.filterIsInstance<NodeAssignVariable>()
     val elements: List<NodeElement> get() = children.filterIsInstance<NodeElement>()
 
+    val referenceMap: Map<String, NodeAssignReference> by lazy {
+        references.associateBy { it.variable.identifier }
+    }
+
     lateinit var path: String
-    lateinit var variableValues: Map<String, AstNode>
 
     override fun setScope(scope: Scope) {
         super.setScope(scope)
