@@ -135,22 +135,27 @@ enum class ElementType {
         mapOf(
             "Value" to TypeType.Float,
             "Bar" to TypeType.PatchStyle,
-            "BarTexturePath" to TypeType.String, // TODO: Why is this a thing? PatchStyle has a texture path...?
+            
+            // These CANNOT be patchstyles.
+            "BarTexturePath" to TypeType.String,
             "EffectTexturePath" to TypeType.String,
-            "EffectWidth" to TypeType.Int32,
-            "EffectHeight" to TypeType.Int32,
-            "EffectOffset" to TypeType.Int32,
-            "Direction" to TypeType.Direction,
-            "Alignment" to TypeType.BarAlignment,
+            // This can and is valid on a circular and normal progress bar.
+            "MaskTexturePath" to TypeType.String,
+            
+            "EffectWidth" to TypeType.Float,
+            "EffectHeight" to TypeType.Float,
+            "EffectOffset" to TypeType.Float,
+            "Direction" to TypeType.ProgressBarDirection,
+            "Alignment" to TypeType.ProgressBarAlignment,
         )
     ),
     Slider(
         mapOf(
             "Style" to TypeType.SliderStyle,
-            "Min" to TypeType.Int32,
-            "Max" to TypeType.Int32,
-            "Step" to TypeType.Float, // TODO: How can an integer slider have a float step???
-            "Value" to TypeType.Int32,
+            "Min" to TypeType.Float,
+            "Max" to TypeType.Float,
+            "Step" to TypeType.Float,
+            "Value" to TypeType.Float,
         )
     ),
     ItemSlotButton(
@@ -182,7 +187,7 @@ enum class ElementType {
             "KeepScrollPosition" to TypeType.Boolean,
             "ShowScrollbar" to TypeType.Boolean,
             "ScrollbarStyle" to TypeType.ScrollbarStyle,
-            "InfoDisplay" to TypeType.InfoDisplay,
+            "InfoDisplay" to TypeType.ItemGridInfoDisplayMode,
         )
     ),
     ItemIcon(
@@ -197,7 +202,9 @@ enum class ElementType {
         )
     ),
 
-    // CLIENT elements.
+    // CLIENT elements
+    
+    // NOT working on mods.
     BackgroundImage(
         mapOf(
             // Image is a path.
@@ -206,6 +213,8 @@ enum class ElementType {
             "ImageUW" to TypeType.String
         )
     ),
+    
+    // WORKING on mods.
     TabNavigation(
         mapOf(
             "Style" to TypeType.TabNavigationStyle,
@@ -213,62 +222,70 @@ enum class ElementType {
             "AllowUnselection" to TypeType.Boolean,
         )
     ),
+    // WORKING on mods.
     ToggleButton(
         mapOf(
             "Style" to TypeType.ButtonStyle,
             "CheckedStyle" to TypeType.ButtonStyle,
         )
     ),
+    // NOT working on mods. Will kick client with "Exception has been thrown by the target of an invocation".
     ItemPreviewComponent(
         mapOf(
             // We assume float...
             "ItemScale" to TypeType.Float,
         )
     ),
+    // NOT working on mods. Will kick client with "Exception has been thrown by the target of an invocation".
     CharacterPreviewComponent,
+    // WORKING on mods.
     SliderNumberField(
         mapOf(
             "SliderStyle" to TypeType.SliderStyle,
             "Style" to TypeType.InputFieldStyle,
             "NumberFieldContainerAnchor" to TypeType.Anchor,
             "NumberFieldStyle" to TypeType.InputFieldStyle,
+            // If min is less than max, it will crash the client.
             "Min" to TypeType.Float,
             "Max" to TypeType.Float,
-            // TODO: Confirm step valid on slider number field.
             "Step" to TypeType.Float,
             "Value" to TypeType.Float,
             
         )
     ),
+    // WORKING on mods.
     BlockSelector(
         mapOf(
-            "Capacity" to TypeType.Int32,
+            // Whilst float is accepted, it is traditionally an Int32.
+            "Capacity" to TypeType.Float,
             "Style" to TypeType.BlockSelectorStyle,
         )
     ),
+    // WORKING on mods.
     ReorderableListGrip,
+    // WORKING on mods - MUST be a child of a TabNavigation element otherwise client crashes (NullReferenceException)
     TabButton(
         mapOf(
             "Id" to TypeType.String,
-            // TODO: Confirm if patchstyle, or only string - seen only as string.
-            "Icon" to TypeType.String,
-            "IconSelected" to TypeType.String,
+            "Icon" to TypeType.PatchStyle,
+            "IconSelected" to TypeType.PatchStyle,
         )
     ),
-    // WHY DOES THIS EXIST?
+    // WORKING on mods.
     FloatSliderNumberField(
         mapOf(
             "SliderStyle" to TypeType.SliderStyle,
-            "Style" to TypeType.InputFieldStyle,
             "NumberFieldContainerAnchor" to TypeType.Anchor,
             "NumberFieldStyle" to TypeType.InputFieldStyle,
             "NumberFieldMaxDecimalPlaces" to TypeType.Int32,
+            // If min is less than max, it will crash the client.
             "Min" to TypeType.Float,
             "Max" to TypeType.Float,
             "Step" to TypeType.Float,
             "Value" to TypeType.Float,
         )
     ),
+    // WORKING on mods.
     ActionButton( // TODO: Should we create common properties for all buttons?
         Elements.BUTTON_PROPERTIES + mapOf(
             "KeyBindingLabel" to TypeType.String,
@@ -276,22 +293,26 @@ enum class ElementType {
             "ActionName" to TypeType.String,
         )
     ),
+    // CANNOT find panel in list of elements.
     Panel,
+    // WORKING on mods.
     LabeledCheckBox(
         mapOf(
             "Style" to TypeType.LabeledCheckBoxStyle,
-            
         )
     ),
+    // DOES NOT work on mods, unknown node type.
     PlayerPreviewComponent(
         mapOf(
-            "Scale" to TypeType.Float, // TODO: Confirm float, not double for .set.
+            "Scale" to TypeType.Float,
         )
     ),
+    // WORKING on mods.
     HotkeyLabel(mapOf(
         "InputBindingKey" to TypeType.String,
         "InputBindingKeyPrefix" to TypeType.String,
     )),
+    // WORKING in mods.
     MenuItem(
         mapOf(
             "Text" to TypeType.String,

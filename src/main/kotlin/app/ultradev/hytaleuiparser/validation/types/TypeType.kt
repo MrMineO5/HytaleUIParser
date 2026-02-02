@@ -12,23 +12,26 @@ enum class TypeType(
     Boolean,
     Color,
 
-    Sound(
+    SoundStyle(
         mapOf(
             "SoundPath" to String,
             "MinPitch" to Float,
             "MaxPitch" to Float,
-            "Volume" to Float, // TODO: Confirm volume is not actually float with Set.
+            "Volume" to Float,
         )
     ),
     SoundsStyle(
         mapOf(
-            "Activate" to Sound,
-            "MouseHover" to Sound,
-            "Close" to Sound,
-            "Context" to Sound, // TODO: Verify this appears on all sound styles.
+            "Activate" to SoundStyle,
+            "MouseHover" to SoundStyle,
+            "Close" to SoundStyle,
+            "Context" to SoundStyle, // TODO: Verify this appears on all sound styles.
         )
     ),
-
+    // Used by TextButton/Button for sounds.
+    ButtonSounds(
+        SoundsStyle.allowedFields
+    ),
     LayoutMode(
         setOf(
             "TopScrolling",
@@ -74,7 +77,7 @@ enum class TypeType(
         )
     ),
 
-    BarAlignment(
+    ProgressBarAlignment(
         setOf(
             "Vertical", "Horizontal"
         )
@@ -92,7 +95,10 @@ enum class TypeType(
             "Center", "Start", "End"
         )
     ),
-    InfoDisplay(
+    ProgressBarDirection(
+      Direction.allowedFields  
+    ),
+    ItemGridInfoDisplayMode(
         setOf(
             // TODO: Confirm how this works, if it is just a list of valid states...
             "None"
@@ -135,7 +141,6 @@ enum class TypeType(
             "Handle" to PatchStyle,
             "HoveredHandle" to PatchStyle,
             "DraggedHandle" to PatchStyle,
-            // TODO: Check size/spacing data types.
         )
     ),
 
@@ -145,7 +150,7 @@ enum class TypeType(
             "HoveredBackground" to PatchStyle,
             "PressedBackground" to PatchStyle,
             "DisabledBackground" to PatchStyle,
-            "ChangedSound" to Sound,
+            "ChangedSound" to SoundStyle,
         )
     ),
     CheckBoxStyle(
@@ -168,7 +173,6 @@ enum class TypeType(
         mapOf(
             "Background" to PatchStyle,
             "LabelStyle" to LabelStyle,
-            "BindingLabelStyle" to LabelStyle
         )
     ),
     ButtonStyle(
@@ -177,7 +181,23 @@ enum class TypeType(
             "Hovered" to ButtonStyleState,
             "Pressed" to ButtonStyleState,
             "Disabled" to ButtonStyleState,
-            "Sounds" to SoundsStyle,
+            "Sounds" to ButtonSounds,
+        )
+    ),
+    SubMenuItemStyleState(
+        mapOf(
+            "Background" to PatchStyle,
+            "LabelStyle" to LabelStyle,
+            "BindingLabelStyle" to LabelStyle
+        )
+    ),
+    SubMenuItemStyle(
+        mapOf(
+            "Default" to SubMenuItemStyleState,
+            "Hovered" to SubMenuItemStyleState,
+            "Pressed" to SubMenuItemStyleState,
+            "Disabled" to SubMenuItemStyleState,
+            "Sounds" to ButtonSounds,
         )
     ),
     TextButtonStyleState(
@@ -189,7 +209,7 @@ enum class TypeType(
             "Hovered" to TextButtonStyleState,
             "Pressed" to TextButtonStyleState,
             "Disabled" to TextButtonStyleState,
-            "Sounds" to SoundsStyle,
+            "Sounds" to ButtonSounds,
         )
     ),
 
@@ -199,7 +219,7 @@ enum class TypeType(
             "Handle" to String,
             "HandleWidth" to Int32,
             "HandleHeight" to Int32,
-            "Sounds" to SoundsStyle,
+            "Sounds" to ButtonSounds,
         )
     ),
 
@@ -310,25 +330,26 @@ enum class TypeType(
             "SlotIconSize" to Int32,
             "SlotSpacing" to Int32,
             "SlotBackground" to PatchStyle,
-            "QuantityPopupSlotOverlay" to String, // TODO: No example of patch style use, check if they accept patch styles
-            "BrokenSlotBackgroundOverlay" to String,
-            "BrokenSlotIconOverlay" to String,
-            "DefaultItemIcon" to String,
+            "QuantityPopupSlotOverlay" to PatchStyle,
+            "BrokenSlotBackgroundOverlay" to PatchStyle,
+            "BrokenSlotIconOverlay" to PatchStyle,
+            "DefaultItemIcon" to PatchStyle,
+            // UI Path
             "DurabilityBar" to String,
-            "DurabilityBarBackground" to String,
+            "DurabilityBarBackground" to PatchStyle,
             "DurabilityBarAnchor" to Anchor,
             "DurabilityBarColorStart" to Color,
             "DurabilityBarColorEnd" to Color,
-            "CursedIconPatch" to PatchStyle, // TODO: I assumed this is a patchstyle from the name, check this too
+            "CursedIconPatch" to PatchStyle,
             "CursedIconAnchor" to Anchor,
-            "ItemStackHoveredSound" to Sound,
-            "ItemStackActivateSound" to Sound,
+            "ItemStackHoveredSound" to SoundStyle,
+            "ItemStackActivateSound" to SoundStyle,
             // MouseHover sound?
             // Close sound?
         )
     ),
 
-    TabStateStyle(
+    TabStyleState(
         mapOf(
             "LabelStyle" to LabelStyle,
             "Padding" to Padding,
@@ -337,36 +358,34 @@ enum class TypeType(
             "IconAnchor" to Anchor,
             "Anchor" to Anchor,
             "TooltipStyle" to TextTooltipStyle,
-            // TODO: VERIFY - is it double or float?
             "IconOpacity" to Float,
-            "ContentMaskTexturePath" to String,
-
-            )
+            "ContentMaskTexturePath" to String
+        )
     ),
 
-    TabNavigationStyleElement(
+    TabStyle(
         mapOf(
-            "Default" to TabStateStyle,
-            "Hovered" to TabStateStyle,
-            "Pressed" to TabStateStyle,
+            "Default" to TabStyleState,
+            "Hovered" to TabStyleState,
+            "Pressed" to TabStyleState,
         )
     ),
 
     TabNavigationStyle(
         mapOf(
-            "TabStyle" to TabNavigationStyleElement,
-            "SelectedTabStyle" to TabNavigationStyleElement,
-            "TabSounds" to SoundsStyle,
+            "TabStyle" to TabStyle,
+            "SelectedTabStyle" to TabStyle,
+            "TabSounds" to ButtonSounds,
             "SeparatorAnchor" to Anchor,
-            "SeparatorBackground" to String, // TODO: Is this a PatchStyle?
+            "SeparatorBackground" to PatchStyle,
         )
     ),
 
     DropdownBoxSounds(
         mapOf(
-            "Activate" to Sound,
-            "MouseHover" to Sound,
-            "Close" to Sound
+            "Activate" to SoundStyle,
+            "MouseHover" to SoundStyle,
+            "Close" to SoundStyle
         )
     ),
     DropdownBoxStyle(
@@ -430,13 +449,12 @@ enum class TypeType(
     BlockSelectorStyle(
         mapOf(
             "ItemGridStyle" to ItemGridStyle,
-            // TODO: Confirm patchstyle or only path? Presented as path only.
             "SlotDropIcon" to PatchStyle,
             "SlotDeleteIcon" to PatchStyle,
             "SlotHoverOverlay" to PatchStyle,
         )
     ),
-    LabeledCheckBoxStyleElement(
+    LabeledCheckBoxStyleState(
         mapOf(
             "DefaultBackground" to PatchStyle,
             "HoveredBackground" to PatchStyle,
@@ -445,13 +463,13 @@ enum class TypeType(
             "DefaultLabelStyle" to LabelStyle,
             "HoveredLabelStyle" to LabelStyle,
             "PressedLabelStyle" to LabelStyle,
-            "ChangedSound" to Sound,
+            "ChangedSound" to SoundStyle,
         )
     ),
     LabeledCheckBoxStyle(
         mapOf(
-            "Checked" to LabeledCheckBoxStyleElement,
-            "Unchecked" to LabeledCheckBoxStyleElement,
+            "Checked" to LabeledCheckBoxStyleState,
+            "Unchecked" to LabeledCheckBoxStyleState,
         )
     ),
 
