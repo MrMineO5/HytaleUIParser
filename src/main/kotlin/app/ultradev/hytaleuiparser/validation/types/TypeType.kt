@@ -370,7 +370,10 @@ enum class TypeType(
             "ContentMaskTexturePath" to String
         )
     ),
-
+    @Deprecated("Use TabStyleState instead")
+    TabStateStyle(
+      TabStyleState.allowedFields
+    ),
     TabStyle(
         mapOf(
             "Default" to TabStyleState,
