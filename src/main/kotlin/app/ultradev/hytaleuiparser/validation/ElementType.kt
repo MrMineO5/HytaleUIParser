@@ -24,6 +24,7 @@ enum class ElementType {
             "Style" to TypeType.LabelStyle,
             "Text" to TypeType.String,
             "MaskTexturePath" to TypeType.String,
+            // This MUST be localisation string - aka "Message".
             "TextSpans" to TypeType.String,
         )
     ),
@@ -51,19 +52,17 @@ enum class ElementType {
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
             "PlaceholderText" to TypeType.String,
+            // CAN be float.
             "MaxLength" to TypeType.Int32,
             "IsReadOnly" to TypeType.Boolean,
             "PasswordChar" to TypeType.String,
-            "Decoration" to TypeType.TextFieldDecoration
+            "Decoration" to TypeType.InputFieldDecorationStyle
         )
     ),
     NumberField(
         mapOf(
             "Format" to TypeType.NumberFieldFormat,
             "Value" to TypeType.Float,
-            "Min" to TypeType.Float,
-            "Max" to TypeType.Float,
-            "Step" to TypeType.Float,
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
         )
@@ -91,7 +90,7 @@ enum class ElementType {
             "PlaceholderText" to TypeType.String,
             "Style" to TypeType.InputFieldStyle,
             "PlaceholderStyle" to TypeType.InputFieldStyle,
-            "Decoration" to TypeType.TextFieldDecoration,
+            "Decoration" to TypeType.InputFieldDecorationStyle,
         )
     ),
     BackButton,

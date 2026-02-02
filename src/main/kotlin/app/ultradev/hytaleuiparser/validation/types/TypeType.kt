@@ -144,7 +144,7 @@ enum class TypeType(
         )
     ),
 
-    CheckedStyleInnerElement(
+    CheckBoxStyleState(
         mapOf(
             "DefaultBackground" to PatchStyle,
             "HoveredBackground" to PatchStyle,
@@ -155,8 +155,8 @@ enum class TypeType(
     ),
     CheckBoxStyle(
         mapOf(
-            "Checked" to CheckedStyleInnerElement,
-            "Unchecked" to CheckedStyleInnerElement
+            "Checked" to CheckBoxStyleState,
+            "Unchecked" to CheckBoxStyleState
         )
     ),
     CheckedStyle(
@@ -244,34 +244,38 @@ enum class TypeType(
             "Alignment" to Alignment
         )
     ),
-    Side(
+    InputFieldButtonSide(
         setOf("Left", "Right")
     ),
 
     // Icon is a really weird type. It appears on a TextField in FileSelector.ui under Icon, and a "ClearButtonStyle".
-    // TODO: Should the Icon and ClearButtonStyle be separated, they are very similar.
-    Icon(
+    InputFieldIcon(
         mapOf(
             "Texture" to PatchStyle, // Can be patchstyle.
+            // These can all be floats.
             "Width" to Int32,
             "Height" to Int32,
             "Offset" to Int32,
-            // Only appears on the ClearButtonStyle so far.
-            "HoveredTexture" to PatchStyle,
-            "PressedTexture" to PatchStyle,
-            "Side" to Side,
+            "Side" to InputFieldButtonSide,
         )
     ),
-    TextFieldDecorationElement(
+    InputFieldButtonStyle(
+        InputFieldIcon.allowedFields + mapOf(
+            "HoveredTexture" to PatchStyle,
+            "PressedTexture" to PatchStyle
+        )
+    ),
+    InputFieldDecorationStyleState(
         mapOf(
             "Background" to PatchStyle,
-            "Icon" to Icon,
-            "ClearButtonStyle" to Icon
+            "Icon" to InputFieldIcon,
+            "ClearButtonStyle" to InputFieldButtonStyle
         )
     ),
-    TextFieldDecoration(
+    InputFieldDecorationStyle(
         mapOf(
-            "Default" to TextFieldDecorationElement
+            "Default" to InputFieldDecorationStyleState,
+            "Focused" to InputFieldDecorationStyleState
         )
     ),
 
@@ -280,7 +284,7 @@ enum class TypeType(
             "OpacitySelectorBackground" to String, // TODO: Are these PatchStyles?
             "ButtonBackground" to String,
             "ButtonFill" to String,
-            "TextFieldDecoration" to TextFieldDecoration,
+            "TextFieldDecoration" to InputFieldDecorationStyle,
             "TextFieldPadding" to Padding,
             "TextFieldHeight" to Int32,
         )
@@ -288,21 +292,25 @@ enum class TypeType(
 
     ColorFormat(setOf("Rgb", "Rgba")), // TODO: Find more formats?
 
-    ColorPickerDropdownBoxBackgroundThing(
+    ColorPickerDropdownBoxStateBackground(
         mapOf(
-            "Default" to String
+            "Default" to PatchStyle,
+            "Hovered" to PatchStyle,
+            "Pressed" to PatchStyle
         )
     ),
-    ColorPickerDropdownBoxStyle( // TODO: Does this have *all* properties of DropdownBoxStyle? If so we can extend that one
+    ColorPickerDropdownBoxStyle( // THIS IS A DISTINCTLY DIFFERENT TYPE.
         mapOf(
             "ColorPickerStyle" to ColorPickerStyle,
-            "Background" to ColorPickerDropdownBoxBackgroundThing,
-            "ArrowBackground" to ColorPickerDropdownBoxBackgroundThing,
-            "Overlay" to ColorPickerDropdownBoxBackgroundThing,
+            "Background" to ColorPickerDropdownBoxStateBackground,
+            "ArrowBackground" to ColorPickerDropdownBoxStateBackground,
+            "Overlay" to ColorPickerDropdownBoxStateBackground,
             "PanelBackground" to PatchStyle,
             "PanelPadding" to Padding,
+            "PanelWidth" to Int32,
             "PanelOffset" to Int32,
             "ArrowAnchor" to Anchor,
+            "Sounds" to ButtonSounds,
         )
     ),
 
@@ -405,7 +413,7 @@ enum class TypeType(
             "HorizontalPadding" to Int32,
             "PanelScrollbarStyle" to ScrollbarStyle,
             "PanelBackground" to PatchStyle,
-            "PanelPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
+            "PanelPadding" to Int32,
             "PanelWidth" to Int32,
             "PanelAlign" to Alignment,
             "PanelOffset" to Int32,
@@ -413,11 +421,11 @@ enum class TypeType(
             "EntryIconWidth" to Int32,
             "EntryIconHeight" to Int32,
             "EntriesInViewport" to Int32,
-            "HorizontalEntryPadding" to Padding, // TODO: Check this actually supports full padding, not just integer
+            "HorizontalEntryPadding" to Int32,
             "HoveredEntryBackground" to PatchStyle,
             "PressedEntryBackground" to PatchStyle,
             "Sounds" to DropdownBoxSounds,
-            "EntrySounds" to SoundsStyle,
+            "EntrySounds" to ButtonSounds,
             "FocusOutlineSize" to Int32,
             "FocusOutlineColor" to Color,
             "PanelTitleLabelStyle" to LabelStyle,
