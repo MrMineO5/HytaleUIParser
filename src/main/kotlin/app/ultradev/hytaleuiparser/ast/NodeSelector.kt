@@ -8,6 +8,8 @@ data class NodeSelector(
     override val children: List<AstNode>
         get() = listOf(selector)
 
+    val identifier get() = selector.text
+
     override fun setScope(scope: Scope) {
         super.setScope(scope)
         selector.setScope(scope)

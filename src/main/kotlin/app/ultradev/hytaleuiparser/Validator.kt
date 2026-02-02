@@ -90,11 +90,11 @@ class Validator(
     }
 
     fun validateElement(node: NodeElement, isInVariable: Boolean = false) {
-        if (node.type is NodeVariable) {
+        if (node.type is VariableReference) {
             val variable = deepLookupReference(node.type) ?: return
 
-            if (variable is NodeVariable) {
-
+            if (variable is VariableReference) {
+                // TODO: We may want to reimplement "missing" variable scopes to allow for better completion?
                 return
             } else {
                 if (variable !is NodeElement) {
@@ -119,11 +119,29 @@ class Validator(
                 definitionCopy.body.setScope(variableScope)
                 node.body.setScope(variableScope)
 
-                definitionCopy.childElements.forEach { validateElement(it) }
-                definitionCopy.selectorElements.forEach { validateSelectorElement(node, it) }
+                definitionCopy.selectorElements.forEach { validationError("Selector elements must be used within a variable element", it) }
 
+                val seenSelectors = mutableSetOf<String>()
+                definitionCopy.selectorElements.forEach { sel ->
+                    if (seenSelectors.add(sel.selector.identifier))
+                        return@forEach validationError("Duplicate selector ${sel.selector.identifier} in definition", sel)
+
+                    val definitionSel = definitionCopy.childElements.firstOrNull { it.selector?.identifier == sel.selector.identifier }
+                        ?: return@forEach validationError("Selector element $sel not found in definition", sel)
+
+                    val selInternalVariables = (definitionSel.localVariables + sel.localVariables)
+                        .associateBy { it.variable.identifier }
+                        .values
+                    val selScope = variableScope.childScope(selInternalVariables, ::validationError)
+                    sel.body.setScope(selScope)
+                    definitionSel.body.setScope(selScope)
+
+                    sel.childElements.forEach { validateElement(it) }
+                    definitionSel.childElements.forEach { validateElement(it) }
+                }
+
+                definitionCopy.childElements.forEach { validateElement(it) }
                 node.childElements.forEach { validateElement(it) }
-                node.selectorElements.forEach { validateSelectorElement(node, it) }
 
                 definitionCopy.properties.forEach {
                     validateProperty(
@@ -156,7 +174,7 @@ class Validator(
         val elementType = findElementType(node)
 
         node.childElements.forEach { validateElement(it) }
-        node.selectorElements.forEach { validateSelectorElement(node, it) }
+        node.selectorElements.forEach { validationError("Selector elements must be used within a variable element", it) }
 
         if (elementType == null) return
 
@@ -177,16 +195,9 @@ class Validator(
 
 
     fun validateSelectorElement(parent: NodeElement, node: NodeSelectorElement) {
-        val parentDef = when (parent.type) {
-            is NodeIdentifier -> return validationError("Cannot have selector elements inside plain elements", parent)
-            is NodeVariable, is NodeRefMember -> deepLookupReference(parent.type) as NodeElement
-            else -> return validationError("Unknown parent type: ${parent.type}", parent)
-        }
+        val source = parent.childElements.find { it.selector?.selector?.text == node.selector.selector.text }
+            ?: return validationError("Unresolved selector ${node.selector.text} in parent", node)
 
-        validateElement(parentDef)
-
-        val source = parentDef.childElements.find { it.selector?.selector?.text == node.selector.selector.text }
-            ?: error("No selector element $node on ${parentDef.type}") // THEY CANNOT BE TRANSITIVE!
         validateElement(source)
         val elementType = source.resolvedType
 
