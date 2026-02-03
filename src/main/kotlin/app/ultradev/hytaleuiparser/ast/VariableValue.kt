@@ -8,5 +8,5 @@ sealed interface VariableValue {
 
     fun deepResolve(): VariableValue? = resolvedValue
 
-    val resolvedTypes: Set<TypeType> get() = deepResolve()!!.resolvedTypes // TODO: Technically resolution shouldn't be nullable I guess?
+    val resolvedTypes: Set<TypeType>? get() = deepResolve()?.resolvedTypes
 }

@@ -357,6 +357,7 @@ enum class TypeType(
         )
     ),
 
+    @Deprecated("Use TabStateStyle instead")
     TabStyleState(
         mapOf(
             "LabelStyle" to LabelStyle,
@@ -370,15 +371,14 @@ enum class TypeType(
             "ContentMaskTexturePath" to String
         )
     ),
-    @Deprecated("Use TabStyleState instead")
     TabStateStyle(
       TabStyleState.allowedFields
     ),
     TabStyle(
         mapOf(
-            "Default" to TabStyleState,
-            "Hovered" to TabStyleState,
-            "Pressed" to TabStyleState,
+            "Default" to TabStateStyle,
+            "Hovered" to TabStateStyle,
+            "Pressed" to TabStateStyle,
         )
     ),
 

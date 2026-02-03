@@ -13,8 +13,17 @@ class Validator(
     private val validated: MutableSet<String> = mutableSetOf()
     val validationErrors: MutableList<ValidatorError> = mutableListOf()
 
-    fun validationError(message: String, astNode: AstNode) {
+    private fun validationError(message: String, astNode: AstNode) {
         validationErrors.add(ValidatorError(message, astNode))
+    }
+
+    private fun reemitErrors(message: String, newNode: AstNode, block: () -> Unit) {
+        val oldIndex = validationErrors.size
+        block()
+        val diff = validationErrors.subList(oldIndex, validationErrors.size)
+        diff.forEach {
+            validationErrors.add(ValidatorError(message, newNode, it))
+        }
     }
 
     fun validate() {
@@ -89,75 +98,95 @@ class Validator(
         }
     }
 
-    fun validateElement(node: NodeElement, isInVariable: Boolean = false) {
-        if (node.type is VariableReference) {
-            val variable = deepLookupReference(node.type) ?: return
 
-            if (variable is VariableReference) {
-                // TODO: We may want to reimplement "missing" variable scopes to allow for better completion?
+    fun validateVariableElement(node: NodeElement) {
+        node.type as VariableReference
+
+        val variable = deepLookupReference(node.type) ?: return
+
+        if (variable is VariableReference) {
+            // TODO: We may want to reimplement "missing" variable scopes to allow for better completion?
+        } else {
+            if (variable !is NodeElement) {
+                validationError("Expected element, got ${variable::class.simpleName}", variable)
                 return
-            } else {
-                if (variable !is NodeElement) {
-                    validationError("Expected element, got ${variable::class.simpleName}", variable)
-                    return
-                }
+            }
 
-                val type = findElementType(variable)!!
-                node.resolvedType = type
+            val type = findElementType(variable)!!
+            node.resolvedType = type
+            variable.resolvedType = type
 
-                val definitionCopy = variable.clone()
-                definitionCopy.initFile(variable.file)
-                definitionCopy.applyParent(variable.parent)
+            val variableCopy = variable.clone()
+            variableCopy.initFile(variable.file)
+            variableCopy.applyParent(variable.parent)
 
-                val internalVariables = (definitionCopy.localVariables + node.localVariables)
+            val internalVariables = (variableCopy.localVariables + node.localVariables)
+                .associateBy { it.variable.identifier }
+                .values
+
+            val variableScope = node.resolvedScope!!.childScope(variable.resolvedScope!!)
+                .childScope(internalVariables, ::validationError)
+
+            variableCopy.body.setScope(variableScope)
+            node.body.setScope(variableScope)
+
+            variableCopy.selectorElements.forEach {
+                validationError(
+                    "Selector elements must be used within a variable element",
+                    it
+                )
+            }
+
+            val seenSelectors = mutableSetOf<String>()
+            node.selectorElements.forEach { sel ->
+                if (!seenSelectors.add(sel.selector.identifier))
+                    return@forEach validationError("Duplicate selector ${sel.selector.identifier} in definition", sel)
+
+                val definitionSel =
+                    variableCopy.childElements.firstOrNull { it.selector?.identifier == sel.selector.identifier }
+                        ?: return@forEach validationError("Selector element ${sel.selector.identifier} not found in ${node.type.text}", sel)
+
+                val selInternalVariables = (definitionSel.localVariables + sel.localVariables)
                     .associateBy { it.variable.identifier }
                     .values
+                val selScope = variableScope.childScope(selInternalVariables, ::validationError)
+                sel.body.setScope(selScope)
+                definitionSel.body.setScope(selScope)
 
-                val variableScope = node.resolvedScope!!.childScope(variable.resolvedScope!!)
-                    .childScope(internalVariables, ::validationError)
+                sel.childElements.forEach { validateElement(it) }
+                definitionSel.childElements.forEach { validateElement(it) }
+            }
 
-                definitionCopy.body.setScope(variableScope)
-                node.body.setScope(variableScope)
+            reemitErrors("Could not validate variable element", node) {
+                variableCopy.childElements.forEach { validateElement(it) }
+            }
 
-                definitionCopy.selectorElements.forEach { validationError("Selector elements must be used within a variable element", it) }
+            node.childElements.forEach { validateElement(it) }
 
-                val seenSelectors = mutableSetOf<String>()
-                definitionCopy.selectorElements.forEach { sel ->
-                    if (seenSelectors.add(sel.selector.identifier))
-                        return@forEach validationError("Duplicate selector ${sel.selector.identifier} in definition", sel)
-
-                    val definitionSel = definitionCopy.childElements.firstOrNull { it.selector?.identifier == sel.selector.identifier }
-                        ?: return@forEach validationError("Selector element $sel not found in definition", sel)
-
-                    val selInternalVariables = (definitionSel.localVariables + sel.localVariables)
-                        .associateBy { it.variable.identifier }
-                        .values
-                    val selScope = variableScope.childScope(selInternalVariables, ::validationError)
-                    sel.body.setScope(selScope)
-                    definitionSel.body.setScope(selScope)
-
-                    sel.childElements.forEach { validateElement(it) }
-                    definitionSel.childElements.forEach { validateElement(it) }
-                }
-
-                definitionCopy.childElements.forEach { validateElement(it) }
-                node.childElements.forEach { validateElement(it) }
-
-                definitionCopy.properties.forEach {
+            val seenProperties = mutableSetOf<String>()
+            node.properties.forEach {
+                if (!seenProperties.add(it.identifier.identifier))
+                    return@forEach validationError("Duplicate property ${it.identifier.identifier} on $type", it)
+                validateProperty(it.value, type.properties[it.identifier.identifier]!!)
+            }
+            val varSeenProperties = mutableSetOf<String>()
+            reemitErrors("Could not validate variable element", node) {
+                variableCopy.properties.filter { it.identifier.identifier !in seenProperties }.forEach {
+                    if (!varSeenProperties.add(it.identifier.identifier))
+                        return@forEach validationError("Duplicate property ${it.identifier.identifier} on $type", it)
                     validateProperty(
                         it.value,
                         type.properties[it.identifier.identifier]!!
                     )
                 }
-                node.properties.forEach { validateProperty(it.value, type.properties[it.identifier.identifier]!!) }
-
-                return
             }
         }
-        // TODO: If this element is an @Variable {} element, we need to validate both its own properties and the parent's
-        // The parent may have undefined variables, we need to add our local variables to the parent's scope for the parent's element validation
-        // This is currently not possible since each element can have only one scope
-        // We'll see how we do this at some point
+    }
+
+    fun validateElement(node: NodeElement, isInVariable: Boolean = false) {
+        if (node.type is VariableReference) {
+            return validateVariableElement(node)
+        }
 
         val childScope =
             node.resolvedScope!!.childScope(
@@ -174,7 +203,12 @@ class Validator(
         val elementType = findElementType(node)
 
         node.childElements.forEach { validateElement(it) }
-        node.selectorElements.forEach { validationError("Selector elements must be used within a variable element", it) }
+        node.selectorElements.forEach {
+            validationError(
+                "Selector elements must be used within a variable element",
+                it
+            )
+        }
 
         if (elementType == null) return
 
@@ -193,29 +227,6 @@ class Validator(
         }
     }
 
-
-    fun validateSelectorElement(parent: NodeElement, node: NodeSelectorElement) {
-        val source = parent.childElements.find { it.selector?.selector?.text == node.selector.selector.text }
-            ?: return validationError("Unresolved selector ${node.selector.text} in parent", node)
-
-        validateElement(source)
-        val elementType = source.resolvedType
-
-        val childScope = node.resolvedScope!!.childScope(node.localVariables, ::validationError)
-        node.body.setScope(childScope)
-
-        if (!elementType.allowsChildren()) assert(node.childElements.isEmpty()) {
-            "Element ${elementType.name} does not allow children"
-        }
-
-        node.properties.forEach {
-            val typeType = elementType.properties[it.identifier.identifier]
-                ?: return@forEach validationError("Unknown property ${it.identifier.identifier} on $elementType", node)
-            validateProperty(it.value, typeType)
-        }
-
-        node.childElements.forEach { validateElement(it) }
-    }
 
     fun validateProperty(node: AstNode, type: TypeType) {
         val value = when (node) {
@@ -298,7 +309,7 @@ class Validator(
             val referredType = try {
                 TypeType.valueOf(node.type.identifier)
             } catch (_: IllegalArgumentException) {
-                return validationError("Unknown type ${node.type.identifier}", node.type)
+                return validationError("Unknown type ${node.type.identifier}, expected $type", node.type)
             }
 
             if (referredType != type)
@@ -360,7 +371,7 @@ class Validator(
 //                        return reference
                         return null
                     }
-                    validationError("Variable not found in local scope", reference)
+                    validationError("Variable ${reference.identifier} not found in local scope", reference)
                 }
                 something
             }
@@ -481,7 +492,7 @@ class Validator(
         for ((key, value) in allFields) {
             validateUnknownProperty(value)
             types.removeIf {
-                it.allowedFields[key] !in value.resolvedTypes
+                it.allowedFields[key] !in value.resolvedTypes!!
             }
         }
         node.resolvedTypes.addAll(types)

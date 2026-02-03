@@ -66,9 +66,10 @@ class Tokenizer(
                 sb.append(ch)
                 sb.append(read())
                 while (true) {
-                    while (peek() != '*') sb.append(read())
+                    while ((peek() ?: break) != '*') sb.append(read())
                     sb.append(read())
-                    if (peek() == '/') {
+
+                    if ((peek() ?: break) == '/') {
                         sb.append(read())
                         break
                     }
