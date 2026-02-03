@@ -523,6 +523,8 @@ enum class TypeType(
 
     ;
 
+    val isStruct: Boolean get() = !isPrimitive && !isEnum
+
     constructor(allowedFields: Map<String, TypeType>) : this(false, false, allowedFields, emptySet())
     constructor() : this(true, false, emptyMap(), emptySet())
     constructor(enum: Set<String>) : this(false, true, emptyMap(), enum)

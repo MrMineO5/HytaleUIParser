@@ -462,6 +462,10 @@ class Validator(
 
         if (node is NodeType) {
             validateUnknownType(node)
+        } else if (node is NodeConstant) {
+            if (node.resolvedTypes.isEmpty()) {
+                validationError("No matching type for value", node)
+            }
         }
     }
 
@@ -477,7 +481,7 @@ class Validator(
 
         val allFields = node.resolveValue()
         val matchingTypes = TypeType.entries.filter { type ->
-            allFields.keys.all { it in type.allowedFields }
+            type.isStruct && allFields.keys.all { it in type.allowedFields }
         }
         if (matchingTypes.isEmpty()) {
             return validationError("No type matches all fields", node)
