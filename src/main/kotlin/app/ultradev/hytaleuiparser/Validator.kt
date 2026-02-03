@@ -61,6 +61,10 @@ class Validator(
         if (validateUnusedVariables) {
             // Validate all variables
             root.variables.forEach { validateAssignVariable(it) }
+
+            root.references.forEach {
+                validateReference(it)
+            }
         }
 
         // Validate elements
@@ -500,5 +504,11 @@ class Validator(
             }
         }
         node.resolvedTypes.addAll(types)
+    }
+
+
+    fun validateReference(node: NodeAssignReference) {
+        if (node.resolvedFilePath !in files)
+            validationError("Import not found: ${node.resolvedFilePath}", node)
     }
 }
