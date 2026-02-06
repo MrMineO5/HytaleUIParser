@@ -34,15 +34,6 @@ class Parser(tokens: Iterator<Token>) {
         }
     }
 
-    private fun parseVariableOrRefMember(): AstNode {
-        val next = tokens.peek()
-        return when (next.type) {
-            Token.Type.VARIABLE -> parseVariable()
-            Token.Type.REFERENCE -> parseRefMember()
-            else -> throw ParserException("Expected variable or reference", next)
-        }
-    }
-
     private fun parseVariable(): NodeVariable {
         val reference = tokens.next()
         if (reference.type != Token.Type.VARIABLE) throw ParserException("Expected variable marker", reference)
@@ -107,6 +98,22 @@ class Parser(tokens: Iterator<Token>) {
         return NodeConstant(listOf(NodeToken(token)), token.text)
     }
 
+    private fun parseVariableReference(): AstNode {
+        val token = tokens.peek()
+        val variable = when (token.type) {
+            Token.Type.VARIABLE -> parseVariable()
+            Token.Type.REFERENCE -> parseRefMember()
+            else -> throw ParserException("Expected variable reference", token)
+        }
+        var curr: AstNode = variable
+        while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
+            val marker = tokens.next()
+            val member = parseIdentifier()
+            curr = NodeMemberField(curr, NodeToken(marker), member)
+        }
+        return curr
+    }
+
     private fun parseVariableValue(): AstNode {
         val token = tokens.peek()
 
@@ -127,8 +134,7 @@ class Parser(tokens: Iterator<Token>) {
                 }
             }
 
-            Token.Type.VARIABLE -> parseVariable()
-            Token.Type.REFERENCE -> parseRefMember()
+            Token.Type.VARIABLE, Token.Type.REFERENCE -> parseVariableReference()
             Token.Type.TRANSLATION_MARKER -> parseTranslation()
             Token.Type.START_PARENTHESIS -> {
                 val afterStart = tokens.peek(2)
@@ -382,7 +388,7 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseSpread(): NodeSpread {
         val spreadMarker = tokens.next()
         if (spreadMarker.type != Token.Type.SPREAD) throw ParserException("Expected spread marker", spreadMarker)
-        val variable = parseVariableOrRefMember()
+        val variable = parseVariableReference()
 
         val next = tokens.peek()
         val end = when (next.type) {
