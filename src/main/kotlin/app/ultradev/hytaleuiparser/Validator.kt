@@ -381,32 +381,12 @@ class Validator(
             }
 
             is NodeMemberField -> {
-                val stack = Stack<NodeMemberField>()
-                var curr: AstNode = reference
-                while (curr is NodeMemberField) {
-                    stack.push(curr)
-                    curr = curr.owner
-                }
-
-                val ownerValue = if (curr is VariableReference) deepLookupReference(curr) else curr
-                if (ownerValue == null)
-                    return null
-
-                if (ownerValue !is NodeType) {
-                    validationError("Expected type, got ${ownerValue::class.simpleName}", ownerValue)
+                val parent = deepLookupReference(reference.ownerAsVariableReference) ?: return null
+                if (parent !is NodeType) {
+                    validationError("Tried to look up field on non-type", parent)
                     return null
                 }
-
-                var currentType: AstNode = ownerValue
-                while (stack.isNotEmpty()) {
-                    if (currentType !is NodeType) {
-                        validationError("Tried to look up field on non-type", currentType)
-                        return null
-                    }
-                    val fieldName = stack.pop().member.identifier
-                    currentType = lookupTypeField(currentType, fieldName) ?: return null
-                }
-                currentType
+                lookupTypeField(parent, reference.member.identifier) ?: return null
             }
         }
         if (result is VariableReference) return deepLookupReference(result)

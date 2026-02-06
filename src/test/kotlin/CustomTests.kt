@@ -7,7 +7,11 @@ class CustomTests {
     private fun validateInternalFile(name: String) {
         val file = javaClass.getResourceAsStream("/$name.ui")!!.reader()
         val rootNode = Parser(Tokenizer(file)).finish()
-        Validator(mapOf("$name.ui" to rootNode)).validate()
+        val validator = Validator(mapOf("$name.ui" to rootNode), validateUnusedVariables = true)
+        validator.validate()
+
+        validator.validationErrors.forEach { println(it) }
+        assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
     }
 
     @Test

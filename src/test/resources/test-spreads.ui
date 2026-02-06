@@ -1,4 +1,6 @@
-@TestObject = DropdownBoxStyle(EntrySounds: ());
+@Sounds = (Activate: ());
+@TestObject = DropdownBoxStyle(Sounds: @Sounds);
 
 @TestVariable = (...@TestObject);
-@TestMember = (...@TestVariable.EntrySounds);
+@TestMember = (...@TestVariable.Sounds);
+@TestDeepMember = (...@TestVariable.Sounds.Activate);
