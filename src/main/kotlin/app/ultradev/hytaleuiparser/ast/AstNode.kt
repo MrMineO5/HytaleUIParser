@@ -10,7 +10,10 @@ sealed class AstNode {
         get() = children.flatMap { it.tokens }
 
     val text: String get() = tokens.joinToString("") { it.text }
-    open val textRange: Pair<Int, Int> get() = children.first().textRange.first to children.last().textRange.second
+
+    open val startOffset: Int get() = children.first().startOffset
+    open val endOffset: Int get() = children.last().endOffset
+    val textRange: Pair<Int, Int> get() = startOffset to endOffset
 
     lateinit var parent: AstNode
     lateinit var file: RootNode

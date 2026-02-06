@@ -35,18 +35,29 @@ data class NodeType(
         resolvedTypes.clear()
     }
 
-    fun resolveValue(deep: Boolean = false): Map<String, VariableValue> {
+    fun resolveValue(): Map<String, VariableValue> {
         val output = mutableMapOf<String, VariableValue>()
         spreads.forEach {
             val res = it.variableAsReference.resolvedValue ?: return@forEach
             if (res !is NodeType) error("Spread resolved to non-type: $res")
-            output.putAll(res.resolveValue(deep))
+            output.putAll(res.resolveValue())
         }
         fields.forEach {
             var value = it.valueAsVariableValue
-            if (value is VariableReference && deep) value = value.deepResolve() ?: return@forEach
+            if (value is VariableReference) value = value.deepResolve() ?: return@forEach
             output[it.identifier.identifier] = value
         }
+        return output
+    }
+
+    fun resolveFields(): Map<String, NodeField> {
+        val output = mutableMapOf<String, NodeField>()
+        spreads.forEach { spread ->
+            val res = spread.variableAsReference.resolvedValue ?: return@forEach
+            if (res !is NodeType) error("Spread resolved to non-type: $res")
+            output.putAll(res.resolveFields())
+        }
+        fields.forEach { output[it.identifier.identifier] = it }
         return output
     }
 

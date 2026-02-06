@@ -483,12 +483,12 @@ class Validator(
             return validateType(node, referredType, node)
         }
 
-        val allFields = node.resolveValue()
+        val fieldNames = node.fields.map { it.identifier.identifier }
         val matchingTypes = TypeType.entries.filter { type ->
-            type.isStruct && allFields.keys.all { it in type.allowedFields }
+            type.isStruct && fieldNames.all { it in type.allowedFields }
         }
         if (matchingTypes.isEmpty()) {
-            return validationError("No type matches all fields", node)
+            return validationError("No type can contain all present fields", node)
         }
 
         if (matchingTypes.size == 1) {
@@ -497,12 +497,27 @@ class Validator(
         }
 
         val types = matchingTypes.toMutableSet()
-        for ((key, value) in allFields) {
+        for (field in node.fields) {
+            val value = field.valueAsVariableValue
             validateUnknownProperty(value)
             types.removeIf {
-                it.allowedFields[key] !in value.resolvedTypes!!
+                it.allowedFields[field.identifier.identifier] !in value.resolvedTypes!!
             }
         }
+        for (spread in node.spreads) {
+            val resolved = deepLookupReference(spread.variableAsReference)
+            if (resolved == null) {
+                validationError("Could not resolve spread variable", spread.variable)
+                continue
+            }
+            if (resolved !is NodeType) {
+                validationError("Expected reference to type, got ${resolved::class.simpleName}", spread)
+                continue
+            }
+            validateUnknownType(resolved)
+            types.removeIf { it !in resolved.resolvedTypes }
+        }
+
         node.resolvedTypes.addAll(types)
     }
 
