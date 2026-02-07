@@ -1,30 +1,21 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 import app.ultradev.hytaleuiparser.validation.types.unifyStruct
 
-data class NodeField(
-    val identifier: NodeIdentifier,
-    val fieldMarker: NodeToken,
-    val value: AstNode,
-    val endStatement: NodeToken? = null
-) : AstNode() {
+class NodeField(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid) {
+    val identifier by child<NodeIdentifier>(0)
+    val fieldMarker by child<NodeToken>(1)
+    val value by child<AstNode>(2)
+    val endStatement by optionalChild<NodeToken>(3)
+
     override fun validate(validationError: (String, AstNode) -> Unit) {
         if (value !is VariableValue) validationError("Expected variable value after assignment operator", value)
         if (parent !is NodeBody) validationError("Field must be contained in a NodeBody", this)
-    }
-
-    override val children: List<AstNode>
-        get() = listOf(identifier, fieldMarker, value) + listOfNotNull(endStatement)
-
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        value.setScope(scope)
-
-        identifier.setScope(scope)
-        fieldMarker.setScope(scope)
-        endStatement?.setScope(scope)
     }
 
     val valueAsVariableValue: VariableValue = value as VariableValue
@@ -45,5 +36,5 @@ data class NodeField(
 
     override fun computePath(): String = super.computePath() + "." + identifier.identifier
 
-    override fun clone() = NodeField(identifier.clone(), fieldMarker.clone(), value.clone(), endStatement?.clone())
+    override fun clone() = NodeField(children.clone(), valid)
 }

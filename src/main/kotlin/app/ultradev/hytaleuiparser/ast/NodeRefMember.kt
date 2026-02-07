@@ -1,23 +1,22 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.Scope
 
-data class NodeRefMember(
-    val reference: NodeReference,
-    val memberMarker: NodeToken,
-    val member: NodeVariable
-) : AstNode(), VariableReference {
-    override val children: List<AstNode>
-        get() = listOf(reference, memberMarker, member)
+class NodeRefMember(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid), VariableReference {
+    val reference by child<NodeReference>(0)
+    val memberMarker by child<NodeToken>(1)
+    val member by child<NodeVariable>(2)
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
+    override fun propagateScope(scope: Scope) {
         reference.setScope(scope)
-
         memberMarker.setScope(scope)
     }
 
     override val resolvedValue get() = member.resolvedValue
 
-    override fun clone() = NodeRefMember(reference.clone(), memberMarker.clone(), member.clone())
+    override fun clone() = NodeRefMember(children.clone(), valid)
 }

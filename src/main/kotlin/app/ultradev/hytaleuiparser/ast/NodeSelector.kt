@@ -1,19 +1,14 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeSelector(
-    val selector: NodeToken
-) : AstNode() {
-    override val children: List<AstNode>
-        get() = listOf(selector)
+class NodeSelector(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid) {
+    val selector by child<NodeToken>(0)
 
     val identifier get() = selector.text
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        selector.setScope(scope)
-    }
-
-    override fun clone() = NodeSelector(selector.clone())
+    override fun clone() = NodeSelector(children.clone(), valid)
 }

@@ -104,9 +104,9 @@ class Validator(
 
 
     fun validateVariableElement(node: NodeElement) {
-        node.type as VariableReference
+        val typeNode = node.type as VariableReference
 
-        val variable = deepLookupReference(node.type) ?: return
+        val variable = deepLookupReference(typeNode) ?: return
 
         if (variable is VariableReference) {
             // TODO: We may want to reimplement "missing" variable scopes to allow for better completion?
@@ -147,8 +147,14 @@ class Validator(
                     return@forEach validationError("Duplicate selector ${sel.selector.identifier} in definition", sel)
 
                 val definitionSel =
-                    variableCopy.childElements.firstOrNull { it.selector?.identifier == sel.selector.identifier }
-                        ?: return@forEach validationError("Selector element ${sel.selector.identifier} not found in ${node.type.text}", sel)
+                    variableCopy.childElements
+                        .asSequence()
+                        .filterIsInstance<NodeElementWithSelector>()
+                        .firstOrNull { it.selector.identifier == sel.selector.identifier }
+                        ?: return@forEach validationError(
+                            "Selector element ${sel.selector.identifier} not found in ${node.type.text}",
+                            sel
+                        )
 
                 val selInternalVariables = (definitionSel.localVariables + sel.localVariables)
                     .associateBy { it.variable.identifier }
@@ -309,7 +315,7 @@ class Validator(
     }
 
     fun validateType(node: NodeType, type: TypeType, usagePoint: AstNode) {
-        if (node.type != null) {
+        if (node is NodeIdentifiedType) {
             val referredType = try {
                 TypeType.valueOf(node.type.identifier)
             } catch (_: IllegalArgumentException) {
@@ -444,7 +450,7 @@ class Validator(
 
     fun validateAssignVariable(node: NodeAssignVariable) {
         if (node.value is NodeElement) { // TODO: Should we have a separate PropertyValue since elements are the only thing that doesn't have a type
-            validateElement(node.value, isInVariable = true)
+            validateElement(node.value as NodeElement, isInVariable = true)
         } else {
             validateUnknownProperty(node.valueAsVariable)
         }
@@ -479,7 +485,7 @@ class Validator(
     }
 
     fun validateUnknownType(node: NodeType) {
-        if (node.type != null) {
+        if (node is NodeIdentifiedType) {
             val referredType = try {
                 TypeType.valueOf(node.type.identifier)
             } catch (_: IllegalArgumentException) {

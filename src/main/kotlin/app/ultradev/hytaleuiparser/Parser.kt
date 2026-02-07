@@ -7,7 +7,11 @@ class Parser(tokens: Iterator<Token>) {
     val tokens = TokenIterator(tokens, skipComments = true)
     val nodes = mutableListOf<AstNode>()
 
-    var previous: AstNode? = null
+    val parserErrors = mutableListOf<ParserError>()
+
+    fun parserError(message: String, token: Token) {
+        parserErrors.add(ParserError(message, token))
+    }
 
     fun finish(): RootNode {
         parseCompletely()
@@ -37,13 +41,13 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseVariable(): NodeVariable {
         val reference = tokens.next()
         if (reference.type != Token.Type.VARIABLE) throw ParserException("Expected variable marker", reference)
-        return NodeVariable(NodeToken(reference))
+        return NodeVariable(listOf(NodeToken(reference)))
     }
 
     private fun parseIdentifier(): NodeIdentifier {
         val token = tokens.next()
         if (token.type != Token.Type.IDENTIFIER) throw ParserException("Expected identifier", token)
-        return NodeIdentifier(NodeToken(token))
+        return NodeIdentifier(listOf(NodeToken(token)))
     }
 
     private fun parseVariableAssignment(): NodeAssignVariable {
@@ -55,13 +59,13 @@ class Parser(tokens: Iterator<Token>) {
             "Expected variable value after assignment operator", assignment
         ) // TODO: AstNode should always have a token?
         val end = parseEndStatement()
-        return NodeAssignVariable(variable, NodeToken(assignment), value, end)
+        return NodeAssignVariable(listOfNotNull(variable, NodeToken(assignment), value, end))
     }
 
     private fun parseReference(): NodeReference {
         val reference = tokens.next()
         if (reference.type != Token.Type.REFERENCE) throw ParserException("Expected reference marker", reference)
-        return NodeReference(NodeToken(reference))
+        return NodeReference(listOf(NodeToken(reference)))
     }
 
     private fun parseReferenceAssignment(): NodeAssignReference {
@@ -70,12 +74,15 @@ class Parser(tokens: Iterator<Token>) {
         if (assignment.type != Token.Type.ASSIGNMENT) throw ParserException("Expected assignment operator", assignment)
         val filePath = parseQuotedStringConstant()
         val endStatement = parseEndStatement()
-        return NodeAssignReference(reference, NodeToken(assignment), filePath, endStatement)
+        return NodeAssignReference(listOfNotNull(reference, NodeToken(assignment), filePath, endStatement))
     }
 
-    private fun parseEndStatement(): NodeToken {
+    private fun parseEndStatement(): NodeToken? {
+        if (tokens.peek().type != Token.Type.END_STATEMENT) {
+            parserError("Expected end statement", tokens.peek())
+            return null
+        }
         val endStatement = tokens.next()
-        if (endStatement.type != Token.Type.END_STATEMENT) throw ParserException("Expected end statement", endStatement)
         return NodeToken(endStatement)
     }
 
@@ -87,7 +94,7 @@ class Parser(tokens: Iterator<Token>) {
         if (token.text.first() != '"' || token.text.last() != '"') throw ParserException(
             "Expected quoted string constant, found ${token.text}", token
         )
-        return NodeConstant(listOf(NodeToken(token)), token.text.substring(1, token.text.length - 1))
+        return NodeConstant(listOf(NodeToken(token)))
     }
 
     private fun parseUnquotedStringConstant(): NodeConstant {
@@ -95,7 +102,7 @@ class Parser(tokens: Iterator<Token>) {
         if (token.type != Token.Type.IDENTIFIER) throw ParserException(
             "Expected identifier constant", token
         )
-        return NodeConstant(listOf(NodeToken(token)), token.text)
+        return NodeConstant(listOf(NodeToken(token)))
     }
 
     private fun parseVariableReference(): AstNode {
@@ -109,7 +116,7 @@ class Parser(tokens: Iterator<Token>) {
         while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
             val marker = tokens.next()
             val member = parseIdentifier()
-            curr = NodeMemberField(curr, NodeToken(marker), member)
+            curr = NodeMemberField(listOf(curr, NodeToken(marker), member))
         }
         return curr
     }
@@ -119,7 +126,7 @@ class Parser(tokens: Iterator<Token>) {
 
         val variable = when (token.type) {
             Token.Type.STRING -> parseQuotedStringConstant()
-            Token.Type.NUMBER -> NodeConstant(tokens.next())
+            Token.Type.NUMBER -> NodeConstant(listOf(NodeToken(tokens.next())))
             Token.Type.SELECTOR -> parseColor()
             Token.Type.IDENTIFIER -> {
                 val next = tokens.peek(2)
@@ -146,11 +153,12 @@ class Parser(tokens: Iterator<Token>) {
                 }
                 if (isType) parseType() else parseMathParenthesis()
             }
+
             Token.Type.START_ARRAY -> parseArray()
             Token.Type.MATH_SUBTRACT -> {
                 val minus = tokens.next()
                 val value = parseVariableValue()
-                NodeNegate(NodeToken(minus), value)
+                NodeNegate(listOf(NodeToken(minus), value))
             }
 
             else -> throw ParserException("Expected a variable value", token)
@@ -164,11 +172,13 @@ class Parser(tokens: Iterator<Token>) {
                 val right = parseVariableValue()
                 if (right is NodeMathOperation) {
                     NodeMathOperation(
-                        NodeMathOperation(variable, NodeToken(mathOperator), right.param1),
-                        right.operator, right.param2
+                        listOf(
+                            NodeMathOperation(listOf(variable, NodeToken(mathOperator), right.param1)),
+                            right.operator, right.param2
+                        )
                     )
                 } else {
-                    NodeMathOperation(variable, NodeToken(mathOperator), right)
+                    NodeMathOperation(listOf(variable, NodeToken(mathOperator), right))
                 }
             }
 
@@ -177,7 +187,7 @@ class Parser(tokens: Iterator<Token>) {
                 while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
                     val memberMarker = tokens.next()
                     val member = parseIdentifier()
-                    current = NodeMemberField(current, NodeToken(memberMarker), member)
+                    current = NodeMemberField(listOf(current, NodeToken(memberMarker), member))
                 }
                 current
             }
@@ -190,24 +200,28 @@ class Parser(tokens: Iterator<Token>) {
         val start = tokens.next()
         if (start.type != Token.Type.START_ARRAY) throw ParserException("Expected start array", start)
 
-        val elements = mutableListOf<AstNode>()
+        val children = mutableListOf<AstNode>(NodeToken(start))
         while (tokens.hasNext()) {
             val next = tokens.peek()
             if (next.type == Token.Type.END_ARRAY) {
-                return NodeArray(NodeToken(start), elements, NodeToken(tokens.next()))
+                children.add(NodeToken(tokens.next()))
+                return NodeArray(children)
             }
 
             val value = parseVariableValue()
-            elements.add(value)
+            children.add(value)
 
             val afterValue = tokens.peek()
             when (afterValue.type) {
                 Token.Type.FIELD_DELIMITER -> {
                     val delimiter = tokens.next()
-                    elements.add(NodeToken(delimiter))
+                    children.add(NodeToken(delimiter))
                 }
 
-                Token.Type.END_ARRAY -> return NodeArray(NodeToken(start), elements, NodeToken(tokens.next()))
+                Token.Type.END_ARRAY -> {
+                    children.add(NodeToken(tokens.next()))
+                    return NodeArray(children)
+                }
 
                 else -> throw ParserException("Expected array element delimiter or end array", afterValue)
             }
@@ -237,7 +251,7 @@ class Parser(tokens: Iterator<Token>) {
 
         if (start.type != Token.Type.START_PARENTHESIS) throw ParserException("Expected start type", start)
 
-        val children = mutableListOf<AstNode>()
+        val children = mutableListOf<AstNode>(NodeToken(start))
         while (tokens.hasNext()) {
             val next = tokens.peek()
 
@@ -245,10 +259,16 @@ class Parser(tokens: Iterator<Token>) {
                 Token.Type.IDENTIFIER -> children.add(parseField())
                 Token.Type.SPREAD -> children.add(parseSpread())
                 Token.Type.REFERENCE -> children.add(parseRefMember())
-                
-                Token.Type.END_PARENTHESIS -> return NodeType(
-                    type, NodeBody(NodeToken(start), children, NodeToken(tokens.next()))
-                )
+
+                Token.Type.END_PARENTHESIS -> {
+                    children.add(NodeToken(tokens.next()))
+                    val body = NodeBody(children)
+                    return if (type != null) {
+                        NodeIdentifiedType(listOf(type, body))
+                    } else {
+                        NodeType(listOf(body))
+                    }
+                }
 
                 else -> throw ParserException("Expected spread, field, or end type", next)
             }
@@ -274,26 +294,33 @@ class Parser(tokens: Iterator<Token>) {
         }
 
         val body = parseElementBody()
-        return NodeElement(identifier, body, selector)
+        return if (selector == null) {
+            NodeElementNormal(listOf(identifier, body))
+        } else {
+            NodeElementWithSelector(listOf(identifier, selector, body))
+        }
     }
 
     private fun parseSelectorElement(): NodeSelectorElement {
         val selector = parseSelector()
         val body = parseElementBody()
-        return NodeSelectorElement(selector, body)
+        return NodeSelectorElement(listOf(selector, body))
     }
 
     private fun parseElementBody(): NodeBody {
         val start = tokens.next()
         if (start.type != Token.Type.START_ELEMENT) throw ParserException("Expected start element", start)
 
-        val children = mutableListOf<AstNode>()
+        val children = mutableListOf<AstNode>(NodeToken(start))
 
         while (tokens.hasNext()) {
             val next = tokens.peek()
 
             when (next.type) {
-                Token.Type.END_ELEMENT -> return NodeBody(NodeToken(start), children, NodeToken(tokens.next()))
+                Token.Type.END_ELEMENT -> {
+                    children.add(NodeToken(tokens.next()))
+                    return NodeBody(children)
+                }
 
                 Token.Type.VARIABLE -> children.add(parseVariableAssignmentOrElement())
                 Token.Type.REFERENCE -> children.add(parseRefAssignmentOrElement())
@@ -332,13 +359,13 @@ class Parser(tokens: Iterator<Token>) {
             else -> throw ParserException("Expected field delimiter, end statement, or end type after field", next)
         }
 
-        return NodeField(identifier, NodeToken(fieldMarker), value, end)
+        return NodeField(listOfNotNull(identifier, NodeToken(fieldMarker), value, end))
     }
 
     private fun parseSelector(): NodeSelector {
         val selector = tokens.next()
         if (selector.type != Token.Type.SELECTOR) throw ParserException("Expected selector marker", selector)
-        return NodeSelector(NodeToken(selector))
+        return NodeSelector(listOf(NodeToken(selector)))
     }
 
     private fun parseColor(): NodeColor {
@@ -351,7 +378,14 @@ class Parser(tokens: Iterator<Token>) {
             opacity = parseOpacity()
         }
 
-        return NodeColor(NodeConstant(color), opacity)
+        return NodeColor(
+            listOfNotNull(
+                NodeConstant(
+                    listOf(NodeToken(color))
+                ),
+                opacity
+            )
+        )
     }
 
     private fun parseOpacity(): NodeOpacity {
@@ -363,7 +397,7 @@ class Parser(tokens: Iterator<Token>) {
 
         val end = tokens.next()
         if (end.type != Token.Type.END_PARENTHESIS) throw ParserException("Expected end type marker", end)
-        return NodeOpacity(NodeToken(start), NodeToken(end), NodeConstant(value))
+        return NodeOpacity(listOf(NodeToken(start), NodeConstant(listOf(NodeToken(value))), NodeToken(end)))
     }
 
     private fun parseRefMember(): NodeRefMember {
@@ -371,7 +405,7 @@ class Parser(tokens: Iterator<Token>) {
         val memberMarker = tokens.next()
         if (memberMarker.type != Token.Type.MEMBER_MARKER) throw ParserException("Expected member marker", memberMarker)
         val member = parseVariable()
-        return NodeRefMember(reference, NodeToken(memberMarker), member)
+        return NodeRefMember(listOf(reference, NodeToken(memberMarker), member))
     }
 
     private fun parseRefAssignmentOrElement(): AstNode {
@@ -397,7 +431,7 @@ class Parser(tokens: Iterator<Token>) {
 
             else -> throw ParserException("Expected field delimiter or end type after spread", next)
         }
-        return NodeSpread(NodeToken(spreadMarker), variable, end)
+        return NodeSpread(listOfNotNull(NodeToken(spreadMarker), variable, end))
     }
 
     private fun parseTranslation(): NodeTranslation {
@@ -413,8 +447,10 @@ class Parser(tokens: Iterator<Token>) {
         }
 
         return NodeTranslation(
-            NodeToken(translationMarker),
-            NodeConstant(parts.map { NodeToken(it) }, parts.joinToString("") { it.text })
+            listOf(
+                NodeToken(translationMarker),
+                NodeConstant(parts.map { NodeToken(it) })
+            )
         )
     }
 

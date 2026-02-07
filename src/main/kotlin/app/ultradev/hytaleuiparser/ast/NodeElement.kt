@@ -1,26 +1,28 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.ValidatorError
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
-data class NodeElement(
-    val type: AstNode,
-    val body: NodeBody,
-    val selector: NodeSelector? = null
-) : AstNode(), VariableValue {
-    override val children: List<AstNode>
-        get() = listOf(type) + listOfNotNull(selector) + listOf(body)
+// TODO: We could make NodeElementNormal an open class instead of having an abstract one, and override the index for the body
+abstract class NodeElement(
+    children: List<AstNode>,
+    valid: Boolean,
+) : AstNode(children, valid), VariableValue {
+    abstract val type: AstNode
+    abstract val body: NodeBody
 
-    protected override fun validate(validationError: (String, AstNode) -> Unit) {
+    override fun validate(validationError: (String, AstNode) -> Unit) {
         body.elements.zipWithNext().forEach { (prev, curr) ->
             if (curr is NodeAssignVariable) {
                 if (prev !is NodeAssignVariable) validationError("Variables must come first", curr)
                 return@forEach
             }
             if (curr is NodeField) {
-                if (prev is NodeElement || prev is NodeSelectorElement) validationError("Fields must come before elements", curr)
+                if (prev is NodeElement || prev is NodeSelectorElement) validationError(
+                    "Fields must come before elements",
+                    curr
+                )
                 return@forEach
             }
             if (curr is NodeElement || curr is NodeSelectorElement) return@forEach
@@ -42,13 +44,11 @@ data class NodeElement(
     override val resolvedTypes: Set<TypeType>
         get() = error("Elements can be variable values, but do not allow resolution as a TypeType, use resolvedType instead")
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
+    override fun propagateScope(scope: Scope) {
         type.setScope(scope)
-        selector?.setScope(scope)
     }
 
     override fun computePath(): String = super.computePath() + "/${type.text}"
 
-    override fun clone() = NodeElement(type.clone(), body.clone(), selector?.clone())
+    abstract override fun clone(): NodeElement
 }

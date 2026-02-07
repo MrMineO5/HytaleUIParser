@@ -1,38 +1,23 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.token.GeneratedTokens
-import app.ultradev.hytaleuiparser.validation.Scope
-import app.ultradev.hytaleuiparser.validation.types.TypeType
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeAssignVariable(
-    val variable: NodeVariable,
-    val assignment: NodeToken,
-    val value: AstNode,
-    val endStatement: NodeToken
-) : AstNode() {
-    init {
-        if (value !is VariableValue) {
-            error("Expected variable value after assignment operator: $value")
-        }
-    }
+class NodeAssignVariable(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid) {
+    val variable by child<NodeVariable>(0)
+    val assignment by child<NodeToken>(1)
+    val value by child<AstNode>(2)
+    val endStatement by child<NodeToken>(3)
 
     val valueAsVariable: VariableValue = value as VariableValue
 
-    override val children: List<AstNode>
-        get() = listOf(variable, assignment, value, endStatement)
-
-    constructor(variable: NodeVariable, value: AstNode) : this(variable, GeneratedTokens.assignment(), value, GeneratedTokens.endStatement())
-
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        variable.setScope(scope)
-        value.setScope(scope)
-
-        assignment.setScope(scope)
-        endStatement.setScope(scope)
+    override fun validate(validationError: (String, AstNode) -> Unit) {
+        if (value !is VariableValue) validationError("Expected variable value after assignment operator", value)
     }
 
     override fun computePath(): String = super.computePath() + ":${variable.identifier}"
 
-    override fun clone() = NodeAssignVariable(variable.clone(), assignment.clone(), value.clone(), endStatement.clone())
+    override fun clone() = NodeAssignVariable(children.clone(), valid)
 }
