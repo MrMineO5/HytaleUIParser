@@ -1,19 +1,14 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeBody(
-    val startToken: NodeToken,
-    val elements: List<AstNode>,
-    val endToken: NodeToken,
-) : AstNode() {
-    override val children: List<AstNode>
-        get() = listOf(startToken) + elements + listOf(endToken)
+class NodeBody(
+    children: List<AstNode>,
+    valid: Boolean = true,
+) : AstNode(children, valid) {
+    val startToken by child<NodeToken>(0)
+    val elements by children<AstNode>(1, -2)
+    val endToken by child<NodeToken>(-1)
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        children.forEach { it.setScope(scope) }
-    }
-
-    override fun clone() = NodeBody(startToken.clone(), elements.map { it.clone() }, endToken.clone())
+    override fun clone() = NodeBody(children.clone(), valid)
 }

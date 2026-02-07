@@ -1,24 +1,15 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.token.Token
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.Scope
 
-data class NodeIdentifier(
-    val token: NodeToken
-) : AstNode() {
-    override val children: List<AstNode>
-        get() = listOf(token)
+class NodeIdentifier(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid) {
+    val token by child<NodeToken>(0)
 
     val identifier get() = token.text
 
-    constructor(identifier: String) : this(
-        NodeToken(Token(Token.Type.IDENTIFIER, identifier)),
-    )
-
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        token.setScope(scope)
-    }
-
-    override fun clone() = NodeIdentifier(token.clone())
+    override fun clone() = NodeIdentifier(children.clone(), valid)
 }

@@ -1,10 +1,11 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.Scope
 
-data class RootNode(
-    override val children: List<AstNode>
-) : AstNode() {
+class RootNode(
+    children: List<AstNode>
+) : AstNode(children, true) {
     override fun validate(validationError: (String, AstNode) -> Unit) {
         children.forEach {
             if (it is NodeAssignReference || it is NodeAssignVariable || it is NodeElement) return@forEach
@@ -22,12 +23,7 @@ data class RootNode(
 
     lateinit var path: String
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        children.forEach { it.setScope(scope) }
-    }
-
     override fun computePath(): String = path
 
-    override fun clone() = RootNode(children.map { it.clone() })
+    override fun clone() = RootNode(children.clone())
 }

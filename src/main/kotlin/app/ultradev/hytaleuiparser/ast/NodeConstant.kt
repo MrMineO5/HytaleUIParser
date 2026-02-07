@@ -1,29 +1,18 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.token.Token
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
-data class NodeConstant(
-    override val children: List<NodeToken>,
+class NodeConstant(
+    children: List<AstNode>,
+    valid: Boolean = true,
+) : AstNode(children, valid), VariableValue {
     val valueText: String
-) : AstNode(), VariableValue {
-    val isQuoted: Boolean get() = text != valueText
+        get() = text.let {
+            if (it.startsWith("\"")) it.substring(1, it.length - 1) else it
+        }
 
-    constructor(token: NodeToken, valueText: String) : this(
-        listOf(token),
-        valueText
-    )
-    constructor(token: Token) : this(NodeToken(token), token.text)
-
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        children.forEach { it.setScope(scope) }
-    }
-
-    companion object {
-        fun quoted(valueText: String) = NodeConstant(NodeToken(Token(Token.Type.STRING, "\"$valueText\"")), valueText)
-    }
+    val isQuoted: Boolean get() = text.startsWith("\"")
 
     fun getAllowedTypes(): Set<TypeType> {
         if (children.first().text.startsWith("\"")) return setOf(TypeType.String)
@@ -37,5 +26,5 @@ data class NodeConstant(
 
     override val resolvedTypes: Set<TypeType> get() = getAllowedTypes()
 
-    override fun clone() = NodeConstant(children.map { it.clone() }, valueText)
+    override fun clone() = NodeConstant(children.clone(), valid)
 }

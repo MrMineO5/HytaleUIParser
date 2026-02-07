@@ -1,23 +1,17 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
-data class NodeTranslation(
-    val translationMarker: NodeToken,
-    val value: NodeConstant
-) : AstNode(), VariableValue {
-    override val children: List<AstNode>
-        get() = listOf(translationMarker, value)
+class NodeTranslation(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid), VariableValue {
+    val translationMarker by child<NodeToken>(0)
+    val value by child<NodeConstant>(1)
 
     override val resolvedTypes: Set<TypeType>
         get() = setOf(TypeType.String)
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        translationMarker.setScope(scope)
-        value.setScope(scope)
-    }
-
-    override fun clone() = NodeTranslation(translationMarker.clone(), value.clone())
+    override fun clone() = NodeTranslation(children.clone(), valid)
 }

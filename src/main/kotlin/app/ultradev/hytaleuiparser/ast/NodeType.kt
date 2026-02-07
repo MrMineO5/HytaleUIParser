@@ -1,14 +1,14 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
-data class NodeType(
-    val type: NodeIdentifier?,
-    val body: NodeBody
-) : AstNode(), VariableValue {
-    override val children: List<AstNode>
-        get() = listOfNotNull(type) + listOf(body)
+open class NodeType(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid), VariableValue {
+    open val body by child<NodeBody>(0)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
         body.elements.forEach {
@@ -22,12 +22,6 @@ data class NodeType(
 
     val spreads: List<NodeSpread> get() = body.elements.filterIsInstance<NodeSpread>()
     val fields: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
-
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        body.setScope(scope)
-        type?.setScope(scope)
-    }
 
     override val resolvedTypes = mutableSetOf<TypeType>()
 
@@ -61,5 +55,5 @@ data class NodeType(
         return output
     }
 
-    override fun clone() = NodeType(type?.clone(), body.clone())
+    override fun clone() = NodeType(children.clone(), valid)
 }

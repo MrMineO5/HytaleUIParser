@@ -4,8 +4,7 @@ import app.ultradev.hytaleuiparser.token.Token
 
 data class NodeToken(
     val token: Token
-) : AstNode() {
-    override val children: List<AstNode> get() = emptyList()
+) : AstNode(emptyList(), true) {
     override val tokens: List<Token>
         get() = listOf(token)
     override val startOffset: Int

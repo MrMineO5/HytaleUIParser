@@ -1,13 +1,14 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.clone
 import app.ultradev.hytaleuiparser.validation.Scope
 
-data class NodeSelectorElement(
-    val selector: NodeSelector,
-    val body: NodeBody,
-) : AstNode() {
-    override val children: List<AstNode>
-        get() = listOf(selector, body)
+class NodeSelectorElement(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid) {
+    val selector by child<NodeSelector>(0)
+    val body by child<NodeBody>(1)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
         body.elements.forEach {
@@ -19,8 +20,7 @@ data class NodeSelectorElement(
         }
     }
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
+    override fun propagateScope(scope: Scope) {
         selector.setScope(scope)
     }
 
@@ -28,5 +28,5 @@ data class NodeSelectorElement(
     val properties: List<NodeField> = body.elements.filterIsInstance<NodeField>()
     val childElements: List<NodeElement> = body.elements.filterIsInstance<NodeElement>()
 
-    override fun clone() = NodeSelectorElement(selector.clone(), body.clone())
+    override fun clone() = NodeSelectorElement(children.clone(), valid)
 }

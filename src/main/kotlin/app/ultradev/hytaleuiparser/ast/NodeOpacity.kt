@@ -1,19 +1,14 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeOpacity(
-    val start: NodeToken,
-    val end: NodeToken,
-    val value: NodeConstant
-) : AstNode(), VariableValue {
-    override val children: List<AstNode>
-        get() = listOf(start, value, end)
+class NodeOpacity(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid), VariableValue {
+    val startMarker by child<NodeToken>(0)
+    val value by child<NodeConstant>(1)
+    val endMarker by child<NodeToken>(2)
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        children.forEach { it.setScope(scope) }
-    }
-
-    override fun clone() = NodeOpacity(start.clone(), end.clone(), value.clone())
+    override fun clone() = NodeOpacity(children.clone(), valid)
 }

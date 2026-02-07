@@ -1,20 +1,13 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeNegate(
-    val minus: NodeToken,
-    val param: AstNode
-) : AstNode(), VariableValue {
-    override val children: List<AstNode>
-        get() = listOf(minus, param)
+class NodeNegate(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid), VariableValue {
+    val minusMarker by child<NodeToken>(0)
+    val param by child<AstNode>(1)
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        param.setScope(scope)
-
-        minus.setScope(scope)
-    }
-
-    override fun clone() = NodeNegate(minus.clone(), param.clone())
+    override fun clone() = NodeNegate(children.clone(), valid)
 }

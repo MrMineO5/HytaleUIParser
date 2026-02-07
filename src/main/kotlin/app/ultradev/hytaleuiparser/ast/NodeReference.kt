@@ -1,12 +1,12 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeReference(
-    val reference: NodeToken
-) : AstNode() {
-    override val children: List<AstNode>
-        get() = listOf(reference)
+class NodeReference(
+    children: List<AstNode>,
+    valid: Boolean = true
+) : AstNode(children, valid) {
+    val reference by child<NodeToken>(0)
 
     val identifier get() = reference.text
 
@@ -14,12 +14,7 @@ data class NodeReference(
         if (identifier == "$") validationError("Reference name cannot be empty", this)
     }
 
-    override fun setScope(scope: Scope) {
-        super.setScope(scope)
-        reference.setScope(scope)
-    }
-
     val resolvedAssignment: NodeAssignReference? get() = file.referenceMap[identifier]
 
-    override fun clone() = NodeReference(reference.clone())
+    override fun clone() = NodeReference(children.clone(), valid)
 }

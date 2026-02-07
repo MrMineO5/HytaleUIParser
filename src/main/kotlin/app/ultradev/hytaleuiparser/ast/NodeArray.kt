@@ -1,19 +1,14 @@
 package app.ultradev.hytaleuiparser.ast
 
-import app.ultradev.hytaleuiparser.token.GeneratedTokens
+import app.ultradev.hytaleuiparser.clone
 
-data class NodeArray(
-    val startToken: NodeToken,
-    val elements: List<AstNode>,
-    val endToken: NodeToken
-) : AstNode(), VariableValue {
-    override val children: List<AstNode>
-        get() = listOf(startToken) + elements + listOf(endToken)
+class NodeArray(
+    children: List<AstNode>,
+    valid: Boolean = true,
+) : AstNode(children, valid), VariableValue {
+    val startToken by child<NodeToken>(0)
+    val entries by children({ it is VariableValue }, 1, -2)
+    val endToken by child<NodeToken>(-1)
 
-    constructor(elements: List<AstNode>) : this(GeneratedTokens.arrayStart(), elements, GeneratedTokens.arrayEnd())
-
-    // Skip delimiters
-    val entries: List<AstNode> get() = elements.filter { it !is NodeToken }
-
-    override fun clone() = NodeArray(startToken.clone(), elements.map { it.clone() }, endToken.clone())
+    override fun clone() = NodeArray(children.clone(), valid)
 }
