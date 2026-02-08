@@ -18,6 +18,7 @@ enum class TypeType(
             "MinPitch" to Float,
             "MaxPitch" to Float,
             "Volume" to Float,
+            "StopExistingPlayback" to Boolean,
         )
     ),
     SoundsStyle(
@@ -89,34 +90,41 @@ enum class TypeType(
             "Top", "Bottom", "Left", "Right", "TopLeft"
         )
     ),
-
-    Direction(
+    DropdownBoxAlign(
+        setOf(
+            // BenchInfoPane.ui - use of "TopLeft"
+            "Top", "Bottom", "Left", "Right"
+        )
+    ),
+    LabelAlignment(
         setOf(
             "Center", "Start", "End"
         )
     ),
     ProgressBarDirection(
-      Direction.allowedFields  
+      LabelAlignment.allowedFields  
     ),
     ItemGridInfoDisplayMode(
         setOf(
-            // TODO: Confirm how this works, if it is just a list of valid states...
-            "None"
+            "None",
+            "Tooltip",
+            "Adjacent"
         )
     ),
     LabelStyle(
         // TODO: move this to styles? Inherit from styles?
         mapOf(
-            "FontSize" to Int32,
-            "FontName" to String, // "Primary", "Secondary"
+            "FontSize" to Float,
+            "FontName" to String, // "", "Secondary"
             "LetterSpacing" to Float,
             "TextColor" to Color,
             "RenderBold" to Boolean,
             "RenderUppercase" to Boolean,
+            "RenderUnderlined" to Boolean,
             "RenderItalics" to Boolean,
-            "Alignment" to Direction,
-            "HorizontalAlignment" to Direction,
-            "VerticalAlignment" to Direction,
+            "Alignment" to LabelAlignment,
+            "HorizontalAlignment" to LabelAlignment,
+            "VerticalAlignment" to LabelAlignment,
             "OutlineColor" to Color,
             "Wrap" to Boolean,
         )
@@ -129,6 +137,7 @@ enum class TypeType(
             "Border" to Int32,
             "Color" to Color,
             "Anchor" to Anchor,
+            "Area" to Padding,
         )
     ),
 
@@ -151,6 +160,7 @@ enum class TypeType(
             "PressedBackground" to PatchStyle,
             "DisabledBackground" to PatchStyle,
             "ChangedSound" to SoundStyle,
+            "HoveredSound" to SoundStyle,
         )
     ),
     CheckBoxStyle(
@@ -173,9 +183,24 @@ enum class TypeType(
         mapOf(
             "Background" to PatchStyle,
             "LabelStyle" to LabelStyle,
+            "LabelMaskTexturePath" to String,
         )
     ),
     ButtonStyle(
+        mapOf(
+            "Default" to ButtonStyleState,
+            "Hovered" to ButtonStyleState,
+            "Pressed" to ButtonStyleState,
+            "Disabled" to ButtonStyleState,
+            "Sounds" to ButtonSounds,
+        )
+    ),
+    ToggleButtonStyleState(
+        mapOf(
+            "Background" to PatchStyle,
+        )
+    ),
+    ToggleButtonStyle(
         mapOf(
             "Default" to ButtonStyleState,
             "Hovered" to ButtonStyleState,
@@ -188,7 +213,8 @@ enum class TypeType(
         mapOf(
             "Background" to PatchStyle,
             "LabelStyle" to LabelStyle,
-            "BindingLabelStyle" to LabelStyle
+            "BindingLabelStyle" to LabelStyle,
+            "LabelMaskTexturePath" to String
         )
     ),
     SubMenuItemStyle(
@@ -216,6 +242,7 @@ enum class TypeType(
     SliderStyle(
         mapOf(
             "Background" to PatchStyle,
+            "Fill" to PatchStyle,
             "Handle" to String,
             "HandleWidth" to Int32,
             "HandleHeight" to Int32,
@@ -231,6 +258,7 @@ enum class TypeType(
             "RenderBold" to Boolean,
             "RenderItalics" to Boolean,
             "RenderUppercase" to Boolean,
+            "FontName" to Boolean,
         )
     ),
     TextTooltipStyle(
@@ -262,14 +290,22 @@ enum class TypeType(
     InputFieldButtonStyle(
         InputFieldIcon.allowedFields + mapOf(
             "HoveredTexture" to PatchStyle,
-            "PressedTexture" to PatchStyle
+            "PressedTexture" to PatchStyle,
+            "Texture" to PatchStyle,
+            "Width" to Int32,
+            "Height" to Int32,
+            "Offset" to Int32,
+            "Side" to InputFieldButtonSide,
         )
     ),
     InputFieldDecorationStyleState(
         mapOf(
             "Background" to PatchStyle,
             "Icon" to InputFieldIcon,
-            "ClearButtonStyle" to InputFieldButtonStyle
+            "ClearButtonStyle" to InputFieldButtonStyle,
+            "ToggleVisibilityButtonStyle" to InputFieldButtonStyle,
+            "OutlineSize" to Int32,
+            "OutlineColor" to Color,
         )
     ),
     InputFieldDecorationStyle(
@@ -281,16 +317,17 @@ enum class TypeType(
 
     ColorPickerStyle(
         mapOf(
-            "OpacitySelectorBackground" to String, // TODO: Are these PatchStyles?
+            "OpacitySelectorBackground" to PatchStyle,
             "ButtonBackground" to String,
             "ButtonFill" to String,
             "TextFieldDecoration" to InputFieldDecorationStyle,
+            "TextFieldInputStyle" to TypeType.InputFieldStyle,
             "TextFieldPadding" to Padding,
             "TextFieldHeight" to Int32,
         )
     ),
 
-    ColorFormat(setOf("Rgb", "Rgba")), // TODO: Find more formats?
+    ColorFormat(setOf("Rgb", "Rgba", "RgbShort")),
 
     ColorPickerDropdownBoxStateBackground(
         mapOf(
@@ -329,6 +366,8 @@ enum class TypeType(
             "Step" to Float,
             "MinValue" to Float,
             "MaxValue" to Float,
+            "DefaultValue" to Float,
+            "Suffix" to String,
         )
     ),
 
@@ -352,8 +391,6 @@ enum class TypeType(
             "CursedIconAnchor" to Anchor,
             "ItemStackHoveredSound" to SoundStyle,
             "ItemStackActivateSound" to SoundStyle,
-            // MouseHover sound?
-            // Close sound?
         )
     ),
 
@@ -399,17 +436,32 @@ enum class TypeType(
             "Close" to SoundStyle
         )
     ),
+    DropdownBoxSearchInputStyle(
+      mapOf(
+          "Background" to PatchStyle,
+          "Icon" to InputFieldIcon,
+          "Style" to InputFieldStyle,
+          "PlaceholderStyle" to TextTooltipStyle,
+          "Anchor" to Anchor,
+          "Padding" to Padding, 
+          "PlaceholderText" to String, 
+          "ClearButtonStyle" to InputFieldButtonStyle
+      )  
+    ),
     DropdownBoxStyle(
         mapOf(
             "DefaultBackground" to PatchStyle,
             "HoveredBackground" to PatchStyle,
             "PressedBackground" to PatchStyle,
+            "DisabledBackground" to PatchStyle,
             "DefaultArrowTexturePath" to String,
             "HoveredArrowTexturePath" to String,
             "PressedArrowTexturePath" to String,
+            "DisabledArrowTexturePath" to String,
             "ArrowWidth" to Int32,
             "ArrowHeight" to Int32,
             "LabelStyle" to LabelStyle,
+            "DisabledLabelStyle" to LabelStyle,
             "EntryLabelStyle" to LabelStyle,
             "NoItemsLabelStyle" to LabelStyle,
             "SelectedEntryLabelStyle" to LabelStyle,
@@ -418,7 +470,7 @@ enum class TypeType(
             "PanelBackground" to PatchStyle,
             "PanelPadding" to Int32,
             "PanelWidth" to Int32,
-            "PanelAlign" to Alignment,
+            "PanelAlign" to DropdownBoxAlign,
             "PanelOffset" to Int32,
             "EntryHeight" to Int32,
             "EntryIconWidth" to Int32,
@@ -433,20 +485,22 @@ enum class TypeType(
             "FocusOutlineColor" to Color,
             "PanelTitleLabelStyle" to LabelStyle,
             "SelectedEntryIconBackground" to PatchStyle,
+            "EntryIconBackground" to PatchStyle,
             "IconTexturePath" to String,
             "IconWidth" to Int32,
             "IconHeight" to Int32,
+            "SearchInputStyle" to DropdownBoxSearchInputStyle
         )
     ),
-
     PopupStyle(
         mapOf(
             "Background" to Color,
             "ButtonPadding" to Padding,
             "Padding" to Padding,
+            "Width" to Int32,
             "TooltipStyle" to TextTooltipStyle,
-            "ButtonStyle" to ButtonStyle,
-            "SelectedButtonStyle" to ButtonStyle,
+            "ButtonStyle" to SubMenuItemStyle,
+            "SelectedButtonStyle" to SubMenuItemStyle,
         )
     ),
     MenuItemStyle(
@@ -470,11 +524,14 @@ enum class TypeType(
             "DefaultBackground" to PatchStyle,
             "HoveredBackground" to PatchStyle,
             "PressedBackground" to PatchStyle,
+            "DisabledBackground" to PatchStyle,
             "Text" to String,
             "DefaultLabelStyle" to LabelStyle,
             "HoveredLabelStyle" to LabelStyle,
             "PressedLabelStyle" to LabelStyle,
+            "DisabledLabelStyle" to LabelStyle,
             "ChangedSound" to SoundStyle,
+            "HoveredSound" to SoundStyle,
         )
     ),
     LabeledCheckBoxStyle(
@@ -496,7 +553,7 @@ enum class TypeType(
             "ArrowHeight" to Int32,
             "LabelStyle" to LabelStyle,
             "HorizontalPadding" to Int32,
-            "PanelAlign" to Alignment,
+            "PanelAlign" to DropdownBoxAlign,
             "PanelOffset" to Int32,
             "Sounds" to DropdownBoxSounds,
         )
@@ -520,7 +577,29 @@ enum class TypeType(
             "ItemSounds" to SoundsStyle,
         )
     ),
-
+    MouseWheelScrollBehaviorType(
+        setOf("Default", "VerticalOnly", "HorizontalOnly")
+    ),
+    CodeEditorLanguage(
+        setOf("Text", "Json")
+    ),
+    ColorOptionGridStyle(
+        mapOf(
+            "OptionSize" to Int32,
+            "OptionSpacingHorizontal" to Int32,
+            "OptionSpacingVertical" to Int32,
+            "HighlightSize" to Int32,
+            "HighlightOffsetLeft" to Int32,
+            "HighlightOffsetTop" to Int32,
+            "HighlightBackground" to PatchStyle,
+            "MaskTexturePath" to String,
+            "FrameBackground" to PatchStyle,
+            "Sounds" to ButtonSounds,
+        )
+    ),
+    ResizeType(
+        setOf("None", "Start", "End")
+    )
     ;
 
     val isStruct: Boolean get() = !isPrimitive && !isEnum
