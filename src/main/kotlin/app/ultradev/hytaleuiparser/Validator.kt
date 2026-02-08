@@ -3,7 +3,6 @@ package app.ultradev.hytaleuiparser
 import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
-import app.ultradev.hytaleuiparser.validation.resolveNeighbour
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 class Validator(
@@ -17,11 +16,12 @@ class Validator(
         validationErrors.add(ValidatorError(message, astNode))
     }
 
-    private fun reemitErrors(message: String, newNode: AstNode, block: () -> Unit) {
+    private fun reemitExternalErrors(message: String, newNode: AstNode, block: () -> Unit) {
         val oldIndex = validationErrors.size
         block()
         val diff = validationErrors.subList(oldIndex, validationErrors.size)
         diff.forEach {
+            if (it.node.file.path == newNode.file.path) return@forEach
             validationErrors.add(ValidatorError(message, newNode, it))
         }
     }
@@ -171,7 +171,7 @@ class Validator(
                 definitionSel.childElements.forEach { validateElement(it) }
             }
 
-            reemitErrors("Could not validate variable element", node) {
+            reemitExternalErrors("Could not validate variable element", node) {
                 variableCopy.childElements.forEach { validateElement(it) }
             }
 
@@ -184,7 +184,7 @@ class Validator(
                 validateProperty(it.value!!, type.properties[it.identifier!!.identifier]!!)
             }
             val varSeenProperties = mutableSetOf<String>()
-            reemitErrors("Could not validate variable element", node) {
+            reemitExternalErrors("Could not validate variable element", node) {
                 variableCopy.properties.filter { it.identifier!!.identifier !in seenProperties }.forEach {
                     if (!varSeenProperties.add(it.identifier!!.identifier))
                         return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $type", it)
