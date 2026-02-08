@@ -1,9 +1,6 @@
 package app.ultradev.hytaleuiparser.validation
 
 import app.ultradev.hytaleuiparser.validation.types.TypeType
-import org.intellij.lang.annotations.Language
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 enum class ElementType {
     Group(

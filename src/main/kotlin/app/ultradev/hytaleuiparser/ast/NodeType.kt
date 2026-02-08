@@ -1,7 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.clone
-import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 open class NodeType(
@@ -11,7 +10,7 @@ open class NodeType(
     open val body by child<NodeBody>(0)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        body.elements.forEach {
+        body?.elements?.forEach {
             if (it is NodeField || it is NodeSpread) return@forEach
             validationError(
                 "Unexpected node in element body. Expected NodeField or NodeSpread.",
@@ -20,8 +19,8 @@ open class NodeType(
         }
     }
 
-    val spreads: List<NodeSpread> get() = body.elements.filterIsInstance<NodeSpread>()
-    val fields: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
+    val spreads: List<NodeSpread> get() = body?.elements?.filterIsInstance<NodeSpread>() ?: emptyList()
+    val fields: List<NodeField> get() = body?.elements?.filterIsInstance<NodeField>() ?: emptyList()
 
     override val resolvedTypes = mutableSetOf<TypeType>()
 
@@ -39,7 +38,7 @@ open class NodeType(
         fields.forEach {
             var value = it.valueAsVariableValue
             if (value is VariableReference) value = value.deepResolve() ?: return@forEach
-            output[it.identifier.identifier] = value
+            output[it.identifier!!.identifier!!] = value
         }
         return output
     }
@@ -51,7 +50,7 @@ open class NodeType(
             if (res !is NodeType) error("Spread resolved to non-type: $res")
             output.putAll(res.resolveFields())
         }
-        fields.forEach { output[it.identifier.identifier] = it }
+        fields.forEach { output[it.identifier!!.identifier!!] = it }
         return output
     }
 

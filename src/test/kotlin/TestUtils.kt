@@ -1,6 +1,5 @@
-import app.ultradev.hytaleuiparser.Validator
 import app.ultradev.hytaleuiparser.ast.AstNode
-import app.ultradev.hytaleuiparser.ast.RootNode
+import java.io.Reader
 import kotlin.reflect.KProperty
 
 object TestUtils {
@@ -25,4 +24,6 @@ object TestUtils {
             checkLateinitProps(root)
         }
     }
+
+    fun getInternalFile(path: String): Reader = javaClass.getResourceAsStream(path)!!.reader()
 }

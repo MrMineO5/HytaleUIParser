@@ -1,7 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.clone
-import app.ultradev.hytaleuiparser.validation.Scope
 
 class RootNode(
     children: List<AstNode>
@@ -18,7 +17,7 @@ class RootNode(
     val elements: List<NodeElement> get() = children.filterIsInstance<NodeElement>()
 
     val referenceMap: Map<String, NodeAssignReference> by lazy {
-        references.associateBy { it.variable.identifier }
+        references.associateBy { it.variable!!.identifier!! }
     }
 
     lateinit var path: String

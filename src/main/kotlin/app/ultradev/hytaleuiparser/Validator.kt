@@ -4,7 +4,6 @@ import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
-import java.util.*
 
 class Validator(
     val files: Map<String, RootNode>,
@@ -38,6 +37,9 @@ class Validator(
 
         val root = files[path] ?: return null
 
+        // Reset internal validation state
+        root.startValidation0()
+
         // Recursively run static validations on all children
         root.validate0(::validationError)
         // Initialize the file path
@@ -48,8 +50,9 @@ class Validator(
         // Ensure no duplicate references
         val seenReferences = mutableSetOf<String>()
         root.references.forEach {
-            if (!seenReferences.add(it.variable.identifier))
-                validationError("Duplicate reference: ${it.variable.identifier}", it)
+            if (it.variable == null) return@forEach
+            if (!seenReferences.add(it.variable!!.identifier))
+                validationError("Duplicate reference: ${it.variable!!.identifier}", it)
         }
 
         // Create root variable scope
@@ -76,7 +79,7 @@ class Validator(
     }
 
     private fun findElementType(node: NodeElement): ElementType? {
-        return when (val type = node.type) {
+        return when (val type = node.type!!) {
             is NodeIdentifier -> {
                 try {
                     ElementType.valueOf(type.identifier)
@@ -125,14 +128,14 @@ class Validator(
             variableCopy.applyParent(variable.parent)
 
             val internalVariables = (variableCopy.localVariables + node.localVariables)
-                .associateBy { it.variable.identifier }
+                .associateBy { it.variable!!.identifier }
                 .values
 
             val variableScope = node.resolvedScope!!.childScope(variable.resolvedScope!!)
                 .childScope(internalVariables, ::validationError)
 
-            variableCopy.body.setScope(variableScope)
-            node.body.setScope(variableScope)
+            variableCopy.body!!.setScope(variableScope)
+            node.body!!.setScope(variableScope)
 
             variableCopy.selectorElements.forEach {
                 validationError(
@@ -143,25 +146,25 @@ class Validator(
 
             val seenSelectors = mutableSetOf<String>()
             node.selectorElements.forEach { sel ->
-                if (!seenSelectors.add(sel.selector.identifier))
-                    return@forEach validationError("Duplicate selector ${sel.selector.identifier} in definition", sel)
+                if (!seenSelectors.add(sel.selector!!.identifier!!))
+                    return@forEach validationError("Duplicate selector ${sel.selector!!.identifier} in definition", sel)
 
                 val definitionSel =
                     variableCopy.childElements
                         .asSequence()
                         .filterIsInstance<NodeElementWithSelector>()
-                        .firstOrNull { it.selector.identifier == sel.selector.identifier }
+                        .firstOrNull { it.selector!!.identifier == sel.selector!!.identifier }
                         ?: return@forEach validationError(
-                            "Selector element ${sel.selector.identifier} not found in ${node.type.text}",
+                            "Selector element ${sel.selector!!.identifier} not found in ${node.type!!.text}",
                             sel
                         )
 
                 val selInternalVariables = (definitionSel.localVariables + sel.localVariables)
-                    .associateBy { it.variable.identifier }
+                    .associateBy { it.variable!!.identifier }
                     .values
                 val selScope = variableScope.childScope(selInternalVariables, ::validationError)
-                sel.body.setScope(selScope)
-                definitionSel.body.setScope(selScope)
+                sel.body!!.setScope(selScope)
+                definitionSel.body!!.setScope(selScope)
 
                 sel.childElements.forEach { validateElement(it) }
                 definitionSel.childElements.forEach { validateElement(it) }
@@ -175,18 +178,18 @@ class Validator(
 
             val seenProperties = mutableSetOf<String>()
             node.properties.forEach {
-                if (!seenProperties.add(it.identifier.identifier))
-                    return@forEach validationError("Duplicate property ${it.identifier.identifier} on $type", it)
-                validateProperty(it.value, type.properties[it.identifier.identifier]!!)
+                if (!seenProperties.add(it.identifier!!.identifier))
+                    return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $type", it)
+                validateProperty(it.value!!, type.properties[it.identifier!!.identifier]!!)
             }
             val varSeenProperties = mutableSetOf<String>()
             reemitErrors("Could not validate variable element", node) {
-                variableCopy.properties.filter { it.identifier.identifier !in seenProperties }.forEach {
-                    if (!varSeenProperties.add(it.identifier.identifier))
-                        return@forEach validationError("Duplicate property ${it.identifier.identifier} on $type", it)
+                variableCopy.properties.filter { it.identifier!!.identifier !in seenProperties }.forEach {
+                    if (!varSeenProperties.add(it.identifier!!.identifier))
+                        return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $type", it)
                     validateProperty(
-                        it.value,
-                        type.properties[it.identifier.identifier]!!
+                        it.value!!,
+                        type.properties[it.identifier!!.identifier]!!
                     )
                 }
             }
@@ -204,7 +207,7 @@ class Validator(
                 ::validationError,
                 allowMissingVariables = isInVariable
             )
-        node.body.setScope(childScope)
+        node.body!!.setScope(childScope)
 
         if (validateUnusedVariables) {
             node.localVariables.forEach { validateAssignVariable(it) }
@@ -229,11 +232,11 @@ class Validator(
 
         val seenProperties = mutableSetOf<String>()
         node.properties.forEach {
-            val typeType = elementType.properties[it.identifier.identifier]
-                ?: return@forEach validationError("Unknown property ${it.identifier.identifier} on $elementType", it)
-            if (!seenProperties.add(it.identifier.identifier))
-                return@forEach validationError("Duplicate property ${it.identifier.identifier} on $elementType", it)
-            validateProperty(it.value, typeType)
+            val typeType = elementType.properties[it.identifier!!.identifier]
+                ?: return@forEach validationError("Unknown property ${it.identifier!!.identifier} on $elementType", it)
+            if (!seenProperties.add(it.identifier!!.identifier))
+                return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $elementType", it)
+            validateProperty(it.value!!, typeType)
         }
     }
 
@@ -261,8 +264,8 @@ class Validator(
                 }
 
                 is NodeMathOperation -> {
-                    validateProperty(value.param1, type)
-                    validateProperty(value.param2, type)
+                    validateProperty(value.param1!!, type)
+                    validateProperty(value.param2!!, type)
 
                     // TODO: Validate the operation is allowed on operands
                 }
@@ -276,7 +279,7 @@ class Validator(
 
                 is NodeNegate -> {
                     if (!type.canNegate()) return validationError("Got negation for non-negatable type $type", node)
-                    validateProperty(value.param, type)
+                    validateProperty(value.param!!, type)
                 }
 
                 is NodeTranslation -> {
@@ -317,13 +320,13 @@ class Validator(
     fun validateType(node: NodeType, type: TypeType, usagePoint: AstNode) {
         if (node is NodeIdentifiedType) {
             val referredType = try {
-                TypeType.valueOf(node.type.identifier)
+                TypeType.valueOf(node.type!!.identifier)
             } catch (_: IllegalArgumentException) {
-                return validationError("Unknown type ${node.type.identifier}, expected $type", node.type)
+                return validationError("Unknown type ${node.type!!.identifier}, expected $type", node.type!!)
             }
 
             if (referredType != type)
-                return validationError("Expected type ${type.name}, got ${node.type.identifier}", usagePoint)
+                return validationError("Expected type ${type.name}, got ${node.type!!.identifier}", usagePoint)
         }
         node.resolvedTypes.add(type)
         node.spreads.forEach { spread ->
@@ -335,39 +338,39 @@ class Validator(
             validateType(value, type, usagePoint)
         }
         node.fields.forEach { field ->
-            val reqType = type.allowedFields[field.identifier.identifier]
+            val reqType = type.allowedFields[field.identifier!!.identifier]
                 ?: return@forEach validationError(
-                    "Unknown field ${field.identifier.identifier} on $type, allowed fields: ${
+                    "Unknown field ${field.identifier!!.identifier} on $type, allowed fields: ${
                         type.allowedFields.keys.joinToString(
                             ", "
                         )
                     }", field
                 )
-            validateProperty(field.value, reqType)
+            validateProperty(field.value!!, reqType)
         }
     }
 
     fun lookupRefMember(ref: NodeRefMember): AstNode? {
-        val referenceAssignment = ref.file.referenceMap[ref.reference.identifier]
+        val referenceAssignment = ref.file.referenceMap[ref.reference!!.identifier]
         if (referenceAssignment == null) {
-            validationError("No reference ${ref.reference.identifier} found", ref)
+            validationError("No reference ${ref.reference!!.identifier} found", ref)
             return null
         }
 
-        val reference = referenceAssignment.resolvedFilePath
+        val reference = referenceAssignment.resolvedFilePath!!
         val rootNode = validateRoot(reference)
         if (rootNode == null) {
             validationError("Failed to resolve reference $reference", referenceAssignment)
             return null
         }
-        ref.member.setScope(rootNode.resolvedScope!!)
-        if (ref.member.resolvedValue == null) {
+        ref.member!!.setScope(rootNode.resolvedScope!!)
+        if (ref.member!!.resolvedValue == null) {
             validationError(
-                "No member ${ref.member.identifier} on ${ref.reference.identifier}", ref
+                "No member ${ref.member!!.identifier} on ${ref.reference!!.identifier}", ref
             )
             return null
         }
-        return ref.member.resolvedValue!!.asAstNode
+        return ref.member!!.resolvedValue!!.asAstNode
     }
 
     fun deepLookupReference(reference: VariableReference): AstNode? {
@@ -378,7 +381,6 @@ class Validator(
                 val something = reference.resolvedScope!!.lookupVariable(reference.identifier)
                 if (something == null) {
                     if (reference.resolvedScope!!.isAllowMissingVariables()) {
-//                        return reference
                         return null
                     }
                     validationError("Variable ${reference.identifier} not found in local scope", reference)
@@ -387,12 +389,15 @@ class Validator(
             }
 
             is NodeMemberField -> {
-                val parent = deepLookupReference(reference.ownerAsVariableReference) ?: return null
+                val parent = deepLookupReference(reference.ownerAsVariableReference!!) ?: return null
                 if (parent !is NodeType) {
                     validationError("Tried to look up field on non-type", parent)
                     return null
                 }
-                lookupTypeField(parent, reference.member.identifier) ?: return null
+
+                if (reference.member == null) return null // TODO: Do we layer on validation errors? Shouldn't need to since parser already added an error...?
+
+                lookupTypeField(parent, reference.member!!.identifier) ?: return null
             }
         }
         if (result is VariableReference) return deepLookupReference(result)
@@ -433,7 +438,7 @@ class Validator(
     }
 
     fun lookupTypeField(type: NodeType, fieldName: String): AstNode? {
-        val declaredField = type.fields.find { it.identifier.identifier == fieldName }
+        val declaredField = type.fields.find { it.identifier!!.identifier == fieldName }
         if (declaredField != null) return declaredField.value
 
         val inheritedField = type.spreads.mapNotNull {
@@ -487,14 +492,14 @@ class Validator(
     fun validateUnknownType(node: NodeType) {
         if (node is NodeIdentifiedType) {
             val referredType = try {
-                TypeType.valueOf(node.type.identifier)
+                TypeType.valueOf(node.type!!.identifier)
             } catch (_: IllegalArgumentException) {
-                return validationError("Unknown type ${node.type.identifier}", node.type)
+                return validationError("Unknown type ${node.type!!.identifier}", node.type!!)
             }
             return validateType(node, referredType, node)
         }
 
-        val fieldNames = node.fields.map { it.identifier.identifier }
+        val fieldNames = node.fields.map { it.identifier!!.identifier }
         val matchingTypes = TypeType.entries.filter { type ->
             type.isStruct && fieldNames.all { it in type.allowedFields }
         }
@@ -512,15 +517,13 @@ class Validator(
             val value = field.valueAsVariableValue
             validateUnknownProperty(value)
             types.removeIf {
-                it.allowedFields[field.identifier.identifier] !in value.resolvedTypes!!
+                it.allowedFields[field.identifier!!.identifier] !in value.resolvedTypes!!
             }
         }
         for (spread in node.spreads) {
             val resolved = deepLookupReference(spread.variableAsReference)
-            if (resolved == null) {
-                validationError("Could not resolve spread variable", spread.variable)
+                ?: //                validationError("Could not resolve spread variable", spread.variable!!)
                 continue
-            }
             if (resolved !is NodeType) {
                 validationError("Expected reference to type, got ${resolved::class.simpleName}", spread)
                 continue

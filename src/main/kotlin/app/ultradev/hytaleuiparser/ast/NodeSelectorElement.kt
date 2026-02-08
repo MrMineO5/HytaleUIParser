@@ -11,7 +11,7 @@ class NodeSelectorElement(
     val body by child<NodeBody>(1)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        body.elements.forEach {
+        body?.elements?.forEach {
             if (it is NodeAssignVariable || it is NodeField || it is NodeElement) return@forEach
             validationError(
                 "Unexpected node in element body. Expected NodeAssignVariable, NodeField, or NodeElement.",
@@ -21,12 +21,12 @@ class NodeSelectorElement(
     }
 
     override fun propagateScope(scope: Scope) {
-        selector.setScope(scope)
+        selector?.setScope(scope)
     }
 
-    val localVariables: List<NodeAssignVariable> = body.elements.filterIsInstance<NodeAssignVariable>()
-    val properties: List<NodeField> = body.elements.filterIsInstance<NodeField>()
-    val childElements: List<NodeElement> = body.elements.filterIsInstance<NodeElement>()
+    val localVariables: List<NodeAssignVariable> = body?.elements?.filterIsInstance<NodeAssignVariable>() ?: emptyList()
+    val properties: List<NodeField> = body?.elements?.filterIsInstance<NodeField>() ?: emptyList()
+    val childElements: List<NodeElement> = body?.elements?.filterIsInstance<NodeElement>() ?: emptyList()
 
     override fun clone() = NodeSelectorElement(children.clone(), valid)
 }

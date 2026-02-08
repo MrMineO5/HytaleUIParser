@@ -11,16 +11,16 @@ class NodeMemberField(
     val member by child<NodeIdentifier>(2)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        if (owner !is VariableReference) validationError("Expected variable reference before member field", owner)
+        if (owner !is VariableReference) validationError("Expected variable reference before member field", findClosestChild(0))
     }
 
-    val ownerAsVariableReference: VariableReference = owner as VariableReference
+    val ownerAsVariableReference: VariableReference? get() = owner as VariableReference?
 
     override val resolvedValue: VariableValue?
         get() {
-            val owner = ownerAsVariableReference.resolvedValue
+            val owner = ownerAsVariableReference?.resolvedValue
             if (owner !is NodeType) error("Member marker used on non-type")
-            return owner.resolveValue()[member.identifier]
+            return owner.resolveValue()[member?.identifier]
         }
 
     override fun clone() = NodeMemberField(children.clone(), valid)

@@ -14,10 +14,10 @@ class NodeAssignVariable(
     val valueAsVariable: VariableValue = value as VariableValue
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        if (value !is VariableValue) validationError("Expected variable value after assignment operator", value)
+        if (value !is VariableValue) validationError("Expected variable value after assignment operator", findClosestChild(2))
     }
 
-    override fun computePath(): String = super.computePath() + ":${variable.identifier}"
+    override fun computePath(): String = super.computePath() + ":${variable?.identifier}"
 
     override fun clone() = NodeAssignVariable(children.clone(), valid)
 }

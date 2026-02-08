@@ -20,9 +20,6 @@ The Hytale UI Parser is a Kotlin library for parsing and validating Hytale UI fi
 ### Basic Parsing
 
 ```kotlin
-import app.ultradev.hytaleuiparser.*
-import java.io.File
-
 val uiFile = File("example.ui")
 val root = Parser(Tokenizer(uiFile.reader())).finish()
 println(root)

@@ -1,16 +1,9 @@
 import app.ultradev.hytaleuiparser.Parser
 import app.ultradev.hytaleuiparser.Tokenizer
 import app.ultradev.hytaleuiparser.Validator
-import app.ultradev.hytaleuiparser.ast.AstNode
-import app.ultradev.hytaleuiparser.ast.NodeConstant
-import app.ultradev.hytaleuiparser.ast.NodeIdentifier
-import app.ultradev.hytaleuiparser.ast.NodeOpacity
-import app.ultradev.hytaleuiparser.ast.NodeSelector
-import app.ultradev.hytaleuiparser.ast.NodeToken
 import app.ultradev.hytaleuiparser.ast.RootNode
 import java.io.StringReader
 import kotlin.io.path.*
-import kotlin.reflect.KProperty
 import kotlin.test.Test
 
 class HytaleTests {

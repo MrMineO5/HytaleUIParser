@@ -19,7 +19,7 @@ class Tokenizer(
     }
 
     override fun next(): Token {
-        val ch = read() ?: error("next was called on an empty tokenizer")
+        val ch = read() ?: return Token(Token.Type.EOF, "", line, column, offset)
         if (ch.customIsWhitespace()) {
             return Token(Token.Type.WHITESPACE, ch.toString(), line, column, offset - 1)
         }

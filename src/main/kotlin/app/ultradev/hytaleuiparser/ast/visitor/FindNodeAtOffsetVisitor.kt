@@ -1,8 +1,6 @@
 package app.ultradev.hytaleuiparser.ast.visitor
 
 import app.ultradev.hytaleuiparser.ast.AstNode
-import app.ultradev.hytaleuiparser.ast.visitor.AstVisitor
-import sun.nio.ch.Net.accept
 
 class FindNodeAtOffsetVisitor(val offset: Int) : AstVisitor {
     var bestMatch: AstNode? = null

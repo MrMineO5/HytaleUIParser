@@ -12,11 +12,11 @@ class NodeRefMember(
     val member by child<NodeVariable>(2)
 
     override fun propagateScope(scope: Scope) {
-        reference.setScope(scope)
-        memberMarker.setScope(scope)
+        reference?.setScope(scope)
+        memberMarker?.setScope(scope)
     }
 
-    override val resolvedValue get() = member.resolvedValue
+    override val resolvedValue get() = member?.resolvedValue
 
     override fun clone() = NodeRefMember(children.clone(), valid)
 }

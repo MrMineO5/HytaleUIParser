@@ -14,7 +14,7 @@ class NodeField(
     val endStatement by optionalChild<NodeToken>(3)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        if (value !is VariableValue) validationError("Expected variable value after assignment operator", value)
+        if (value !is VariableValue) validationError("Expected variable value after assignment operator", findClosestChild(2))
         if (parent !is NodeBody) validationError("Field must be contained in a NodeBody", this)
     }
 
@@ -31,10 +31,11 @@ class NodeField(
 
     val resolvedType: TypeType
         get() {
-            return resolvedParentFields[identifier.identifier] ?: error("Field not found in parent type")
+            val id = identifier?.identifier ?: error("Field has no identifier")
+            return resolvedParentFields[id] ?: error("Field not found in parent type")
         }
 
-    override fun computePath(): String = super.computePath() + "." + identifier.identifier
+    override fun computePath(): String = super.computePath() + "." + identifier?.identifier
 
     override fun clone() = NodeField(children.clone(), valid)
 }

@@ -13,7 +13,7 @@ class NodeSpread(
     override fun validate(validationError: (String, AstNode) -> Unit) {
         if (variable !is VariableReference) validationError(
             "Expected variable reference after spread operator",
-            variable
+            findClosestChild(1)
         )
     }
 

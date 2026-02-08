@@ -5,15 +5,15 @@ import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 // TODO: We could make NodeElementNormal an open class instead of having an abstract one, and override the index for the body
-abstract class NodeElement(
+open class NodeElement(
     children: List<AstNode>,
-    valid: Boolean,
+    valid: Boolean = true,
 ) : AstNode(children, valid), VariableValue {
-    abstract val type: AstNode
-    abstract val body: NodeBody
+    open val type by child<AstNode>(0)
+    open val body by child<NodeBody>(1)
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        body.elements.zipWithNext().forEach { (prev, curr) ->
+        body?.elements?.zipWithNext()?.forEach { (prev, curr) ->
             if (curr is NodeAssignVariable) {
                 if (prev !is NodeAssignVariable) validationError("Variables must come first", curr)
                 return@forEach
@@ -34,10 +34,10 @@ abstract class NodeElement(
         }
     }
 
-    val localVariables: List<NodeAssignVariable> get() = body.elements.filterIsInstance<NodeAssignVariable>()
-    val properties: List<NodeField> get() = body.elements.filterIsInstance<NodeField>()
-    val childElements: List<NodeElement> get() = body.elements.filterIsInstance<NodeElement>()
-    val selectorElements: List<NodeSelectorElement> get() = body.elements.filterIsInstance<NodeSelectorElement>()
+    val localVariables: List<NodeAssignVariable> get() = body?.elements?.filterIsInstance<NodeAssignVariable>() ?: emptyList()
+    val properties: List<NodeField> get() = body?.elements?.filterIsInstance<NodeField>() ?: emptyList()
+    val childElements: List<NodeElement> get() = body?.elements?.filterIsInstance<NodeElement>() ?: emptyList()
+    val selectorElements: List<NodeSelectorElement> get() = body?.elements?.filterIsInstance<NodeSelectorElement>() ?: emptyList()
 
     lateinit var resolvedType: ElementType
 
@@ -45,10 +45,10 @@ abstract class NodeElement(
         get() = error("Elements can be variable values, but do not allow resolution as a TypeType, use resolvedType instead")
 
     override fun propagateScope(scope: Scope) {
-        type.setScope(scope)
+        type?.setScope(scope)
     }
 
-    override fun computePath(): String = super.computePath() + "/${type.text}"
+    override fun computePath(): String = super.computePath() + "/${type?.text}"
 
-    abstract override fun clone(): NodeElement
+    override fun clone(): NodeElement = NodeElement(children, valid)
 }

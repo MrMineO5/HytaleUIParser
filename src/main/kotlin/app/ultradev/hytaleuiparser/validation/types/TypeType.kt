@@ -321,7 +321,7 @@ enum class TypeType(
             "ButtonBackground" to String,
             "ButtonFill" to String,
             "TextFieldDecoration" to InputFieldDecorationStyle,
-            "TextFieldInputStyle" to TypeType.InputFieldStyle,
+            "TextFieldInputStyle" to InputFieldStyle,
             "TextFieldPadding" to Padding,
             "TextFieldHeight" to Int32,
         )

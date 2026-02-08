@@ -103,11 +103,9 @@ sealed class AstNode(
     protected inline fun <reified T : AstNode> child(index: Int) = NodeDelegate<T>(index)
     protected inline fun <reified T : AstNode> optionalChild(index: Int) = NodeDelegate<T?>(index)
     protected class NodeDelegate<T : AstNode?>(val index: Int) {
-        operator fun getValue(thisRef: AstNode, property: KProperty<*>): T {
-            if (!thisRef.valid) throw IllegalStateException("Cannot access children of invalid node")
-
+        operator fun getValue(thisRef: AstNode, property: KProperty<*>): T? {
             val finalIndex = if (index < 0) thisRef.children.size + index else index
-            return thisRef.children.getOrNull(finalIndex) as T
+            return thisRef.children.getOrNull(finalIndex) as? T
         }
     }
 
@@ -118,7 +116,6 @@ sealed class AstNode(
     protected fun children(filter: (AstNode) -> Boolean, startIndex: Int = 0, endIndex: Int = 0) = NodeDelegateList<AstNode>(filter, startIndex, endIndex)
     protected class NodeDelegateList<T: AstNode>(val filter: (AstNode) -> Boolean, val startIndex: Int, val endIndex: Int) {
         operator fun getValue(thisRef: AstNode, property: KProperty<*>): List<T> {
-            if (!thisRef.valid) throw IllegalStateException("Cannot access children of invalid node")
             val trueStart = if (startIndex <= 0) thisRef.children.size + startIndex else startIndex
             val trueEnd = if (endIndex <= 0) thisRef.children.size + endIndex else endIndex
             val count = trueEnd - trueStart + 1
@@ -128,5 +125,11 @@ sealed class AstNode(
                 .filter(filter)
                 .toList() as List<T>
         }
+    }
+
+    protected fun findClosestChild(index: Int): AstNode {
+        if (children.isEmpty()) return this
+        if (index < children.size) return children[index]
+        return children.last()
     }
 }

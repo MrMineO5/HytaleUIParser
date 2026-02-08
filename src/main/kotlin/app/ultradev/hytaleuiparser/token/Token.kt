@@ -39,5 +39,7 @@ data class Token(
 
         WHITESPACE,
         UNKNOWN,
+
+        EOF,
     }
 }

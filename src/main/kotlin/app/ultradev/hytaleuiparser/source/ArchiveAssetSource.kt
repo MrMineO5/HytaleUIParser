@@ -3,12 +3,8 @@ package app.ultradev.hytaleuiparser.source
 import java.io.InputStream
 import java.nio.file.Path
 import java.util.zip.ZipInputStream
-import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.inputStream
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.relativeTo
-import kotlin.io.path.walk
 
 class ArchiveAssetSource(
     val archive: Path

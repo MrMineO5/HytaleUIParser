@@ -8,7 +8,7 @@ class NodeReference(
 ) : AstNode(children, valid) {
     val reference by child<NodeToken>(0)
 
-    val identifier get() = reference.text
+    val identifier get() = reference!!.text
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
         if (identifier == "$") validationError("Reference name cannot be empty", this)

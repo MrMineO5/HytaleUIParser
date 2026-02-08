@@ -1,7 +1,6 @@
 package app.ultradev.hytaleuiparser.ast
 
 import app.ultradev.hytaleuiparser.clone
-import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 class NodeMathOperation(
@@ -16,8 +15,8 @@ class NodeMathOperation(
     val param2AsVariable: VariableValue get() = param2 as VariableValue
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
-        if (param1 !is VariableValue) validationError("Expected variable before math operation", param1)
-        if (param2 !is VariableValue) validationError("Expected variable after math operation", param2)
+        if (param1 !is VariableValue) validationError("Expected variable before math operation", findClosestChild(0))
+        if (param2 !is VariableValue) validationError("Expected variable after math operation", findClosestChild(2))
     }
 
     override val resolvedTypes: Set<TypeType>?

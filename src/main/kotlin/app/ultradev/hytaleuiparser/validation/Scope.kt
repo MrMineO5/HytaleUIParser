@@ -18,13 +18,13 @@ class Scope private constructor(
         ): Scope {
             val seenKeys = mutableSetOf<String>()
             variables.forEach {
-                if (seenKeys.contains(it.variable.identifier))
-                    return@forEach validationError("Duplicate variable: ${it.variable.identifier}", it)
-                seenKeys.add(it.variable.identifier)
+                if (seenKeys.contains(it.variable!!.identifier!!))
+                    return@forEach validationError("Duplicate variable: ${it.variable!!.identifier}", it)
+                seenKeys.add(it.variable!!.identifier!!)
             }
             return Scope(
                 null,
-                variables.associateBy { it.variable.identifier }
+                variables.associateBy { it.variable!!.identifier!! }
             )
         }
     }
@@ -36,11 +36,11 @@ class Scope private constructor(
     ): Scope {
         val seenKeys = mutableSetOf<String>()
         variables.forEach {
-            if (seenKeys.contains(it.variable.identifier))
-                return@forEach validationError("Duplicate variable: ${it.variable.identifier}", it)
-            seenKeys.add(it.variable.identifier)
+            if (seenKeys.contains(it.variable!!.identifier!!))
+                return@forEach validationError("Duplicate variable: ${it.variable!!.identifier!!}", it)
+            seenKeys.add(it.variable!!.identifier!!)
         }
-        return Scope(this, variables.associateBy { it.variable.identifier }, allowMissingVariables)
+        return Scope(this, variables.associateBy { it.variable!!.identifier!! }, allowMissingVariables)
     }
 
     fun childScope(other: Scope): Scope {
