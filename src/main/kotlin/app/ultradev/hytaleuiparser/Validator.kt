@@ -3,6 +3,7 @@ package app.ultradev.hytaleuiparser
 import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
+import app.ultradev.hytaleuiparser.validation.resolveNeighbour
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 
 class Validator(
@@ -351,7 +352,7 @@ class Validator(
     }
 
     fun lookupRefMember(ref: NodeRefMember): AstNode? {
-        val referenceAssignment = ref.file.referenceMap[ref.reference!!.identifier]
+        val referenceAssignment = ref.reference?.resolvedAssignment
         if (referenceAssignment == null) {
             validationError("No reference ${ref.reference!!.identifier} found", ref)
             return null
@@ -363,6 +364,7 @@ class Validator(
             validationError("Failed to resolve reference $reference", referenceAssignment)
             return null
         }
+        referenceAssignment.resolvedFileRoot = rootNode
 
         if (ref.member == null) return null
 
@@ -540,7 +542,8 @@ class Validator(
 
 
     fun validateReference(node: NodeAssignReference) {
-        if (node.resolvedFilePath !in files)
-            validationError("Import not found: ${node.resolvedFilePath}", node)
+        val path = node.resolvedFilePath ?: return validationError("No path found for reference", node)
+        val root = validateRoot(path) ?: return validationError("Import not found: ${node.resolvedFilePath}", node)
+        node.resolvedFileRoot = root
     }
 }

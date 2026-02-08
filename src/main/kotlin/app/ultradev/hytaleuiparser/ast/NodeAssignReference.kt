@@ -13,6 +13,7 @@ class NodeAssignReference(
     val endStatement by child<NodeToken>(3)
 
     val resolvedFilePath: String? get() = filePath?.let { file.path.resolveNeighbour(it.valueText) }
+    lateinit var resolvedFileRoot: RootNode
 
 
     override fun computePath(): String = super.computePath() + variable?.identifier
