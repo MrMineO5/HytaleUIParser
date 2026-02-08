@@ -434,7 +434,7 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseSpread(): NodeSpread {
         val spreadMarker = tokens.next()
         if (spreadMarker.type != Token.Type.SPREAD) throw ParserException("Expected spread marker", spreadMarker)
-        val variable = parseVariableReference()
+        val variable = recoverable { parseVariableReference() }
 
         val next = tokens.peek()
         val end = when (next.type) {
