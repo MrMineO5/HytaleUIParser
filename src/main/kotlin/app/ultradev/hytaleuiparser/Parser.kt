@@ -13,6 +13,15 @@ class Parser(tokens: Iterator<Token>) {
         parserErrors.add(ParserError(message, token))
     }
 
+    private fun recoverable(block: () -> AstNode?): AstNode? {
+        return try {
+            block()
+        } catch (e: ParserException) {
+            parserError(e.message ?: "Unknown error", e.token)
+            null
+        }
+    }
+
     fun finish(): RootNode {
         parseCompletely()
         val root = RootNode(nodes)
@@ -39,22 +48,14 @@ class Parser(tokens: Iterator<Token>) {
     }
 
     private fun parseVariable(): NodeVariable {
-        val reference = tokens.next()
+        val reference = tokens.peek()
         if (reference.type != Token.Type.VARIABLE) throw ParserException("Expected variable marker", reference)
-        return NodeVariable(listOf(NodeToken(reference)))
+        return NodeVariable(listOf(nextToken()))
     }
 
     private fun parseIdentifier(): NodeIdentifier {
-        val token = tokens.next()
-        if (token.type != Token.Type.IDENTIFIER) throw ParserException("Expected identifier", token)
-        return NodeIdentifier(listOf(NodeToken(token)))
-    }
-    private fun parseIdentifierRecoverable(): NodeIdentifier? {
         val token = tokens.peek()
-        if (token.type != Token.Type.IDENTIFIER) {
-            parserError("Expected identifier, got ${token.text}", token)
-            return null
-        }
+        if (token.type != Token.Type.IDENTIFIER) throw ParserException("Expected identifier", token)
         return NodeIdentifier(listOf(nextToken()))
     }
 
@@ -123,7 +124,7 @@ class Parser(tokens: Iterator<Token>) {
         var curr: AstNode = variable
         while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
             val marker = tokens.next()
-            val member = parseIdentifierRecoverable()
+            val member = recoverable { parseIdentifier() }
             val valid = member != null
             curr = NodeMemberField(listOfInsertMissing(curr, NodeToken(marker), member), valid)
         }
@@ -415,8 +416,8 @@ class Parser(tokens: Iterator<Token>) {
         val reference = parseReference()
         val memberMarker = tokens.next()
         if (memberMarker.type != Token.Type.MEMBER_MARKER) throw ParserException("Expected member marker", memberMarker)
-        val member = parseVariable()
-        return NodeRefMember(listOf(reference, NodeToken(memberMarker), member))
+        val member = recoverable { parseVariable() }
+        return NodeRefMember(listOfInsertMissing(reference, NodeToken(memberMarker), member))
     }
 
     private fun parseRefAssignmentOrElement(): AstNode {

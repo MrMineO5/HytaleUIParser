@@ -363,6 +363,9 @@ class Validator(
             validationError("Failed to resolve reference $reference", referenceAssignment)
             return null
         }
+
+        if (ref.member == null) return null
+
         ref.member!!.setScope(rootNode.resolvedScope!!)
         if (ref.member!!.resolvedValue == null) {
             validationError(

@@ -1,0 +1,3 @@
+- The tokenizer was updated to emit EOF tokens once it has no more chars to read. This helps with the parser since we don't need to worry about peeking, there are always tokens there.
+  - This breaks parsing from a list iterator since the list always has a finite number of EOF tokens (usually one, depending on how the tokenizer is read), should TokenIterator be updated to account for this.
+- Comments are not allowed in all places by Hytale's client, we should add a readAllowComments and readDenyComments function (and corresponding peek, etc.) in the parser to check for these cases
