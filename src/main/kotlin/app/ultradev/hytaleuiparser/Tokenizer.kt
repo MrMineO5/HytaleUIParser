@@ -42,7 +42,9 @@ class Tokenizer(
         if (ch == '"') {
             val sb = StringBuilder("\"")
             var peek = peek()
-            while (peek != '"' && peek != null) {
+            var escaped = false
+            while ((escaped || peek != '"') && peek != null) {
+                escaped = if (peek == '\\') true else false
                 sb.append(read())
                 peek = peek()
             }

@@ -1,0 +1,2 @@
+@TestQuoted = "some string";
+@TestEscaped = "some string with \"quotes\"";

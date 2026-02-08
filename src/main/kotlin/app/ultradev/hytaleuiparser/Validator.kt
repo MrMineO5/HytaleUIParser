@@ -397,6 +397,17 @@ class Validator(
         when (type) {
             TypeType.String -> {
                 if (!value.isQuoted) validationError("Expected string to be quoted", value)
+                val str = value.valueText
+                var i = 0
+                while (i < str.length) {
+                    if (str[i] == '\\') {
+                        if (i + 1 >= str.length) validationError("Unterminated escape sequence", value)
+                        val next = str[i + 1]
+                        if (next != '"' && next != '\\') validationError("Invalid escape sequence: \\$next", value)
+                        i++
+                    }
+                    i++
+                }
             } // All constants are strings
 
             TypeType.Int32, TypeType.Float -> {
@@ -449,6 +460,20 @@ class Validator(
         } else if (node is NodeConstant) {
             if (node.resolvedTypes.isEmpty()) {
                 validationError("No matching type for value", node)
+            }
+
+            if (node.isQuoted) {
+                val str = node.valueText
+                var i = 0
+                while (i < str.length) {
+                    if (str[i] == '\\') {
+                        if (i + 1 >= str.length) validationError("Unterminated escape sequence", node)
+                        val next = str[i + 1]
+                        if (next != '"' && next != '\\') validationError("Invalid escape sequence: \\$next", node)
+                        i++
+                    }
+                    i++
+                }
             }
         }
     }

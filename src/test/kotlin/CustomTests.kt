@@ -27,4 +27,9 @@ class CustomTests {
     fun testSpreads() {
         validateInternalFile("test-spreads")
     }
+
+    @Test
+    fun testStrings() {
+        validateInternalFile("test-strings")
+    }
 }
