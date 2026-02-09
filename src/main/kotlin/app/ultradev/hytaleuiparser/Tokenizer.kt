@@ -44,7 +44,7 @@ class Tokenizer(
             var peek = peek()
             var escaped = false
             while ((escaped || peek != '"') && peek != null) {
-                escaped = if (peek == '\\') true else false
+                escaped = if (peek == '\\') !escaped else false
                 sb.append(read())
                 peek = peek()
             }
