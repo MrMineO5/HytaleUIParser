@@ -124,21 +124,17 @@ class Validator(
             node.resolvedType = type
             variable.resolvedType = type
 
-            val variableCopy = variable.clone()
-            variableCopy.initFile(variable.file)
-            variableCopy.applyParent(variable.parent)
-
-            val internalVariables = (variableCopy.localVariables + node.localVariables)
+            val internalVariables = (variable.localVariables + node.localVariables)
                 .associateBy { it.variable!!.identifier }
                 .values
 
             val variableScope = node.resolvedScope!!.childScope(variable.resolvedScope!!)
                 .childScope(internalVariables, ::validationError)
 
-            variableCopy.body!!.setScope(variableScope)
+            variable.body!!.setVarScope(node, variableScope)
             node.body!!.setScope(variableScope)
 
-            variableCopy.selectorElements.forEach {
+            variable.selectorElements.forEach {
                 validationError(
                     "Selector elements must be used within a variable element",
                     it
@@ -147,11 +143,11 @@ class Validator(
 
             val seenSelectors = mutableSetOf<String>()
             node.selectorElements.forEach { sel ->
-                if (!seenSelectors.add(sel.selector!!.identifier!!))
+                if (!seenSelectors.add(sel.selector!!.identifier))
                     return@forEach validationError("Duplicate selector ${sel.selector!!.identifier} in definition", sel)
 
                 val definitionSel =
-                    variableCopy.childElements
+                    variable.childElements
                         .asSequence()
                         .filterIsInstance<NodeElementWithSelector>()
                         .firstOrNull { it.selector!!.identifier == sel.selector!!.identifier }
@@ -165,14 +161,14 @@ class Validator(
                     .values
                 val selScope = variableScope.childScope(selInternalVariables, ::validationError)
                 sel.body!!.setScope(selScope)
-                definitionSel.body!!.setScope(selScope)
+                definitionSel.body!!.setVarScope(node, selScope)
 
                 sel.childElements.forEach { validateElement(it) }
                 definitionSel.childElements.forEach { validateElement(it) }
             }
 
             reemitExternalErrors("Could not validate variable element", node) {
-                variableCopy.childElements.forEach { validateElement(it) }
+                variable.childElements.forEach { validateElement(it) }
             }
 
             node.childElements.forEach { validateElement(it) }
@@ -185,7 +181,7 @@ class Validator(
             }
             val varSeenProperties = mutableSetOf<String>()
             reemitExternalErrors("Could not validate variable element", node) {
-                variableCopy.properties.filter { it.identifier!!.identifier !in seenProperties }.forEach {
+                variable.properties.filter { it.identifier!!.identifier !in seenProperties }.forEach {
                     if (!varSeenProperties.add(it.identifier!!.identifier))
                         return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $type", it)
                     validateProperty(
@@ -194,6 +190,8 @@ class Validator(
                     )
                 }
             }
+
+//            variable.setActiveScopeKey(null)
         }
     }
 
@@ -394,9 +392,10 @@ class Validator(
             }
 
             is NodeMemberField -> {
-                val parent = deepLookupReference(reference.ownerAsVariableReference!!) ?: return null
+                var parent = reference.ownerAsVariableValue
+                if (parent is VariableReference) parent = deepLookupReference(parent) as? NodeType ?: return null
                 if (parent !is NodeType) {
-                    validationError("Tried to look up field on non-type", parent)
+                    validationError("Tried to look up field on non-type", parent.asAstNode)
                     return null
                 }
 

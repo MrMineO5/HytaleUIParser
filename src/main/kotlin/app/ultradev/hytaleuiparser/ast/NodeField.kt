@@ -18,7 +18,7 @@ class NodeField(
         if (parent !is NodeBody) validationError("Field must be contained in a NodeBody", this)
     }
 
-    val valueAsVariableValue: VariableValue = value as VariableValue
+    val valueAsVariableValue: VariableValue get() = value as VariableValue
 
     val resolvedParentFields: Map<String, TypeType>
         get() {

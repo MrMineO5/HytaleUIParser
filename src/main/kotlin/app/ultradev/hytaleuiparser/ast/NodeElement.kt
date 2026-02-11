@@ -39,13 +39,24 @@ open class NodeElement(
     val childElements: List<NodeElement> get() = body?.elements?.filterIsInstance<NodeElement>() ?: emptyList()
     val selectorElements: List<NodeSelectorElement> get() = body?.elements?.filterIsInstance<NodeSelectorElement>() ?: emptyList()
 
+    override fun propagateScopeChildren(): List<AstNode> = listOfNotNull(type)
+
     lateinit var resolvedType: ElementType
 
     override val resolvedTypes: Set<TypeType>
         get() = error("Elements can be variable values, but do not allow resolution as a TypeType, use resolvedType instead")
 
-    override fun propagateScope(scope: Scope) {
-        type?.setScope(scope)
+    val resolvedVariableImplementation: NodeElement? get() = (type as? VariableReference)?.deepResolve() as? NodeElement
+
+    fun resolveProperties(): Map<String, VariableValue> {
+        val output = mutableMapOf<String, VariableValue>()
+        resolvedVariableImplementation?.let { output.putAll(it.resolveProperties()) }
+        properties.forEach {
+            var value = it.valueAsVariableValue
+            if (value is VariableReference) value = value.deepResolve() ?: return@forEach
+            output[it.identifier!!.identifier] = value
+        }
+        return output
     }
 
     override fun computePath(): String = super.computePath() + "/${type?.text}"

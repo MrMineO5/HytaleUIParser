@@ -11,10 +11,7 @@ class NodeRefMember(
     val memberMarker by child<NodeToken>(1)
     val member by child<NodeVariable>(2)
 
-    override fun propagateScope(scope: Scope) {
-        reference?.setScope(scope)
-        memberMarker?.setScope(scope)
-    }
+    override fun propagateScopeChildren(): List<AstNode> = listOfNotNull(reference, memberMarker)
 
     override val resolvedValue get() = member?.resolvedValue
 

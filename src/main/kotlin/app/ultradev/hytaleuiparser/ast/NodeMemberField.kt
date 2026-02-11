@@ -14,11 +14,11 @@ class NodeMemberField(
         if (owner !is VariableReference) validationError("Expected variable reference before member field", findClosestChild(0))
     }
 
-    val ownerAsVariableReference: VariableReference? get() = owner as VariableReference?
+    val ownerAsVariableValue get() = owner as VariableValue
 
     override val resolvedValue: VariableValue?
         get() {
-            val owner = ownerAsVariableReference?.resolvedValue
+            val owner = ownerAsVariableValue.resolvedValue
             if (owner !is NodeType) error("Member marker used on non-type")
             return owner.resolveValue()[member?.identifier]
         }

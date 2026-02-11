@@ -14,7 +14,7 @@ class NodeVariable(
         if (identifier == "@") validationError("Variable name cannot be empty", this)
     }
 
-    val resolvedAssignment: NodeAssignVariable? get() = resolvedScope?.lookupVariableAssignment(identifier!!)
+    val resolvedAssignment: NodeAssignVariable? get() = resolvedScope?.lookupVariableAssignment(identifier)
     override val resolvedValue: VariableValue? get() = resolvedAssignment?.valueAsVariable
 
     override fun clone() = NodeVariable(children.clone(), valid)

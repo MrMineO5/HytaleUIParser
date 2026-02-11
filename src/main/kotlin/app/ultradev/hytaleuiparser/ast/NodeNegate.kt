@@ -9,5 +9,7 @@ class NodeNegate(
     val minusMarker by child<NodeToken>(0)
     val param by child<AstNode>(1)
 
+    val paramAsVariableValue get() = param as VariableValue
+
     override fun clone() = NodeNegate(children.clone(), valid)
 }

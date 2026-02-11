@@ -20,15 +20,23 @@ sealed class AstNode(
 
     lateinit var parent: AstNode
     lateinit var file: RootNode
-    var resolvedScope: Scope? = null
+    val scopes: MutableMap<AstNode, Scope> = mutableMapOf()
+    internal var activeScopeKey: AstNode? = null
         private set
+    val resolvedScope: Scope? get() = scopes[activeScopeKey ?: file]
 
     /**
      * Set the scope of this node and propagate using its propagation rule.
      */
-    internal fun setScope(scope: Scope) {
-        resolvedScope = scope
-        propagateScope(scope)
+    internal fun setScope(scope: Scope) = setVarScope(file, scope)
+    internal fun setVarScope(node: AstNode, scope: Scope) {
+        scopes[node] = scope
+        activeScopeKey = node
+        propagateScopeChildren().forEach { it.setVarScope(node, scope) }
+    }
+    internal fun setActiveScopeKey(node: AstNode?) {
+        activeScopeKey = node
+        propagateScopeChildren().forEach { it.setActiveScopeKey(node) }
     }
 
     /**
@@ -36,9 +44,7 @@ sealed class AstNode(
      *
      * Can be overwritten in special cases to change this behavior (e.g. for nodes that create a scope)
      */
-    internal open fun propagateScope(scope: Scope) {
-        children.forEach { it.setScope(scope) }
-    }
+    internal open fun propagateScopeChildren(): List<AstNode> = children
 
     fun initFile(file: RootNode) {
         this.file = file
@@ -65,6 +71,7 @@ sealed class AstNode(
 
 
     internal fun startValidation0()  {
+        scopes.clear()
         startValidation()
         children.forEach { it.startValidation0() }
     }

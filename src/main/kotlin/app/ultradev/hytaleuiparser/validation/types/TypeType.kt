@@ -35,18 +35,25 @@ enum class TypeType(
     ),
     LayoutMode(
         setOf(
-            "TopScrolling",
-            "MiddleCenter",
+            "Full",
+
             "Left",
             "Right",
-            "Full",
-            "Middle",
-            "Bottom",
-            "BottomScrolling",
-            "CenterMiddle",
             "Top",
+            "Bottom",
+
+            "Center",
+            "Middle",
+
+            "CenterMiddle",
+            "MiddleCenter",
+
+            "TopScrolling",
+            "BottomScrolling",
+            "LeftScrolling",
+            "RightScrolling",
+
             "LeftCenterWrap",
-            "Center"
         )
     ),
     Anchor(

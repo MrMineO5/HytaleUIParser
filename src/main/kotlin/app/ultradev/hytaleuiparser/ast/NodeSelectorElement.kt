@@ -20,13 +20,22 @@ class NodeSelectorElement(
         }
     }
 
-    override fun propagateScope(scope: Scope) {
-        selector?.setScope(scope)
-    }
+    override fun propagateScopeChildren(): List<AstNode> = listOfNotNull(selector)
 
-    val localVariables: List<NodeAssignVariable> = body?.elements?.filterIsInstance<NodeAssignVariable>() ?: emptyList()
-    val properties: List<NodeField> = body?.elements?.filterIsInstance<NodeField>() ?: emptyList()
-    val childElements: List<NodeElement> = body?.elements?.filterIsInstance<NodeElement>() ?: emptyList()
+    val localVariables: List<NodeAssignVariable> get() = body?.elements?.filterIsInstance<NodeAssignVariable>() ?: emptyList()
+    val properties: List<NodeField> get() = body?.elements?.filterIsInstance<NodeField>() ?: emptyList()
+    val childElements: List<NodeElement> get() = body?.elements?.filterIsInstance<NodeElement>() ?: emptyList()
+
+
+    fun resolveProperties(): Map<String, VariableValue> {
+        val output = mutableMapOf<String, VariableValue>()
+        properties.forEach {
+            var value = it.valueAsVariableValue
+            if (value is VariableReference) value = value.deepResolve() ?: return@forEach
+            output[it.identifier!!.identifier] = value
+        }
+        return output
+    }
 
     override fun clone() = NodeSelectorElement(children.clone(), valid)
 }

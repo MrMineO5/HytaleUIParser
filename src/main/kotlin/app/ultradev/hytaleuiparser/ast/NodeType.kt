@@ -38,7 +38,7 @@ open class NodeType(
         fields.forEach {
             var value = it.valueAsVariableValue
             if (value is VariableReference) value = value.deepResolve() ?: return@forEach
-            output[it.identifier!!.identifier!!] = value
+            output[it.identifier!!.identifier] = value
         }
         return output
     }

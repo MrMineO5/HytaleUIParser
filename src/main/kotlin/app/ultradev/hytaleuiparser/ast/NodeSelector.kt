@@ -8,7 +8,7 @@ class NodeSelector(
 ) : AstNode(children, valid) {
     val selector by child<NodeToken>(0)
 
-    val identifier get() = selector?.text
+    val identifier get() = selector!!.text
 
     override fun clone() = NodeSelector(children.clone(), valid)
 }
