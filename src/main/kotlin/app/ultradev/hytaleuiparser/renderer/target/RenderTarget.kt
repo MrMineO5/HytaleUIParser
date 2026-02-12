@@ -20,5 +20,14 @@ interface RenderTarget {
     )
     fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int)
 
-    fun renderText(text: String, x: Int, y: Int, color: Color)
+    fun renderText(
+        text: String,
+        x: Int,
+        y: Int,
+        color: Color,
+        isBold: Boolean = false,
+        isItalics: Boolean = false,
+        isUnderlined: Boolean = false,
+        isSecondary: Boolean = false
+    )
 }
