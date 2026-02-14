@@ -1,3 +1,0 @@
-@TestQuoted = "some string";
-@TestEscaped = "some string with \"quotes\"";
-@TestEscaped2 = "some string with escaped \\\\";
