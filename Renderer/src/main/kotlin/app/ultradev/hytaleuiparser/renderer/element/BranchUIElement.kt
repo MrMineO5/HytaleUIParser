@@ -10,6 +10,7 @@ abstract class BranchUIElement(
     val children: List<AbstractUIElement>,
 ) : AbstractUIElement(node) {
     open val layoutMode: LayoutMode get() = LayoutMode.Full
+    val visibleChildren get() = children.filter { it.visible }
 
     override fun contentDesiredHeight(): Int = Layout.get(layoutMode).contentDesiredHeight(this)
     override fun contentDesiredWidth(): Int = Layout.get(layoutMode).contentDesiredWidth(this)

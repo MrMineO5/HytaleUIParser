@@ -7,10 +7,12 @@ import app.ultradev.hytaleuiparser.ast.RootNode
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.GroupProperties
 import app.ultradev.hytaleuiparser.generated.elements.LabelProperties
+import app.ultradev.hytaleuiparser.generated.elements.TextButtonProperties
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.UnknownUIElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UILabelElement
+import app.ultradev.hytaleuiparser.renderer.element.impl.UITextButtonElement
 
 object UITransformer {
     fun transform(root: RootNode): UIGroupElement {
@@ -69,6 +71,7 @@ object UITransformer {
     private fun createUIElement(node: AstNode, properties: ElementProperties, children: List<AbstractUIElement> = emptyList()): AbstractUIElement {
         return when (properties) {
             is LabelProperties -> UILabelElement(node, properties)
+            is TextButtonProperties -> UITextButtonElement(node, properties)
             is GroupProperties -> UIGroupElement(node, children, properties)
 
             else -> {

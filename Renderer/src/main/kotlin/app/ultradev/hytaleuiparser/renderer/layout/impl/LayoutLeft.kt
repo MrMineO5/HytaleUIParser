@@ -14,7 +14,7 @@ object LayoutLeft : Layout {
 
         var totalFlexWeight = 0
         var totalNonFlexWidth = 0
-        element.children.forEach { child ->
+        element.visibleChildren.forEach { child ->
             if (child.properties.flexWeight != null) {
                 totalFlexWeight += child.properties.flexWeight!!
             } else {
@@ -25,7 +25,7 @@ object LayoutLeft : Layout {
         val widthPerFlexWeight = if (totalFlexWeight > 0) (cbox.width - totalNonFlexWidth) / totalFlexWeight else 0
 
         var x = cbox.x
-        element.children.forEach { child ->
+        element.visibleChildren.forEach { child ->
             val width = if (child.properties.flexWeight == null) {
                 child.desiredWidth()
             } else {
@@ -48,6 +48,6 @@ object LayoutLeft : Layout {
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement): Int = element.children.maxOfOrZero { it.desiredHeight() }
-    override fun contentDesiredWidth(element: BranchUIElement): Int = element.children.sumOf { it.totalWidth() }
+    override fun contentDesiredHeight(element: BranchUIElement): Int = element.visibleChildren.maxOfOrZero { it.totalHeight() }
+    override fun contentDesiredWidth(element: BranchUIElement): Int = element.visibleChildren.sumOf { it.totalWidth() }
 }

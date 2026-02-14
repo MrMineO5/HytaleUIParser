@@ -2,6 +2,7 @@ package app.ultradev.hytaleuiparser.asttools
 
 import app.ultradev.hytaleuiparser.ast.NodeColor
 import app.ultradev.hytaleuiparser.ast.NodeConstant
+import app.ultradev.hytaleuiparser.ast.NodeMathOperation
 import app.ultradev.hytaleuiparser.ast.NodeNegate
 import app.ultradev.hytaleuiparser.ast.NodeTranslation
 import app.ultradev.hytaleuiparser.ast.NodeType
@@ -12,22 +13,27 @@ import java.awt.Color
 /*
  * PRIMITIVES
  */
-fun VariableValue.valueAsInt32(): Int {
+private fun VariableValue.valueAsNumber(): Double {
     val finalValue = this.deepResolve()
     when (finalValue) {
-        is NodeConstant -> return finalValue.valueText.toInt()
-        is NodeNegate -> return -finalValue.paramAsVariableValue.valueAsInt32()
+        is NodeConstant -> return finalValue.valueText.toDouble()
+        is NodeNegate -> return -finalValue.paramAsVariableValue.valueAsNumber()
+        is NodeMathOperation -> {
+            val p1 = finalValue.param1AsVariable.valueAsNumber()
+            val p2 = finalValue.param2AsVariable.valueAsNumber()
+            return when (finalValue.operator!!.text) {
+                "+" -> p1 + p2
+                "-" -> p1 - p2
+                "*" -> p1 * p2
+                "/" -> p1 / p2
+                else -> error("Could not interpret math operation ${finalValue.operator!!.text}")
+            }
+        }
         else -> error("Could not interpret $finalValue as an integer.")
     }
 }
-fun VariableValue.valueAsFloat(): Float {
-    val finalValue = this.deepResolve()
-    when (finalValue) {
-        is NodeConstant -> return finalValue.valueText.toFloat()
-        is NodeNegate -> return -finalValue.paramAsVariableValue.valueAsFloat()
-        else -> error("Could not interpret $finalValue as a float.")
-    }
-}
+fun VariableValue.valueAsInt32(): Int = valueAsNumber().toInt()
+fun VariableValue.valueAsFloat(): Float = valueAsNumber().toFloat()
 fun VariableValue.valueAsString(): String {
     val finalValue = this.deepResolve()
     when (finalValue) {
