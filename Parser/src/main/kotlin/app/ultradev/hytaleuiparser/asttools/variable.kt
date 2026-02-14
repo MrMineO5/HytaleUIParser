@@ -24,6 +24,7 @@ fun VariableValue.valueAsFloat(): Float {
     val finalValue = this.deepResolve()
     when (finalValue) {
         is NodeConstant -> return finalValue.valueText.toFloat()
+        is NodeNegate -> return -finalValue.paramAsVariableValue.valueAsFloat()
         else -> error("Could not interpret $finalValue as a float.")
     }
 }

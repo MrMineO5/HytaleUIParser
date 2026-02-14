@@ -1,8 +1,9 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
-import app.ultradev.hytaleuiparser.renderer.GameFonts
+import app.ultradev.hytaleuiparser.renderer.text.GameFonts
 import app.ultradev.hytaleuiparser.renderer.NineSlice
 import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.text.TextRenderInfo
 import java.awt.Color
 import java.awt.Graphics
 import java.awt.font.TextAttribute
@@ -36,19 +37,9 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         graphics.fillRect(x, y, width, height)
     }
 
-    override fun renderText(text: String, x: Int, y: Int, color: Color,
-                            isBold: Boolean, isItalics: Boolean, isUnderlined: Boolean,
-                            isSecondary: Boolean
-    ) {
-        val attrs = HashMap<TextAttribute, Int>()
-        if (isUnderlined) attrs[TextAttribute.UNDERLINE] = TextAttribute.UNDERLINE_ON
-        if (isItalics) attrs[TextAttribute.POSTURE] = TextAttribute.POSTURE_OBLIQUE.toInt()
-        
-        attrs[TextAttribute.SIZE] = 16
-        
+    override fun renderText(text: String, x: Int, y: Int, color: Color, info: TextRenderInfo) {
         graphics.color = color
-        graphics.font = (if (isBold) GameFonts.defaultBold else GameFonts.default)
-            .deriveFont(attrs)
+        graphics.font = info.font
         graphics.drawString(text, x, y)
     }
 }

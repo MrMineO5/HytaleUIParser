@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
 import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.text.TextRenderInfo
 import java.awt.Color
 import java.awt.image.BufferedImage
 
@@ -16,6 +17,7 @@ interface RenderTarget {
         horizontalBorder: Int = 0,
         verticalBorder: Int = 0
     )
+
     fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int)
 
     fun renderText(
@@ -23,9 +25,6 @@ interface RenderTarget {
         x: Int,
         y: Int,
         color: Color,
-        isBold: Boolean = false,
-        isItalics: Boolean = false,
-        isUnderlined: Boolean = false,
-        isSecondary: Boolean = false
+        info: TextRenderInfo,
     )
 }

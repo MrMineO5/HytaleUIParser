@@ -4,6 +4,7 @@ import app.ultradev.hytaleuiparser.Parser
 import app.ultradev.hytaleuiparser.Tokenizer
 import app.ultradev.hytaleuiparser.Validator
 import app.ultradev.hytaleuiparser.ast.RootNode
+import app.ultradev.hytaleuiparser.renderer.layout.LayoutPass
 import app.ultradev.hytaleuiparser.renderer.target.AWTRenderTarget
 import java.awt.Dimension
 import java.awt.Graphics
@@ -40,8 +41,9 @@ object TestRenderer {
         val validator = Validator(assets)
         val testPage = validator.validateRoot("Pages/LaunchPadSettingsPage.ui") ?: error("Failed to validate page")
 
-        val elements = UITransformer(testPage).buildElementList(RenderBox(0, 0, 1800, 900))
-        println(elements.joinToString("\n") { it.node.toString() + it.box.toString() + it.background.toString() })
+        val rootUIElement = UITransformer.transform(testPage)
+        rootUIElement.box = RenderBox(0, 0, 1800, 900)
+        LayoutPass.run(rootUIElement)
 
         frame.add(
             object : JPanel() {
@@ -51,7 +53,7 @@ object TestRenderer {
 
                 override fun paintComponent(g: Graphics) {
                     val target = AWTRenderTarget(g)
-                    elements.forEach { it.draw(target) }
+                    rootUIElement.draw0(target)
 //                    target.renderImage(image, 0, 0, 800, 600, 23, 23)
                 }
             }

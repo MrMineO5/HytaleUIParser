@@ -1,4 +1,4 @@
-package app.ultradev.hytaleuiparser.renderer
+package app.ultradev.hytaleuiparser.renderer.text
 
 import java.awt.Font
 
