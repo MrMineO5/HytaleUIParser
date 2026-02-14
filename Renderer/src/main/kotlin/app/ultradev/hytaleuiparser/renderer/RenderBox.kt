@@ -2,6 +2,11 @@ package app.ultradev.hytaleuiparser.renderer
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
 import app.ultradev.hytaleuiparser.generated.types.Padding
+import app.ultradev.hytaleuiparser.renderer.extensions.bottomFallback
+import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback
+import app.ultradev.hytaleuiparser.renderer.extensions.rightFallback
+import app.ultradev.hytaleuiparser.renderer.extensions.topFallback
+import app.ultradev.hytaleuiparser.renderer.layout.LayoutTools
 import kotlin.math.max
 
 data class RenderBox(
@@ -12,29 +17,19 @@ data class RenderBox(
 ) {
 
     fun withAnchor(anchor: Anchor): RenderBox {
-        val parentStartX = x
-        val parentEndX = x + width
-        val parentStartY = y
-        val parentEndY = y + height
-
-        val left: Int? = anchor.left ?: anchor.horizontal ?: anchor.full
-        val right: Int? = anchor.right ?: anchor.horizontal ?: anchor.full
-        val top: Int? = anchor.top ?: anchor.vertical ?: anchor.full
-        val bottom: Int? = anchor.bottom ?: anchor.vertical ?: anchor.full
-
-        val (newX, newEndX) = resolveAxis(
-            parentStart = parentStartX,
-            parentEnd = parentEndX,
-            startOffset = left,
-            endOffset = right,
+        val (newX, newEndX) = LayoutTools.resolveAxis(
+            parentStart = x,
+            parentEnd = x + width,
+            startOffset = anchor.leftFallback(),
+            endOffset = anchor.rightFallback(),
             size = anchor.width
         )
 
-        val (newY, newEndY) = resolveAxis(
-            parentStart = parentStartY,
-            parentEnd = parentEndY,
-            startOffset = top,
-            endOffset = bottom,
+        val (newY, newEndY) = LayoutTools.resolveAxis(
+            parentStart = y,
+            parentEnd = y + height,
+            startOffset = anchor.topFallback(),
+            endOffset = anchor.bottomFallback(),
             size = anchor.height
         )
 
@@ -52,33 +47,5 @@ data class RenderBox(
         val left = padding.left ?: padding.horizontal ?: padding.full ?: 0
         val right = padding.right ?: padding.horizontal ?: padding.full ?: 0
         return RenderBox(x + left, y + top, width - left - right, height - top - bottom)
-    }
-
-    private fun resolveAxis(
-        parentStart: Int,
-        parentEnd: Int,
-        startOffset: Int?, // null = not pinned
-        endOffset: Int?,   // null = not pinned
-        size: Int?
-    ): Pair<Int, Int> {
-        val startPinned = startOffset != null
-        val endPinned = endOffset != null
-
-        var s = parentStart + (startOffset ?: 0)
-        var e = parentEnd - (endOffset ?: 0)
-
-        if (size != null && !(startPinned && endPinned)) {
-            when {
-                startPinned -> e = s + size
-                endPinned -> s = e - size
-                else -> {
-                    s = parentStart + (parentEnd - parentStart - size) / 2
-                    e = s + size
-                }
-            }
-        }
-
-        if (e < s) e = s
-        return s to e
     }
 }

@@ -1,12 +1,10 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
-import app.ultradev.hytaleuiparser.renderer.text.GameFonts
 import app.ultradev.hytaleuiparser.renderer.NineSlice
 import app.ultradev.hytaleuiparser.renderer.RenderBox
-import app.ultradev.hytaleuiparser.renderer.text.TextRenderInfo
+import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 import java.awt.Graphics
-import java.awt.font.TextAttribute
 import java.awt.image.BufferedImage
 
 class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
@@ -37,9 +35,11 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         graphics.fillRect(x, y, width, height)
     }
 
-    override fun renderText(text: String, x: Int, y: Int, color: Color, info: TextRenderInfo) {
+    override fun renderText(text: String, box: RenderBox, color: Color, info: TextRenderStyle) {
+        val (tx, ty) = info.calculateAlignment(box, text)
+
         graphics.color = color
         graphics.font = info.font
-        graphics.drawString(text, x, y)
+        graphics.drawString(text, tx, ty)
     }
 }

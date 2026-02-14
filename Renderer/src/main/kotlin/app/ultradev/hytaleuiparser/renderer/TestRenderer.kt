@@ -42,7 +42,7 @@ object TestRenderer {
         val testPage = validator.validateRoot("Pages/LaunchPadSettingsPage.ui") ?: error("Failed to validate page")
 
         val rootUIElement = UITransformer.transform(testPage)
-        rootUIElement.box = RenderBox(0, 0, 1800, 900)
+        rootUIElement.box = RenderBox(50, 50, 1600, 800)
         LayoutPass.run(rootUIElement)
 
         frame.add(

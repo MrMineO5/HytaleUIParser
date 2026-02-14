@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
 import app.ultradev.hytaleuiparser.renderer.RenderBox
-import app.ultradev.hytaleuiparser.renderer.text.TextRenderInfo
+import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 import java.awt.image.BufferedImage
 
@@ -22,9 +22,8 @@ interface RenderTarget {
 
     fun renderText(
         text: String,
-        x: Int,
-        y: Int,
+        box: RenderBox,
         color: Color,
-        info: TextRenderInfo,
+        info: TextRenderStyle,
     )
 }

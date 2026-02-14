@@ -30,8 +30,8 @@ data class UIElementBackground(
 
     companion object {
         fun fromPatchStyle(style: PatchStyle): UIElementBackground {
-            val image = style.texturePath?.let {
-                val path = TestRenderer.basePath.resolve(style.texturePath)
+            val image = style.texturePath?.let { texturePath ->
+                val path = TestRenderer.basePath.resolve(texturePath)
                 if (!path.exists()) {
                     // try @2x and scale it
                     // TODO: Handle antialiasing

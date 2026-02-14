@@ -3,15 +3,28 @@ package app.ultradev.hytaleuiparser.renderer.layout
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutFull
+import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutLeft
+import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutMiddle
+import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutTop
 
 interface Layout {
     fun doLayout(element: BranchUIElement)
 
+    fun contentDesiredWidth(element: BranchUIElement): Int
+    fun contentDesiredHeight(element: BranchUIElement): Int
+
     companion object {
         fun get(mode: LayoutMode): Layout {
             return when (mode) {
+                LayoutMode.Full -> LayoutFull
+                LayoutMode.Top -> LayoutTop
+                LayoutMode.Left -> LayoutLeft
+                LayoutMode.Middle -> LayoutMiddle
                 // TODO: Support more modes
-                else -> LayoutFull
+                else -> {
+                    System.err.println("Warning: Unimplemented layout mode: $mode")
+                    LayoutFull
+                }
             }
         }
     }
