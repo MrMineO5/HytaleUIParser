@@ -1,5 +1,8 @@
 package app.ultradev.hytaleuiparser.codegen
 
+import app.ultradev.hytaleuiparser.ast.NodeColor
+import app.ultradev.hytaleuiparser.ast.NodeConstant
+import app.ultradev.hytaleuiparser.ast.NodeType
 import app.ultradev.hytaleuiparser.ast.VariableValue
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 import com.squareup.kotlinpoet.*
@@ -120,10 +123,32 @@ object TypeGen {
             FunSpec.builder("fromVariable")
                 .addParameter("variable", VariableValue::class)
                 .returns(getTypeName(type))
+                .addStatement($$"val resolved = variable.deepResolve() ?: error(\"Could not resolve variable: $variable\")")
+                .beginControlFlow("return when (resolved)")
+                .also {
+                    if (type == TypeType.PatchStyle) {
+                        it.addStatement(
+                            "is %T -> %T(texturePath = resolved.%M())",
+                            typeNameOf<NodeConstant>(),
+                            getTypeName(type),
+                            MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsPath")
+                        )
+                        it.addStatement(
+                            "is %T -> %T(color = resolved.%M())",
+                            typeNameOf<NodeColor>(),
+                            getTypeName(type),
+                            MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsColor")
+                        )
+                    }
+                }
                 .addStatement(
-                    "return fromProperties(variable.%M())",
-                    MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsProperties")
+                    "is %T -> fromProperties(resolved.resolveValue())",
+                    typeNameOf<NodeType>(),
                 )
+                .addStatement(
+                    $$"else -> error(\"Could not convert $resolved into $${type.name}\")"
+                )
+                .endControlFlow()
                 .build()
         )
         companion.addFunction(
