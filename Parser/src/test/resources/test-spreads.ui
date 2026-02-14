@@ -1,0 +1,6 @@
+@Sounds = (Activate: ());
+@TestObject = DropdownBoxStyle(Sounds: @Sounds);
+
+@TestVariable = (...@TestObject);
+@TestMember = (...@TestVariable.Sounds);
+@TestDeepMember = (...@TestVariable.Sounds.Activate);

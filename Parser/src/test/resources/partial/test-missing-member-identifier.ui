@@ -1,0 +1,2 @@
+@Var1 = (Unchecked: ());
+@Var2 = @Var1.;
