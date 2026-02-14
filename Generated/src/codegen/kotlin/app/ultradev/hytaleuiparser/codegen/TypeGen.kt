@@ -13,7 +13,7 @@ object TypeGen {
         TypeType.entries.forEach(::generateType)
     }
 
-    private fun getTypeName(type: TypeType): ClassName {
+    fun getTypeName(type: TypeType): ClassName {
         return if (type.isPrimitive) {
             when (type) {
                 TypeType.String -> String::class.asTypeName()
@@ -64,7 +64,7 @@ object TypeGen {
     }
 
 
-    private fun convertProperty(name: String, type: TypeType): CodeBlock {
+    fun convertProperty(name: String, type: TypeType): CodeBlock {
         if (type.isPrimitive) {
             // Special case for paths
             if (name == "TexturePath") {
@@ -88,6 +88,7 @@ object TypeGen {
             )
         }
     }
+
 
     private fun generateStruct(type: TypeType): TypeSpec {
         val structClass = TypeSpec.classBuilder(type.name)

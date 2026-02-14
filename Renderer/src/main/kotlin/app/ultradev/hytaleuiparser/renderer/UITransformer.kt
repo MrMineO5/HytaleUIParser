@@ -6,6 +6,7 @@ import app.ultradev.hytaleuiparser.ast.NodeElementWithSelector
 import app.ultradev.hytaleuiparser.ast.RootNode
 import app.ultradev.hytaleuiparser.ast.VariableValue
 import app.ultradev.hytaleuiparser.asttools.valueAsString
+import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.types.Anchor
 import app.ultradev.hytaleuiparser.generated.types.Padding
 import app.ultradev.hytaleuiparser.generated.types.PatchStyle
@@ -57,13 +58,15 @@ class UITransformer(val root: RootNode) {
     }
 
     private fun createUIElement(node: AstNode, type: ElementType, properties: Map<String, VariableValue>, parentBox: RenderBox): RenderBox {
-        val anchor = properties["Anchor"]?.let(Anchor::fromVariable) ?: Anchor.EMPTY
-        val padding = properties["Padding"]?.let(Padding::fromVariable) ?: Padding.EMPTY
+        val elementProps = ElementProperties.fromProperties(type, properties)
+
+        val anchor = elementProps.anchor ?: Anchor.EMPTY
+        val padding = elementProps.padding ?: Padding.EMPTY
 
         val selfBox = parentBox.withAnchor(anchor)
         val childBox = selfBox.withPadding(padding)
 
-        val background = properties["Background"]?.let(PatchStyle::fromVariable) ?: PatchStyle.EMPTY
+        val background = elementProps.background ?: PatchStyle.EMPTY
 
         val element = when (type) {
             ElementType.Label -> {

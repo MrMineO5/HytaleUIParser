@@ -11,4 +11,5 @@ fun main(args: Array<String>) {
     CodeGen.outputDir = outputDir
 
     TypeGen.generateTypes()
+    ElementGen.generateElements()
 }
