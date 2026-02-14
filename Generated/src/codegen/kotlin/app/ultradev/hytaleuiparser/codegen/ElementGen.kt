@@ -22,7 +22,7 @@ object ElementGen {
             .also {
                 Elements.COMMON_PROPERTIES.forEach { (name, type) ->
                     it.addProperty(
-                        PropertySpec.builder(name.lowercaseFirstChar(), TypeGen.getTypeName(type))
+                        PropertySpec.builder(name.lowercaseFirstChar(), TypeGen.getTypeName(type).copy(nullable = true))
                             .build()
                     )
                 }
@@ -96,7 +96,7 @@ object ElementGen {
                 .addCode("return %T(\n", className)
                 .also {
                     type.properties.forEach { (name, type) ->
-                        it.addCode("    %L = %L ?: %L,\n", name.lowercaseFirstChar(), TypeGen.convertProperty(name, type))
+                        it.addCode("    %L = %L,\n", name.lowercaseFirstChar(), TypeGen.convertProperty(name, type))
                     }
                 }
                 .addCode(")")
