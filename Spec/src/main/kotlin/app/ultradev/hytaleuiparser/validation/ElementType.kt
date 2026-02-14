@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.validation
 
 import app.ultradev.hytaleuiparser.validation.types.TypeType
-import kotlin.collections.plus
+import java.util.*
 
 enum class ElementType {
     Group(
@@ -18,7 +18,8 @@ enum class ElementType {
             "Style" to TypeType.LabelStyle,
             "Seconds" to TypeType.Int32,
             "Text" to TypeType.String,
-        )
+        ),
+        false
     ),
     Label(
         mapOf(
@@ -26,20 +27,21 @@ enum class ElementType {
             "Text" to TypeType.String,
             // This MUST be localisation string - aka "Message".
             "TextSpans" to TypeType.String,
-        )
+        ),
+        false
     ),
     TextButton(
         Elements.BUTTON_PROPERTIES + mapOf(
             "Text" to TypeType.String,
             "Style" to TypeType.TextButtonStyle,
             "Disabled" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     Button(
         Elements.BUTTON_PROPERTIES + mapOf(
             "Style" to TypeType.ButtonStyle,
             "LayoutMode" to TypeType.LayoutMode,
-
         )
     ),
     CheckBox(
@@ -47,7 +49,8 @@ enum class ElementType {
             "Style" to TypeType.CheckBoxStyle,
             "Value" to TypeType.Boolean,
             "Disabled" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     CheckBoxContainer(
         Group.properties
@@ -66,7 +69,8 @@ enum class ElementType {
             "AutoFocus" to TypeType.Boolean,
             "AutoSelectAll" to TypeType.Boolean,
             "IsReadOnly" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     NumberField(
         mapOf(
@@ -80,6 +84,17 @@ enum class ElementType {
             "AutoSelectAll" to TypeType.Boolean,
             "IsReadOnly" to TypeType.Boolean,
             "MaxLength" to TypeType.Int32,
+        ),
+        false
+    ),
+    DropdownEntry(
+        mapOf(
+            "Text" to TypeType.String,
+            "LayoutMode" to TypeType.LayoutMode,
+            "Value" to TypeType.String,
+            "Selected" to TypeType.Boolean,
+            "Disabled" to TypeType.Boolean,
+            "Style" to TypeType.ButtonStyle,
         )
     ),
     DropdownBox(
@@ -98,7 +113,8 @@ enum class ElementType {
             "ShowSearchInput" to TypeType.Boolean,
             "ForcedLabel" to TypeType.String,
             "DisplayNonExistingValue" to TypeType.Boolean,
-        )
+        ),
+        requiredChildTypes = EnumSet.of(DropdownEntry)
     ),
     Sprite(
         mapOf(
@@ -109,7 +125,8 @@ enum class ElementType {
             "AutoPlay" to TypeType.Boolean,
             "Angle" to TypeType.Float,
             "RepeatCount" to TypeType.Int32,
-        )
+        ),
+        false
     ),
     CompactTextField(
         mapOf(
@@ -126,7 +143,8 @@ enum class ElementType {
             "AutoSelectAll" to TypeType.String,
             "IsReadOnly" to TypeType.String,
             "MaxLength" to TypeType.Int32,
-        )
+        ),
+        false
     ),
     FloatSlider(
         mapOf(
@@ -135,7 +153,8 @@ enum class ElementType {
             "Max" to TypeType.Float,
             "Step" to TypeType.Float,
             "Value" to TypeType.Float,
-        )
+        ),
+        false
     ),
     MultilineTextField(
         mapOf(
@@ -156,7 +175,8 @@ enum class ElementType {
             "MaxVisibleLines" to TypeType.Int32,
             "ContentPadding" to TypeType.PatchStyle,
             "PlaceholderText" to TypeType.String,
-        )
+        ),
+        false
     ),
     ColorPickerDropdownBox(
         mapOf(
@@ -165,7 +185,8 @@ enum class ElementType {
             "DisplayTextField" to TypeType.Boolean,
             "ResetTransparencyWhenChangingColor" to TypeType.Boolean,
             "IsReadOnly" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     CircularProgressBar(
         mapOf(
@@ -173,7 +194,8 @@ enum class ElementType {
             // Path to texture for background of circular pg.
             "MaskTexturePath" to TypeType.String,
             "Color" to TypeType.Color,
-        )
+        ),
+        false
     ),
     CodeEditor(
         mapOf(
@@ -195,17 +217,21 @@ enum class ElementType {
             "AutoGrow" to TypeType.Boolean,
             "ContentPadding" to TypeType.Padding,
             "PlaceholderText" to TypeType.String,
-        )
+        ),
+        false
     ),
+
+    // This is in the docs, but it... doesn't exist
     ColorOptionGrid(
-      mapOf(
-          // TODO: How does this even work? List<ColorOption> which is not defined
-          //  anywhere.
-          //"ColorOptions" to TypeType.ColorOption
-          "ColorsPerRow" to TypeType.Int32,
-          //"Selected" to TypeType.ColorOption
-          "Style" to TypeType.ColorOptionGridStyle,
-      )
+        mapOf(
+            // TODO: How does this even work? List<ColorOption> which is not defined
+            //  anywhere.
+            //"ColorOptions" to TypeType.ColorOption
+            "ColorsPerRow" to TypeType.Int32,
+            //"Selected" to TypeType.ColorOption
+            "Style" to TypeType.ColorOptionGridStyle,
+        ),
+        false
     ),
     ProgressBar(
         mapOf(
@@ -223,7 +249,8 @@ enum class ElementType {
             "EffectOffset" to TypeType.Int32,
             "Direction" to TypeType.ProgressBarDirection,
             "Alignment" to TypeType.ProgressBarAlignment,
-        )
+        ),
+        false
     ),
     Slider(
         mapOf(
@@ -233,7 +260,8 @@ enum class ElementType {
             "Step" to TypeType.Int32,
             "Value" to TypeType.Int32,
             "IsReadOnly" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     ItemSlotButton(
         mapOf(
@@ -250,7 +278,8 @@ enum class ElementType {
             "ItemId" to TypeType.String,
             "Quantity" to TypeType.Int32,
             "ShowDurabilityBar" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     AssetImage(
         mapOf(
@@ -258,7 +287,7 @@ enum class ElementType {
             "AssetPath" to TypeType.String,
         )
     ),
-    SceneBlur,
+    SceneBlur(emptyMap(), false),
     ItemGrid(
         mapOf(
             "Style" to TypeType.ItemGridStyle,
@@ -275,12 +304,14 @@ enum class ElementType {
             "InventorySectionId" to TypeType.Int32,
             "AllowMaxStackDraggableItems" to TypeType.Boolean,
             "DisplayItemQuantity" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
     ItemIcon(
         mapOf(
             "ItemId" to TypeType.String,
-        )
+        ),
+        false
     ),
     ColorPicker(
         mapOf(
@@ -289,29 +320,40 @@ enum class ElementType {
             "Value" to TypeType.Color,
             "DisplayTextField" to TypeType.Boolean,
             "ResetTransparencyWhenChangingColor" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
 
-    // CLIENT elements
-
-    // NOT working on mods.
     BackgroundImage(
         mapOf(
             // Image is a path.
             "Image" to TypeType.String,
             // Ultrawide image is a path.
             "ImageUW" to TypeType.String
+        ),
+        clientOnly = true,
+    ),
+    TabButton(
+        mapOf(
+            "Id" to TypeType.String,
+            "Icon" to TypeType.PatchStyle,
+            "IconSelected" to TypeType.PatchStyle,
+            "IconAnchor" to TypeType.Anchor,
+            "LayoutMode" to TypeType.LayoutMode,
+            "Text" to TypeType.String,
+            "Disabled" to TypeType.Boolean,
+            "Style" to TypeType.ButtonStyle,
         )
     ),
-
-    // WORKING on mods.
     TabNavigation(
         mapOf(
             "Style" to TypeType.TabNavigationStyle,
             "SelectedTab" to TypeType.String,
             "AllowUnselection" to TypeType.Boolean,
-        )
+        ),
+        requiredChildTypes = EnumSet.of(TabButton)
     ),
+
     // WORKING on mods.
     ToggleButton(
         mapOf(
@@ -319,20 +361,23 @@ enum class ElementType {
             "CheckedStyle" to TypeType.ToggleButtonStyle,
             "IsChecked" to TypeType.Boolean,
             "Disabled" to TypeType.Boolean,
-
         )
     ),
-    // NOT working on mods. Will kick client with "Exception has been thrown by the target of an invocation".
+
+    // NOT working on mods. Invalid cast error on client
+    //  TODO: Figure out if there is a set we can send to the client to fix
     ItemPreviewComponent(
         mapOf(
             // We assume float...
             "ItemScale" to TypeType.Float,
             "ItemId" to TypeType.String,
-        )
+        ),
     ),
-    // NOT working on mods. Will kick client with "Exception has been thrown by the target of an invocation".
+
+    // NOT working on mods. Invalid cast error on client
+    //  TODO: Figure out if there is a set we can send to the client to fix
     CharacterPreviewComponent,
-    // WORKING on mods.
+
     SliderNumberField(
         mapOf(
             "SliderStyle" to TypeType.SliderStyle,
@@ -346,19 +391,17 @@ enum class ElementType {
             "NumberFieldMaxDecimalPlaces" to TypeType.Int32,
             "NumberFieldDefaultValue" to TypeType.Float,
             "NumberFieldSuffix" to TypeType.Float,
-
-        )
+        ),
+        false
     ),
-    // WORKING on mods.
     BlockSelector(
         mapOf(
-            // Whilst float is accepted, it is traditionally an Int32.
             "Capacity" to TypeType.Float,
             "Style" to TypeType.BlockSelectorStyle,
             "Value" to TypeType.String,
-        )
+        ),
+        false
     ),
-    // WORKING on mods.
     ReorderableListGrip(
         mapOf(
             "ScrollbarStyle" to TypeType.ScrollbarStyle,
@@ -366,7 +409,6 @@ enum class ElementType {
             "IsDragEnabled" to TypeType.Boolean,
         )
     ),
-    // WORKING on mods.
     ReorderableList(
         mapOf(
             "ScrollbarStyle" to TypeType.ScrollbarStyle,
@@ -375,20 +417,6 @@ enum class ElementType {
             "DropIndicatorBackground" to TypeType.PatchStyle,
         )
     ),
-    // WORKING on mods - MUST be a child of a TabNavigation element otherwise client crashes (NullReferenceException)
-    TabButton(
-        mapOf(
-            "Id" to TypeType.String,
-            "Icon" to TypeType.PatchStyle,
-            "IconSelected" to TypeType.PatchStyle,
-            "IconAnchor" to TypeType.Anchor,
-            "LayoutMode" to TypeType.LayoutMode,
-            "Text" to TypeType.String,
-            "Disabled" to TypeType.Boolean,
-            "Style" to TypeType.ButtonStyle,
-        )
-    ),
-    // WORKING on mods.
     FloatSliderNumberField(
         mapOf(
             "SliderStyle" to TypeType.SliderStyle,
@@ -401,9 +429,9 @@ enum class ElementType {
             "Max" to TypeType.Float,
             "Step" to TypeType.Float,
             "Value" to TypeType.Float,
-        )
+        ),
+        false
     ),
-    // WORKING on mods.
     ActionButton( // TODO: Should we create common properties for all buttons?
         Elements.BUTTON_PROPERTIES + mapOf(
             "KeyBindingLabel" to TypeType.String,
@@ -414,10 +442,12 @@ enum class ElementType {
             "IsAvailable" to TypeType.Boolean,
             "IsHoldBinding" to TypeType.Boolean,
             "LayoutMode" to TypeType.LayoutMode,
-        )
+        ),
+        false
     ),
     BackButton(
-        ActionButton.properties
+        ActionButton.properties,
+        false
     ),
     Panel(
         mapOf(
@@ -425,33 +455,38 @@ enum class ElementType {
             "ScrollbarStyle" to TypeType.ScrollbarStyle,
         )
     ),
-    // WORKING on mods.
     LabeledCheckBox(
         mapOf(
             "Style" to TypeType.LabeledCheckBoxStyle,
             "Value" to TypeType.Boolean,
             "Disabled" to TypeType.Boolean,
-        )
+        ),
+        false
     ),
-    // DOES NOT work on mods, unknown node type.
     PlayerPreviewComponent(
         mapOf(
             "Scale" to TypeType.Float,
-        )
+        ),
+        clientOnly = true
     ),
-    // WORKING on mods.
     HotkeyLabel(
         mapOf(
             "InputBindingKey" to TypeType.String,
             "InputBindingKeyPrefix" to TypeType.String,
             "InputBindingKeyPrefixBinding" to TypeType.String,
-        )
+        ),
+        false
     ),
-    // WORKING in mods.
+
+    /**
+     * Has no LayoutMode property but allows children
+     *
+     * Children are laid out equivalently to LayoutMode: Left
+     */
     MenuItem(
         mapOf(
             "Text" to TypeType.String,
-            // MESSAGE data type.
+            // TODO: IList`1
             "TextSpans" to TypeType.String,
             "PopupStyle" to TypeType.PopupStyle,
             "Style" to TypeType.TextButtonStyle,
@@ -460,16 +495,6 @@ enum class ElementType {
             "IconAnchor" to TypeType.Anchor,
             "IsSelected" to TypeType.Boolean,
             "Disabled" to TypeType.Boolean,
-        )
-    ),
-    DropdownEntry(
-        mapOf(
-            "Text" to TypeType.String,
-            "LayoutMode" to TypeType.LayoutMode,
-            "Value" to TypeType.String,
-            "Selected" to TypeType.Boolean,
-            "Disabled" to TypeType.Boolean,
-            "Style" to TypeType.ButtonStyle,
         )
     ),
     DynamicPane(
@@ -492,21 +517,34 @@ enum class ElementType {
     ;
 
     val properties: Map<String, TypeType>
+    val allowsChildren: Boolean
+    val clientOnly: Boolean
 
-    constructor() : this(emptyMap())
-    constructor(properties: Map<String, TypeType>) {
+    val requiredChildTypes: Set<ElementType>
+
+    constructor(
+        properties: Map<String, TypeType> = emptyMap(),
+        allowsChildren: Boolean = true,
+        clientOnly: Boolean = false,
+        requiredChildTypes: Set<ElementType> = emptySet()
+    ) {
         this.properties = Elements.COMMON_PROPERTIES + properties
+        this.allowsChildren = allowsChildren
+        this.clientOnly = clientOnly
+        this.requiredChildTypes = requiredChildTypes
     }
 
+    @Deprecated(
+        "Use allowsChildren field instead",
+        replaceWith = ReplaceWith("this.allowsChildren")
+    )
     fun allowsChildren(): Boolean {
-        return when (this) {
-            SceneBlur -> false
-            else -> true
-        }
+        return allowsChildren
     }
 
 
     fun displayFullStructure(): String {
-        return "element " + this.name + " {\n" + properties.map { (key, value) -> "   $key: ${value.name}\n" }.joinToString("") + "}"
+        return "element " + this.name + " {\n" + properties.map { (key, value) -> "   $key: ${value.name}\n" }
+            .joinToString("") + "}"
     }
 }

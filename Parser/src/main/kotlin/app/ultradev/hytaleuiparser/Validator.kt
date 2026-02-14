@@ -224,8 +224,19 @@ class Validator(
 
         if (elementType == null) return
 
-        if (!elementType.allowsChildren() && node.childElements.isNotEmpty())
+        if (!elementType.allowsChildren && node.childElements.isNotEmpty())
             validationErrors.add(ValidatorError("Element ${elementType.name} does not allow children", node))
+
+        if (elementType.requiredChildTypes.isNotEmpty()) {
+            val errorMessage by lazy {
+                "$elementType can only contain children of type: ${elementType.requiredChildTypes.joinToString(", ")}"
+            }
+            node.childElements.forEach {
+                if (it.resolvedType !in elementType.requiredChildTypes) {
+                    validationError(errorMessage, it)
+                }
+            }
+        }
 
         node.resolvedType = elementType
 
