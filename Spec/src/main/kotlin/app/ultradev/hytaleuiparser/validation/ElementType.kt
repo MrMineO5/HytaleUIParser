@@ -114,7 +114,7 @@ enum class ElementType {
             "ForcedLabel" to TypeType.String,
             "DisplayNonExistingValue" to TypeType.Boolean,
         ),
-        requiredChildTypes = EnumSet.of(DropdownEntry)
+        requiredChildTypes = setOf(DropdownEntry)
     ),
     Sprite(
         mapOf(
@@ -351,7 +351,7 @@ enum class ElementType {
             "SelectedTab" to TypeType.String,
             "AllowUnselection" to TypeType.Boolean,
         ),
-        requiredChildTypes = EnumSet.of(TabButton)
+        requiredChildTypes = setOf(TabButton)
     ),
 
     // WORKING on mods.
