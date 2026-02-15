@@ -9,6 +9,7 @@ import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.rightFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.topFallback
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
+import java.awt.Point
 
 abstract class AbstractUIElement(
     val node: AstNode
@@ -50,12 +51,12 @@ abstract class AbstractUIElement(
     fun totalHeight(): Int = desiredHeight() + (properties.anchor?.topFallback() ?: 0) + (properties.anchor?.bottomFallback() ?: 0)
 
 
-    fun draw0(target: RenderTarget) {
-        draw(target)
-        afterDraw(target)
+    fun draw0(target: RenderTarget, mousePosition: Point) {
+        draw(target, mousePosition)
+        afterDraw(target, mousePosition)
     }
-    open fun draw(target: RenderTarget) {
+    open fun draw(target: RenderTarget, mousePosition: Point) {
         background?.draw(target, box)
     }
-    open fun afterDraw(target: RenderTarget) {}
+    open fun afterDraw(target: RenderTarget, mousePosition: Point) {}
 }

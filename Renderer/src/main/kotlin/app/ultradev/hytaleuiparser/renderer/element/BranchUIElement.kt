@@ -4,6 +4,7 @@ import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
 import app.ultradev.hytaleuiparser.renderer.layout.Layout
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
+import java.awt.Point
 
 abstract class BranchUIElement(
     node: AstNode,
@@ -15,7 +16,7 @@ abstract class BranchUIElement(
     override fun contentDesiredHeight(): Int = Layout.get(layoutMode).contentDesiredHeight(this)
     override fun contentDesiredWidth(): Int = Layout.get(layoutMode).contentDesiredWidth(this)
 
-    override fun afterDraw(target: RenderTarget) {
-        visibleChildren.forEach { it.draw0(target) }
+    override fun afterDraw(target: RenderTarget, mousePosition: Point) {
+        visibleChildren.forEach { it.draw0(target, mousePosition) }
     }
 }

@@ -7,6 +7,7 @@ import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
+import java.awt.Point
 import java.awt.font.FontRenderContext
 
 class UILabelElement(
@@ -23,8 +24,8 @@ class UILabelElement(
         return textRenderInfo.getWidth(FontRenderContext(null, false, false), text)
     }
 
-    override fun draw(target: RenderTarget) {
-        super.draw(target)
+    override fun draw(target: RenderTarget, mousePosition: Point) {
+        super.draw(target, mousePosition)
         target.renderText(text, box, Color.WHITE, textRenderInfo)
     }
 }
