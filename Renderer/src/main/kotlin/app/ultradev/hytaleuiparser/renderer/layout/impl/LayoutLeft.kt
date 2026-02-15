@@ -12,25 +12,20 @@ object LayoutLeft : Layout {
     override fun doLayout(element: BranchUIElement) {
         val cbox = element.contentBox
 
-        var totalFlexWeight = 0
-        var totalNonFlexWidth = 0
-        element.visibleChildren.forEach { child ->
-            if (child.properties.flexWeight != null) {
-                totalFlexWeight += child.properties.flexWeight!!
-            } else {
-                totalNonFlexWidth += child.totalWidth()
-            }
-        }
-        // TODO: Rounding could be a problem for small width
-        val widthPerFlexWeight = if (totalFlexWeight > 0) (cbox.width - totalNonFlexWidth) / totalFlexWeight else 0
+        val flexMetrics = LayoutTools.flexMetrics(
+            element.visibleChildren,
+            cbox.width,
+            totalSize = { it.totalWidth() }
+        )
 
         var x = cbox.x
         element.visibleChildren.forEach { child ->
-            val width = if (child.properties.flexWeight == null) {
-                child.desiredWidth()
-            } else {
-                widthPerFlexWeight * child.properties.flexWeight!! - child.totalWidth() + child.desiredWidth()
-            }
+            val width = LayoutTools.resolveFlexSize(
+                child,
+                flexMetrics.sizePerFlexWeight,
+                totalSize = { it.totalWidth() },
+                desiredSize = { it.desiredWidth() }
+            )
 
             val (y, endY) = LayoutTools.resolveAxis(
                 cbox.y,

@@ -12,9 +12,20 @@ object LayoutTop : Layout {
     override fun doLayout(element: BranchUIElement) {
         val cbox = element.contentBox
 
+        val flexMetrics = LayoutTools.flexMetrics(
+            element.visibleChildren,
+            cbox.height,
+            totalSize = { it.totalHeight() }
+        )
+
         var y = cbox.y
         element.visibleChildren.forEach { child ->
-            val height = child.desiredHeight()
+            val height = LayoutTools.resolveFlexSize(
+                child,
+                flexMetrics.sizePerFlexWeight,
+                totalSize = { it.totalHeight() },
+                desiredSize = { it.desiredHeight() }
+            )
 
             val (x, endX) = LayoutTools.resolveAxis(
                 cbox.x,

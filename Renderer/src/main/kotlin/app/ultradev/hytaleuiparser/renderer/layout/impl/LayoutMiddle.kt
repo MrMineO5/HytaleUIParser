@@ -12,11 +12,21 @@ object LayoutMiddle : Layout {
     override fun doLayout(element: BranchUIElement) {
         val cbox = element.contentBox
 
-        val totalHeight = contentDesiredHeight(element)
+        val flexMetrics = LayoutTools.flexMetrics(
+            element.visibleChildren,
+            cbox.height,
+            totalSize = { it.totalHeight() }
+        )
+        val totalHeight = flexMetrics.totalNonFlexSize + flexMetrics.totalFlexWeight * flexMetrics.sizePerFlexWeight
 
         var y = cbox.y + (cbox.height - totalHeight) / 2
         element.visibleChildren.forEach { child ->
-            val height = child.desiredHeight()
+            val height = LayoutTools.resolveFlexSize(
+                child,
+                flexMetrics.sizePerFlexWeight,
+                totalSize = { it.totalHeight() },
+                desiredSize = { it.desiredHeight() }
+            )
 
             val (x, endX) = LayoutTools.resolveAxis(
                 cbox.x,
