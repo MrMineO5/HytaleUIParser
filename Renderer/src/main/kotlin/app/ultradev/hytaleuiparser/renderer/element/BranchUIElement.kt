@@ -16,6 +16,6 @@ abstract class BranchUIElement(
     override fun contentDesiredWidth(): Int = Layout.get(layoutMode).contentDesiredWidth(this)
 
     override fun afterDraw(target: RenderTarget) {
-        children.forEach { it.draw0(target) }
+        visibleChildren.forEach { it.draw0(target) }
     }
 }

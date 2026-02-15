@@ -4,12 +4,14 @@ import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.ast.NodeElement
 import app.ultradev.hytaleuiparser.ast.NodeElementWithSelector
 import app.ultradev.hytaleuiparser.ast.RootNode
+import app.ultradev.hytaleuiparser.generated.elements.ButtonProperties
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.GroupProperties
 import app.ultradev.hytaleuiparser.generated.elements.LabelProperties
 import app.ultradev.hytaleuiparser.generated.elements.TextButtonProperties
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.UnknownUIElement
+import app.ultradev.hytaleuiparser.renderer.element.impl.UIButtonElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UILabelElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UITextButtonElement
@@ -73,6 +75,7 @@ object UITransformer {
             is LabelProperties -> UILabelElement(node, properties)
             is TextButtonProperties -> UITextButtonElement(node, properties)
             is GroupProperties -> UIGroupElement(node, children, properties)
+            is ButtonProperties -> UIButtonElement(node, children, properties)
 
             else -> {
                 System.err.println("Warning: Unknown element type: ${properties::class.simpleName}")
