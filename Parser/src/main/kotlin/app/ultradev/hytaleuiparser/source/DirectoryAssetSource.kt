@@ -12,7 +12,7 @@ import kotlin.io.path.walk
 class DirectoryAssetSource(
     val directory: Path
 ) : AssetSource {
-    override fun listAssets(): List<Path> {
+    override fun listUIFiles(): List<Path> {
         return directory.walk()
             .filter { it.isRegularFile() && it.extension == "ui" }
             .map { it.relativeTo(directory) }
