@@ -260,12 +260,12 @@ enum class TypeType(
     // Text field styles - used by TextField, CompactTextField, MultilineTextField, NumberField, SliderNumberField, FloatSliderNumberField
     InputFieldStyle(
         mapOf(
+            "FontName" to String,
+            "FontSize" to Float,
             "TextColor" to Color,
-            "FontSize" to Int32,
+            "RenderUppercase" to Boolean,
             "RenderBold" to Boolean,
             "RenderItalics" to Boolean,
-            "RenderUppercase" to Boolean,
-            "FontName" to Boolean,
         )
     ),
     TextTooltipStyle(
