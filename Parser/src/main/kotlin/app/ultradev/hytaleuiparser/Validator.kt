@@ -4,6 +4,7 @@ import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
+import app.ultradev.hytaleuiparser.warning.ValidatorWarning
 
 class Validator(
     val files: Map<String, RootNode>,
@@ -11,6 +12,7 @@ class Validator(
 ) {
     private val validated: MutableSet<String> = mutableSetOf()
     val validationErrors: MutableList<ValidatorError> = mutableListOf()
+    val validationWarnings: MutableList<ValidatorWarning> = mutableListOf()
 
     private fun validationError(message: String, astNode: AstNode) {
         validationErrors.add(ValidatorError(message, astNode))
