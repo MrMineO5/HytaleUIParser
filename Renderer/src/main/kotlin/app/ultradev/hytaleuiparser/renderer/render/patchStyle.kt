@@ -14,7 +14,13 @@ fun drawPatchStyle(target: RenderTarget, context: RenderContext, box: RenderBox,
     // TODO: Image tinting
     if (style.texturePath != null) {
         val image = context.cache.images[style.texturePath!!]
-        target.renderImage(image, finalBox.x, finalBox.y, finalBox.width, finalBox.height)
+        target.renderImage(
+            image,
+            finalBox.x, finalBox.y,
+            finalBox.width, finalBox.height,
+            style.horizontalBorder ?: style.border ?: 0,
+            style.verticalBorder ?: style.border ?: 0
+            )
     } else if (style.color != null) {
         target.renderFill(style.color!!, finalBox.x, finalBox.y, finalBox.width, finalBox.height)
     }
