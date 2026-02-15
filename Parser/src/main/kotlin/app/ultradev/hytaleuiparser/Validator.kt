@@ -1,14 +1,18 @@
 package app.ultradev.hytaleuiparser
 
 import app.ultradev.hytaleuiparser.ast.*
+import app.ultradev.hytaleuiparser.source.AssetSource
+import app.ultradev.hytaleuiparser.source.AssetSources
 import app.ultradev.hytaleuiparser.validation.ElementType
 import app.ultradev.hytaleuiparser.validation.Scope
 import app.ultradev.hytaleuiparser.validation.types.TypeType
 import app.ultradev.hytaleuiparser.warning.ValidatorWarning
+import kotlin.io.path.Path
 
 class Validator(
     val files: Map<String, RootNode>,
     val validateUnusedVariables: Boolean = false,
+    val assetSource: AssetSource? = null
 ) {
     private val validated: MutableSet<String> = mutableSetOf()
     val validationErrors: MutableList<ValidatorError> = mutableListOf()
@@ -305,6 +309,30 @@ class Validator(
                         "Expected $type, got ${value::class.simpleName}",
                         value
                     )
+
+                    if (assetSource != null) {
+                        val key = value.value?.valueText ?: return
+                        val filename = key.substringBefore(".")
+                        val keyInFile = key.substringAfter(".")
+                        val file = assetSource.getAsset(Path("Server/Languages/en-US/${filename}.lang")) ?: return validationError(
+                            "Could not find translation file $filename.lang",
+                            value.value!!
+                        )
+                        val translation = file.bufferedReader()
+                            .lineSequence()
+                            .withIndex()
+                            .filter { (_, it) -> it.startsWith(keyInFile) }
+                            .mapValue { it.substringAfter(keyInFile).trim() }
+                            .filter { (_, it) -> it[0] == '=' }
+                            .mapValue { it.substring(1).trim() }
+                            .firstOrNull()
+                        if (translation == null) {
+                            return validationError("Could not find translation for key $key", value)
+                        }
+
+                        // TODO: Store line number and file for e.g. IDE navigation?
+                        value.resolvedTranslation = translation.value
+                    }
                 }
 
                 else -> return validationError("Expected ${type}, got ${value::class.simpleName}", node)

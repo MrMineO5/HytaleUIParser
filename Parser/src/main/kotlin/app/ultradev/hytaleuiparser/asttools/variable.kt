@@ -38,7 +38,7 @@ fun VariableValue.valueAsString(): String {
     val finalValue = this.deepResolve()
     when (finalValue) {
         is NodeConstant -> return finalValue.valueText
-        is NodeTranslation -> return finalValue.value?.text ?: "null" // TODO: Get translation from lang file?
+        is NodeTranslation -> return finalValue.resolvedTranslation ?: finalValue.text
         else -> error("Could not interpret $finalValue as a string.")
     }
 }

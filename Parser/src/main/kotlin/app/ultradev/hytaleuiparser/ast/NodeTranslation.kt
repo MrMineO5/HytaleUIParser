@@ -13,5 +13,7 @@ class NodeTranslation(
     override val resolvedTypes: Set<TypeType>
         get() = setOf(TypeType.String)
 
+    var resolvedTranslation: String? = null
+
     override fun clone() = NodeTranslation(children.clone(), valid)
 }
