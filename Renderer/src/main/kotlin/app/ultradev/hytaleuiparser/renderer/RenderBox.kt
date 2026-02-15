@@ -18,6 +18,8 @@ data class RenderBox(
     fun contains(px: Int, py: Int) = px in x..(x + width) && py in y..(y + height)
 
     fun withAnchor(anchor: Anchor): RenderBox {
+        if (anchor == Anchor.EMPTY) return this
+
         val (newX, newEndX) = LayoutTools.resolveAxis(
             parentStart = x,
             parentEnd = x + width,
