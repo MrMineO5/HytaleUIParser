@@ -32,10 +32,10 @@ class UINumberFieldElement(
 
     override fun draw(target: RenderTarget, context: RenderContext) {
         super.draw(target, context)
-        if (text.isEmpty()) {
-            target.renderText(text, box, textRenderInfo)
+        if (text.isNotEmpty()) {
+            target.renderText(text, contentBox, textRenderInfo)
         } else {
-            target.renderText("0", box, placeholderTextRenderInfo) // TODO: Placeholder value?
+            target.renderText("0", contentBox, placeholderTextRenderInfo) // TODO: Placeholder value?
         }
     }
 
