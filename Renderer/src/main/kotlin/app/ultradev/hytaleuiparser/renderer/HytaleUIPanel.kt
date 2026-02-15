@@ -4,12 +4,16 @@ import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutPass
 import app.ultradev.hytaleuiparser.renderer.target.AWTRenderTarget
+import java.awt.Cursor
 import java.awt.Graphics
 import java.awt.Point
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.awt.event.MouseMotionAdapter
 import java.awt.event.MouseMotionListener
+import java.awt.event.MouseWheelEvent
 import java.awt.image.BufferedImage
 import javax.swing.JPanel
 
@@ -20,12 +24,32 @@ class HytaleUIPanel(
     val context = RenderContext()
 
     init {
-        addMouseMotionListener(object : MouseMotionListener {
-            override fun mouseDragged(e: MouseEvent) {
+        context.setCursor = ::setCursor
+
+        addMouseMotionListener(object : MouseMotionAdapter() {
+            override fun mouseMoved(e: MouseEvent) {
+                context.mousePosition = e.point
+                element.mouseMoved(context)
+                context.previousMousePosition = context.mousePosition
+                repaint()
+            }
+        })
+
+        addMouseListener(object : MouseAdapter() {
+            override fun mousePressed(e: MouseEvent) {
+                context.mousePosition = e.point
+                element.mouseDown(context)
+                repaint()
             }
 
-            override fun mouseMoved(e: MouseEvent) {
+            override fun mouseReleased(e: MouseEvent) {
+                context.mousePosition = e.point
+                element.mouseUp(context)
                 repaint()
+            }
+
+            override fun mouseWheelMoved(e: MouseWheelEvent) {
+                if (e.scrollType != MouseWheelEvent.WHEEL_UNIT_SCROLL) return
             }
         })
 
@@ -43,8 +67,6 @@ class HytaleUIPanel(
     }
 
     override fun paintComponent(g: Graphics) {
-        context.mousePosition = mousePosition ?: Point(0, 0)
-
         g.clearRect(0, 0, width, height)
 
         if (backgroundImage != null) {

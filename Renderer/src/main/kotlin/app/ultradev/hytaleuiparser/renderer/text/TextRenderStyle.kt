@@ -1,5 +1,6 @@
 package app.ultradev.hytaleuiparser.renderer.text
 
+import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
 import app.ultradev.hytaleuiparser.generated.types.LabelAlignment
 import app.ultradev.hytaleuiparser.generated.types.LabelStyle
 import app.ultradev.hytaleuiparser.renderer.RenderBox
@@ -78,6 +79,19 @@ data class TextRenderStyle(
                 style.renderUnderlined ?: false,
                 style.horizontalAlignment ?: style.alignment ?: LabelAlignment.Start,
                 style.verticalAlignment ?: style.alignment ?: LabelAlignment.Start,
+            )
+        }
+
+        fun fromInputFieldStyle(style: InputFieldStyle): TextRenderStyle {
+            return TextRenderStyle(
+                style.fontName ?: "Default",
+                style.fontSize ?: 16f,
+                style.textColor ?: Color.WHITE,
+                style.renderBold ?: false,
+                style.renderItalics ?: false,
+                false,
+                LabelAlignment.Start,
+                LabelAlignment.Center,
             )
         }
     }

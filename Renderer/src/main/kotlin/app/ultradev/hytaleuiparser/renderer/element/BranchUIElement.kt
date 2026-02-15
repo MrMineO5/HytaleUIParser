@@ -21,4 +21,23 @@ abstract class BranchUIElement(
     override fun afterDraw(target: RenderTarget, context: RenderContext) {
         visibleChildren.forEach { it.draw0(target, context) }
     }
+
+
+    override fun mouseMoved(context: RenderContext) {
+        visibleChildren.forEach { it.mouseMoved(context) }
+    }
+
+    override fun mouseDown(context: RenderContext): Boolean {
+        visibleChildren.forEach {
+            if (!context.mouseInside(it.box)) return@forEach
+            if (it.mouseDown(context)) return true
+        }
+        return false
+    }
+
+    override fun mouseUp(context: RenderContext) {
+        visibleChildren.forEach {
+            it.mouseUp(context)
+        }
+    }
 }

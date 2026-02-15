@@ -11,6 +11,7 @@ import app.ultradev.hytaleuiparser.renderer.extensions.rightFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.topFallback
 import app.ultradev.hytaleuiparser.renderer.render.drawPatchStyle
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
+import java.awt.Point
 
 abstract class AbstractUIElement(
     val node: AstNode
@@ -77,4 +78,19 @@ abstract class AbstractUIElement(
     }
 
     open fun afterDraw(target: RenderTarget, context: RenderContext) {}
+
+
+    /* ----------------
+     * | INTERACTIONS |
+     * ---------------- */
+    open fun mouseMoved(context: RenderContext) {}
+
+    open fun mouseDown(context: RenderContext): Boolean {
+        return false
+    }
+    open fun mouseUp(context: RenderContext) {}
+
+    open fun mouseWheel(delta: Int, context: RenderContext): Boolean {
+        return false
+    }
 }
