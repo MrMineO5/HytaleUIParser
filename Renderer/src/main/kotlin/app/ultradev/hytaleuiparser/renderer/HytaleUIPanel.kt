@@ -37,14 +37,12 @@ class HytaleUIPanel(
     }
 
     fun recomputeLayout() {
-        println("Recomputing layout for ${element.javaClass.simpleName}, ${width}, ${height}")
         element.box = RenderBox(0, 0, width, height)
         if (element is BranchUIElement) LayoutPass.run(element)
+        repaint()
     }
 
     override fun paintComponent(g: Graphics) {
-        println("Painting ${element.javaClass.simpleName} with ${width}, ${height}")
-
         context.mousePosition = mousePosition ?: Point(0, 0)
 
         g.clearRect(0, 0, width, height)
