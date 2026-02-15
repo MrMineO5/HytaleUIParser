@@ -5,6 +5,7 @@ import app.ultradev.hytaleuiparser.ast.NodeElement
 import app.ultradev.hytaleuiparser.ast.NodeElementWithSelector
 import app.ultradev.hytaleuiparser.ast.RootNode
 import app.ultradev.hytaleuiparser.generated.elements.ButtonProperties
+import app.ultradev.hytaleuiparser.generated.elements.CheckBoxProperties
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.GroupProperties
 import app.ultradev.hytaleuiparser.generated.elements.LabelProperties
@@ -13,6 +14,7 @@ import app.ultradev.hytaleuiparser.generated.elements.TextButtonProperties
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.UnknownUIElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIButtonElement
+import app.ultradev.hytaleuiparser.renderer.element.impl.UICheckBoxElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UILabelElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UINumberFieldElement
@@ -74,11 +76,15 @@ object UITransformer {
 
     private fun createUIElement(node: AstNode, properties: ElementProperties, children: List<AbstractUIElement> = emptyList()): AbstractUIElement {
         return when (properties) {
+            // Leaf nodes
             is LabelProperties -> UILabelElement(node, properties)
             is TextButtonProperties -> UITextButtonElement(node, properties)
+            is NumberFieldProperties -> UINumberFieldElement(node, properties)
+            is CheckBoxProperties -> UICheckBoxElement(node, properties)
+
+            // Branch nodes
             is GroupProperties -> UIGroupElement(node, children, properties)
             is ButtonProperties -> UIButtonElement(node, children, properties)
-            is NumberFieldProperties -> UINumberFieldElement(node, properties)
 
             else -> {
                 System.err.println("Warning: Unknown element type: ${properties::class.simpleName}")
