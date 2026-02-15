@@ -10,87 +10,76 @@ import app.ultradev.hytaleuiparser.renderer.layout.Layout
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutTools
 
 object LayoutLeftCenterWrap : Layout {
-    private const val FORCE_ANCHOR_WIDTH = true
-
-    private fun resolvedWidth(child: AbstractUIElement): Int {
-        if (FORCE_ANCHOR_WIDTH || child.properties.anchor?.width == null) return child.desiredWidth()
-        val baseWidth = child.contentDesiredWidth()
-        val pl = child.properties.padding?.leftFallback() ?: 0
-        val pr = child.properties.padding?.rightFallback() ?: 0
-        return baseWidth + pl + pr
-    }
-
     private data class Row(
         val children: MutableList<AbstractUIElement> = mutableListOf(),
         var totalWidth: Int = 0,
         var maxTotalHeight: Int = 0
     )
 
-    override fun doLayout(element: BranchUIElement) {
-        val cbox = element.contentBox
+    private fun splitIntoRows(availableWidth: Int, children: List<AbstractUIElement>): List<Row> {
         val rows = mutableListOf<Row>()
         var current = Row()
 
-        element.visibleChildren.forEach { child ->
-            val childWidth =
-                resolvedWidth(child) +
-                    (child.properties.anchor?.leftFallback() ?: 0) +
-                    (child.properties.anchor?.rightFallback() ?: 0)
-            val childHeight = child.totalHeight()
-            if (current.children.isNotEmpty() && current.totalWidth + childWidth > cbox.width) {
+        children.forEach { child ->
+            val childWidth = child.totalWidth(availableWidth)
+            val height = child.totalHeight(100) // TODO: how do we even?
+            if (current.children.isNotEmpty() && current.totalWidth + childWidth > availableWidth) {
                 rows += current
                 current = Row()
             }
             current.children += child
             current.totalWidth += childWidth
-            if (childHeight > current.maxTotalHeight) current.maxTotalHeight = childHeight
+            if (height > current.maxTotalHeight) current.maxTotalHeight = height
         }
         if (current.children.isNotEmpty()) rows += current
 
+        return rows
+    }
+
+    override fun doLayout(element: BranchUIElement) {
+        val cbox = element.contentBox
+        val rows = splitIntoRows(cbox.width, element.visibleChildren)
         var y = cbox.y
         rows.forEach { row ->
-            /*
-             * LeftCenterWrap spacing ... janky game behaviours...
-             * - Rows are centered based on base widths when all weights are 0.
-             * - When any weight exists, we still center the base widths first, then add extra space.
-             * - Extra space can overhang the parent; it is applied only before weighted items.
-             * - The per-weight unit is half of the base remaining width, scaled by FlexWeight.
-             */
-            var totalFlexWeight = 0
-            row.children.forEach { child ->
-                totalFlexWeight += child.properties.flexWeight ?: 0
-            }
-            val baseRemaining = cbox.width - row.totalWidth
-            val weightUnit = if (baseRemaining > 0 && totalFlexWeight > 0) baseRemaining / 2 else 0
-            var x = cbox.x + if (totalFlexWeight > 0) 0 else baseRemaining / 2
+            val flexMetrics = LayoutTools.flexMetrics(
+                row.children,
+                cbox.width,
+                totalSize = { it.totalWidth(cbox.width) }
+            )
 
+            var x = cbox.x + (cbox.width - flexMetrics.totalSize) / 2
             row.children.forEach { child ->
-                val weight = child.properties.flexWeight ?: 0
-                val beforeExtra = if (weightUnit > 0 && weight > 0) weightUnit * weight else 0
-                val width = resolvedWidth(child)
+                val info = LayoutTools.computeFlex(
+                    child,
+                    flexMetrics.sizePerFlexWeight,
+                    totalSize = { it.totalWidth(cbox.width) },
+                    desiredSize = { it.desiredWidthFromTotal(cbox.width) },
+                    startOffset = child.properties.anchor?.leftFallback(),
+                    endOffset = child.properties.anchor?.rightFallback(),
+                    size = child.properties.anchor?.width
+                )
 
                 val (cy, endY) = LayoutTools.resolveAxis(
                     y,
                     y + row.maxTotalHeight,
                     child.properties.anchor?.top,
                     child.properties.anchor?.bottom,
-                    child.desiredHeight()
+                    child.desiredHeight(100) // TODO: how do we even?
                 )
 
-                x += beforeExtra
-                x += child.properties.anchor?.leftFallback() ?: 0
-                child.box = RenderBox(x, cy, width, endY - cy)
-                x += width
-                x += child.properties.anchor?.rightFallback() ?: 0
+                child.box = RenderBox(x + info.relativeStart, cy, info.relativeSize, endY - cy)
+                x += info.size
             }
 
             y += row.maxTotalHeight
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement): Int =
-        element.visibleChildren.maxOfOrZero { it.totalHeight() }
+    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int =
+        element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
 
-    override fun contentDesiredWidth(element: BranchUIElement): Int =
-        element.visibleChildren.sumOf { it.totalWidth() }
+    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int {
+        val rows = splitIntoRows(available, element.visibleChildren)
+        return rows.maxOfOrZero { it.totalWidth }
+    }
 }

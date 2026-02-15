@@ -17,10 +17,10 @@ class UILabelElement(
     val text get() = properties.text ?: ""
     val textRenderInfo by lazy { TextRenderStyle.fromLabelStyle(properties.style ?: LabelStyle.EMPTY) }
 
-    override fun contentDesiredHeight(): Int {
+    override fun contentDesiredHeight(available: Int): Int {
         return textRenderInfo.getBounds(FontRenderContext(null, false, false), text).height.toInt()
     }
-    override fun contentDesiredWidth(): Int {
+    override fun contentDesiredWidth(available: Int): Int {
         return textRenderInfo.getWidth(FontRenderContext(null, false, false), text)
     }
 

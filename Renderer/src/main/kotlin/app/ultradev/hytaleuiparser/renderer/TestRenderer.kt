@@ -42,7 +42,7 @@ object TestRenderer {
         val assets = parseServerAssets()
 
         val validator = Validator(assets)
-        val testPage = validator.validateRoot("Pages/LaunchPadSettingsPage.ui") ?: error("Failed to validate page")
+        val testPage = validator.validateRoot("Test.ui") ?: error("Failed to validate page")
 
         val rootUIElement = UITransformer.transform(testPage)
         rootUIElement.box = RenderBox(0, 0, 1600, 800)

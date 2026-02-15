@@ -16,8 +16,8 @@ import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutTop
 interface Layout {
     fun doLayout(element: BranchUIElement)
 
-    fun contentDesiredWidth(element: BranchUIElement): Int
-    fun contentDesiredHeight(element: BranchUIElement): Int
+    fun contentDesiredWidth(element: BranchUIElement, available: Int): Int
+    fun contentDesiredHeight(element: BranchUIElement, available: Int): Int
 
     companion object {
         fun get(mode: LayoutMode): Layout {

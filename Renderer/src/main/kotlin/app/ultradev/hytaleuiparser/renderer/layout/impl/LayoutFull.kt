@@ -13,6 +13,6 @@ object LayoutFull : Layout {
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement): Int = element.visibleChildren.maxOfOrZero { it.totalHeight() }
-    override fun contentDesiredWidth(element: BranchUIElement): Int = element.visibleChildren.maxOfOrZero { it.totalWidth() }
+    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
+    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalWidth(available) }
 }

@@ -15,17 +15,19 @@ object LayoutCenterMiddle : Layout {
         val flexMetrics = LayoutTools.flexMetrics(
             element.visibleChildren,
             cbox.width,
-            totalSize = { it.totalWidth() }
+            totalSize = { it.totalWidth(cbox.width) }
         )
-        val totalWidth = flexMetrics.totalNonFlexSize + flexMetrics.totalFlexWeight * flexMetrics.sizePerFlexWeight
 
-        var x = cbox.x + (cbox.width - totalWidth) / 2
+        var x = cbox.x + (cbox.width - flexMetrics.totalSize) / 2
         element.visibleChildren.forEach { child ->
-            val width = LayoutTools.resolveFlexSize(
+            val info = LayoutTools.computeFlex(
                 child,
                 flexMetrics.sizePerFlexWeight,
-                totalSize = { it.totalWidth() },
-                desiredSize = { it.desiredWidth() }
+                totalSize = { it.totalWidth(cbox.width) },
+                desiredSize = { it.desiredWidthFromTotal(cbox.width) },
+                startOffset = child.properties.anchor?.leftFallback(),
+                endOffset = child.properties.anchor?.rightFallback(),
+                size = child.properties.anchor?.width
             )
 
             val (y, endY) = LayoutTools.resolveAxis(
@@ -33,17 +35,15 @@ object LayoutCenterMiddle : Layout {
                 cbox.y + cbox.height,
                 child.properties.anchor?.top,
                 child.properties.anchor?.bottom,
-                child.desiredHeight()
+                child.desiredHeightFromTotal(cbox.height)
             )
 
-            x += child.properties.anchor?.leftFallback() ?: 0
-            child.box = RenderBox(x, y, width, endY - y)
-            x += child.properties.anchor?.rightFallback() ?: 0
+            child.box = RenderBox(x + info.relativeStart, y, info.relativeSize, endY - y)
 
-            x += width
+            x += info.size
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement): Int = element.visibleChildren.maxOfOrZero { it.totalHeight() }
-    override fun contentDesiredWidth(element: BranchUIElement): Int = element.visibleChildren.sumOf { it.totalWidth() }
+    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
+    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int = element.visibleChildren.sumOf { it.totalWidth(available) }
 }

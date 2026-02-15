@@ -23,32 +23,43 @@ abstract class AbstractUIElement(
     lateinit var box: RenderBox
     val contentBox: RenderBox by lazy { box.withPadding(properties.padding ?: Padding.EMPTY) }
 
-    open fun contentDesiredWidth(): Int = 0
-    open fun contentDesiredHeight(): Int = 0
+    open fun contentDesiredWidth(available: Int): Int = 0
+    open fun contentDesiredHeight(available: Int): Int = 0
 
-    fun desiredWidth(): Int {
+    fun desiredWidth(available: Int): Int {
         var width = properties.anchor?.width
         if (width != null) return width
-        width = contentDesiredWidth()
-
         val pl = properties.padding?.leftFallback() ?: 0
         val pr = properties.padding?.rightFallback() ?: 0
+
+        width = contentDesiredWidth(available - pl - pr)
+
         width += pl + pr
         return width
     }
-    fun desiredHeight(): Int {
+    fun desiredHeight(available: Int): Int {
         var height = properties.anchor?.height
         if (height != null) return height
-        height = contentDesiredHeight()
+        height = contentDesiredHeight(available)
 
         val pt = properties.padding?.topFallback() ?: 0
         val pb = properties.padding?.bottomFallback() ?: 0
         height += pt + pb
         return height
     }
+    fun desiredWidthFromTotal(available: Int): Int {
+        val left = properties.anchor?.leftFallback() ?: 0
+        val right = properties.anchor?.rightFallback() ?: 0
+        return desiredWidth(available - left - right)
+    }
+    fun desiredHeightFromTotal(available: Int): Int {
+        val top = properties.anchor?.topFallback() ?: 0
+        val bottom = properties.anchor?.bottomFallback() ?: 0
+        return desiredHeight(available - top - bottom)
+    }
 
-    fun totalWidth(): Int = desiredWidth() + (properties.anchor?.leftFallback() ?: 0) + (properties.anchor?.rightFallback() ?: 0)
-    fun totalHeight(): Int = desiredHeight() + (properties.anchor?.topFallback() ?: 0) + (properties.anchor?.bottomFallback() ?: 0)
+    fun totalWidth(available: Int): Int = desiredWidthFromTotal(available) + (properties.anchor?.leftFallback() ?: 0) + (properties.anchor?.rightFallback() ?: 0)
+    fun totalHeight(available: Int): Int = desiredHeightFromTotal(available) + (properties.anchor?.topFallback() ?: 0) + (properties.anchor?.bottomFallback() ?: 0)
 
 
     fun draw0(target: RenderTarget, mousePosition: Point) {

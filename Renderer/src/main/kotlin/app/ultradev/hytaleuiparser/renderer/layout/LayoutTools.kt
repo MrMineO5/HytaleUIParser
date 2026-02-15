@@ -7,7 +7,18 @@ object LayoutTools {
         val totalFlexWeight: Int,
         val totalNonFlexSize: Int,
         val sizePerFlexWeight: Int
-    )
+    ) {
+        val totalSize get() = totalNonFlexSize + totalFlexWeight * sizePerFlexWeight
+    }
+
+    data class ElementFlexInfo(
+        val isFlex: Boolean,
+        val size: Int,
+        val relativeStart: Int,
+        val relativeEnd: Int,
+    ) {
+        val relativeSize: Int get() = relativeEnd - relativeStart
+    }
 
     fun resolveAxis(
         parentStart: Int,
@@ -45,25 +56,54 @@ object LayoutTools {
         var totalFlexWeight = 0
         var totalNonFlexSize = 0
         children.forEach { child ->
-            val flexWeight = child.properties.flexWeight
-            if (flexWeight != null) {
+            val flexWeight = child.properties.flexWeight ?: 0
+            if (flexWeight != 0) {
                 totalFlexWeight += flexWeight
             } else {
                 totalNonFlexSize += totalSize(child)
             }
         }
-        val sizePerFlexWeight =
-            if (totalFlexWeight > 0) (availableSize - totalNonFlexSize) / totalFlexWeight else 0
+        val sizePerFlexWeight = if (totalFlexWeight > 0) {
+            ((availableSize - totalNonFlexSize) / totalFlexWeight).coerceAtLeast(0)
+        } else 0
         return FlexMetrics(totalFlexWeight, totalNonFlexSize, sizePerFlexWeight)
     }
 
-    fun resolveFlexSize(
+    fun computeFlex(
         child: AbstractUIElement,
         sizePerFlexWeight: Int,
+        desiredSize: (AbstractUIElement) -> Int,
         totalSize: (AbstractUIElement) -> Int,
-        desiredSize: (AbstractUIElement) -> Int
-    ): Int {
-        val flexWeight = child.properties.flexWeight ?: return desiredSize(child)
-        return sizePerFlexWeight * flexWeight - totalSize(child) + desiredSize(child)
+        startOffset: Int?,
+        endOffset: Int?,
+        size: Int?,
+    ): ElementFlexInfo {
+        val flexWeight = child.properties.flexWeight ?: 0
+        if (flexWeight == 0) {
+            val computedSize = desiredSize(child)
+            val startPoint = startOffset ?: 0
+            val endPoint = startPoint + computedSize
+            return ElementFlexInfo(
+                false,
+                totalSize(child),
+                startPoint,
+                endPoint
+            )
+        }
+
+        val flexSize = sizePerFlexWeight * flexWeight
+        val (relativeStart, relativeEnd) = resolveAxis(
+            0,
+            flexSize,
+            startOffset,
+            endOffset,
+            size
+        )
+        return ElementFlexInfo(
+            true,
+            flexSize,
+            relativeStart,
+            relativeEnd,
+        )
     }
 }

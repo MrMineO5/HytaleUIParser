@@ -15,16 +15,19 @@ object LayoutRight : Layout {
         val flexMetrics = LayoutTools.flexMetrics(
             element.visibleChildren,
             cbox.width,
-            totalSize = { it.totalWidth() }
+            totalSize = { it.totalWidth(cbox.width) }
         )
 
         var x = cbox.x + cbox.width
         element.visibleChildren.asReversed().forEach { child ->
-            val width = LayoutTools.resolveFlexSize(
+            val info = LayoutTools.computeFlex(
                 child,
                 flexMetrics.sizePerFlexWeight,
-                totalSize = { it.totalWidth() },
-                desiredSize = { it.desiredWidth() }
+                totalSize = { it.totalWidth(cbox.width) },
+                desiredSize = { it.desiredWidthFromTotal(cbox.width) },
+                startOffset = child.properties.anchor?.leftFallback(),
+                endOffset = child.properties.anchor?.rightFallback(),
+                size = child.properties.anchor?.width
             )
 
             val (y, endY) = LayoutTools.resolveAxis(
@@ -35,14 +38,12 @@ object LayoutRight : Layout {
                 child.properties.anchor?.height
             )
             
-            x -= width
+            x -= info.size
 
-            x -= child.properties.anchor?.leftFallback() ?: 0
-            child.box = RenderBox(x, y, width, endY - y)
-            x -= child.properties.anchor?.rightFallback() ?: 0
+            child.box = RenderBox(x + info.relativeStart, y, info.relativeSize, endY - y)
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement): Int = element.visibleChildren.maxOfOrZero { it.totalHeight() }
-    override fun contentDesiredWidth(element: BranchUIElement): Int = element.visibleChildren.sumOf { it.totalWidth() }
+    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
+    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int = element.visibleChildren.sumOf { it.totalWidth(available) }
 }
