@@ -5,6 +5,7 @@ import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutFull
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutLeft
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutMiddle
+import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutRight
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutTop
 
 interface Layout {
@@ -20,6 +21,8 @@ interface Layout {
                 LayoutMode.Top -> LayoutTop
                 LayoutMode.Left -> LayoutLeft
                 LayoutMode.Middle -> LayoutMiddle
+                LayoutMode.Right -> LayoutRight
+                LayoutMode.Bottom -> LayoutRight
                 // TODO: Support more modes
                 else -> {
                     System.err.println("Warning: Unimplemented layout mode: $mode")
