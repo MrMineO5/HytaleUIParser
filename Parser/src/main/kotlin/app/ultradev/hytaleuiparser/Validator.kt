@@ -31,11 +31,17 @@ class Validator(
     fun validate() {
         validationErrors.clear()
 
-        files.keys.forEach(::validateRoot)
+        files.keys.forEach {
+            try {
+                validateRoot(it)
+            } catch(e: Exception) {
+                throw RuntimeException("Failed to validate $it", e)
+            }
+        }
     }
 
     fun validateRoot(path: String, revalidate: Boolean = false): RootNode? {
-        if (validated.contains(path) && !revalidate) return files[path]!!
+        if (validated.contains(path) && !revalidate) return files[path] ?: error("Couldn't find $path")
         validated.add(path)
 
         val root = files[path] ?: return null
