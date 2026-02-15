@@ -29,6 +29,6 @@ class UITextButtonElement(
             ?: properties.style?.default
 
         drawPatchStyle(target, context, box, style?.background)
-        target.renderText(text, box, Color.WHITE, textRenderInfo)
+        target.renderText(text, box, textRenderInfo)
     }
 }

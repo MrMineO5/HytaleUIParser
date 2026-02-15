@@ -27,6 +27,6 @@ class UILabelElement(
 
     override fun draw(target: RenderTarget, context: RenderContext) {
         super.draw(target, context)
-        target.renderText(text, box, Color.WHITE, textRenderInfo)
+        target.renderText(text, box, textRenderInfo)
     }
 }

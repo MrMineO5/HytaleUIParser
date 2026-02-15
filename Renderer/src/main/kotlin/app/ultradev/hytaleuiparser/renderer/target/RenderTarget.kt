@@ -23,7 +23,6 @@ interface RenderTarget {
     fun renderText(
         text: String,
         box: RenderBox,
-        color: Color,
         info: TextRenderStyle,
     )
 }

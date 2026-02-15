@@ -5,11 +5,22 @@ import app.ultradev.hytaleuiparser.renderer.RenderBox
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 
 class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
     override val box: RenderBox
         get() = graphics.clipBounds.let { RenderBox(it.x, it.y, it.width, it.height) }
+
+    init {
+        if (graphics is Graphics2D) {
+            // Enable antialiasing for text
+            graphics.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+            )
+        }
+    }
 
     override fun renderImage(
         image: BufferedImage,
@@ -35,10 +46,10 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         graphics.fillRect(x, y, width, height)
     }
 
-    override fun renderText(text: String, box: RenderBox, color: Color, info: TextRenderStyle) {
+    override fun renderText(text: String, box: RenderBox, info: TextRenderStyle) {
         val (tx, ty) = info.calculateAlignment(box, text)
 
-        graphics.color = color
+        graphics.color = info.color
         graphics.font = info.font
         graphics.drawString(text, tx, ty)
     }
