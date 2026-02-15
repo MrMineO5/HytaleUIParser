@@ -23,14 +23,17 @@ interface Layout {
         fun get(mode: LayoutMode): Layout {
             return when (mode) {
                 LayoutMode.Full -> LayoutFull
+
                 LayoutMode.Top -> LayoutTop
                 LayoutMode.Left -> LayoutLeft
-                LayoutMode.Middle -> LayoutMiddle
                 LayoutMode.Right -> LayoutRight
                 LayoutMode.Bottom -> LayoutBottom
+
                 LayoutMode.Center -> LayoutCenter
+                LayoutMode.Middle -> LayoutMiddle
                 LayoutMode.CenterMiddle -> LayoutCenterMiddle
                 LayoutMode.MiddleCenter -> LayoutMiddleCenter
+
                 LayoutMode.LeftCenterWrap -> LayoutLeftCenterWrap
                 // TODO: Support more modes
                 else -> {
