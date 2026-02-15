@@ -1,5 +1,5 @@
 package app.ultradev.hytaleuiparser.renderer.cache
 
-class RenderCache {
+class RenderCacheCollection {
     val images = ImageCache()
 }

@@ -1,6 +1,6 @@
 package app.ultradev.hytaleuiparser.renderer
 
-import app.ultradev.hytaleuiparser.renderer.cache.RenderCache
+import app.ultradev.hytaleuiparser.renderer.cache.RenderCacheCollection
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import java.awt.Cursor
 import java.awt.Point
@@ -12,7 +12,7 @@ class RenderContext(
 ) {
     var active: AbstractUIElement? = null
 
-    val cache: RenderCache = RenderCache()
+    val cache: RenderCacheCollection = RenderCacheCollection()
 
     var setCursor: (Cursor) -> Unit = {}
 

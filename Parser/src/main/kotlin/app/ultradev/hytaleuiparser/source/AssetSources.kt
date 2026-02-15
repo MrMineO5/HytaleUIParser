@@ -43,4 +43,9 @@ object AssetSources {
     fun getAssetsZipPath(hytaleDir: String = getHytaleDirectory(), patchline: String = "release", build: String = "latest"): String {
         return "${hytaleDir}/install/${patchline}/package/game/${build}/Assets.zip"
     }
+
+    fun getAssetsZipSource(hytaleDir: String = getHytaleDirectory(), patchline: String = "release", build: String = "latest"): AssetSource {
+        val archive = Path(getAssetsZipPath(hytaleDir, patchline, build))
+        return ArchiveAssetSource(archive)
+    }
 }
