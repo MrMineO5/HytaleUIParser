@@ -23,7 +23,7 @@ class UINumberFieldElement(
     val placeholderTextRenderInfo get() = TextRenderStyle.fromInputFieldStyle(properties.placeholderStyle ?: InputFieldStyle.EMPTY)
 
     override fun contentDesiredHeight(available: Int): Int {
-        return textRenderInfo.getBounds(FontRenderContext(null, false, false), text).height.toInt()
+        return textRenderInfo.getHeight(FontRenderContext(null, false, false), text)
     }
 
     override fun contentDesiredWidth(available: Int): Int {

@@ -40,21 +40,25 @@ data class TextRenderStyle(
         return baseFont.deriveFont(attrs)
     }
 
-    fun getWidth(context: FontRenderContext, text: String): Int {
-        return font.getStringBounds(
-            text,
-            context
-        ).let { it.width + it.x }.roundToInt()
+    fun transform(text: String): String {
+        return if (uppercase) text.uppercase() else text
     }
+
     fun getBounds(context: FontRenderContext, text: String): Rectangle2D {
         return font.getStringBounds(
-            text,
+            transform(text),
             context
         )
     }
+    fun getWidth(context: FontRenderContext, text: String): Int {
+        return getBounds(context, text).let { it.width + it.x }.roundToInt()
+    }
+    fun getHeight(context: FontRenderContext, text: String): Int {
+        return getBounds(context, text).height.roundToInt()
+    }
 
     fun calculateAlignment(box: RenderBox, text: String): Pair<Int, Int> {
-        val bounds = getBounds(FontRenderContext(null, false, false), text)
+        val bounds = getBounds(FontRenderContext(null, true, false), text)
 
         val renderX = when (horizontalAlignment) {
             LabelAlignment.Start -> box.x - bounds.x

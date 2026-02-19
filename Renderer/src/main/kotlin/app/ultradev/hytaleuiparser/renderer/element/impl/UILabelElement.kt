@@ -18,7 +18,7 @@ class UILabelElement(
     val textRenderInfo get() = TextRenderStyle.fromLabelStyle(properties.style ?: LabelStyle.EMPTY)
 
     override fun contentDesiredHeight(available: Int): Int {
-        return textRenderInfo.getBounds(FontRenderContext(null, false, false), text).height.toInt()
+        return textRenderInfo.getHeight(FontRenderContext(null, false, false), text)
     }
 
     override fun contentDesiredWidth(available: Int): Int {
