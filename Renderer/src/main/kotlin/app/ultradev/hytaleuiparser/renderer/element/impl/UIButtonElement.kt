@@ -20,12 +20,11 @@ class UIButtonElement(
     override fun draw(target: RenderTarget, context: RenderContext) {
         super.draw(target, context)
 
-        val style = if (context.active == this) {
+        val style = (if (context.active == this) {
             properties.style?.pressed
         } else if (context.mouseInside(box)) {
             properties.style?.hovered
-        } else null
-            ?: properties.style?.default
+        } else null) ?: properties.style?.default
 
         drawPatchStyle(target, context, box, style?.background)
     }
