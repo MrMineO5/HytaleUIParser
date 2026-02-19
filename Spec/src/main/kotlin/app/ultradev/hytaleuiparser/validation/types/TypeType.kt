@@ -134,6 +134,8 @@ enum class TypeType(
             "VerticalAlignment" to LabelAlignment,
             "OutlineColor" to Color,
             "Wrap" to Boolean,
+            "ShrinkTextToFit" to Boolean,
+            "MinShrinkTextToFitFontSize" to Float,
         )
     ),
     PatchStyle(
