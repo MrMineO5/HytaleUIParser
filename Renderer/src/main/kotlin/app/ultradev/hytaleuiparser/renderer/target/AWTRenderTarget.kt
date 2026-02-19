@@ -51,6 +51,7 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
 
         graphics.color = info.color
         graphics.font = info.font
-        graphics.drawString(text, tx, ty)
+        val textToDraw = if (info.uppercase) text.uppercase() else text
+        graphics.drawString(textToDraw, tx, ty)
     }
 }

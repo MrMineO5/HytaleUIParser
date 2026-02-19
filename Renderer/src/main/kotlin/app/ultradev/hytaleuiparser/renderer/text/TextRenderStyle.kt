@@ -21,6 +21,8 @@ data class TextRenderStyle(
 
     val horizontalAlignment: LabelAlignment,
     val verticalAlignment: LabelAlignment,
+
+    val uppercase: Boolean,
 ) {
     val font by lazy { toFont() }
     private fun toFont(): Font {
@@ -79,6 +81,7 @@ data class TextRenderStyle(
                 style.renderUnderlined ?: false,
                 style.horizontalAlignment ?: style.alignment ?: LabelAlignment.Start,
                 style.verticalAlignment ?: style.alignment ?: LabelAlignment.Start,
+                style.renderUppercase ?: false,
             )
         }
 
@@ -92,6 +95,7 @@ data class TextRenderStyle(
                 false,
                 LabelAlignment.Start,
                 LabelAlignment.Center,
+                style.renderUppercase ?: false,
             )
         }
     }
