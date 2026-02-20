@@ -126,19 +126,31 @@ object TypeGen {
                 .addStatement($$"val resolved = variable.deepResolve() ?: error(\"Could not resolve variable: $variable\")")
                 .beginControlFlow("return when (resolved)")
                 .also {
-                    if (type == TypeType.PatchStyle) {
-                        it.addStatement(
-                            "is %T -> %T(texturePath = resolved.%M())",
-                            typeNameOf<NodeConstant>(),
-                            getTypeName(type),
-                            MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsPath")
-                        )
-                        it.addStatement(
-                            "is %T -> %T(color = resolved.%M())",
-                            typeNameOf<NodeColor>(),
-                            getTypeName(type),
-                            MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsColor")
-                        )
+                    when (type) {
+                        TypeType.PatchStyle -> {
+                            it.addStatement(
+                                "is %T -> %T(texturePath = resolved.%M())",
+                                typeNameOf<NodeConstant>(),
+                                getTypeName(type),
+                                MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsPath")
+                            )
+                            it.addStatement(
+                                "is %T -> %T(color = resolved.%M())",
+                                typeNameOf<NodeColor>(),
+                                getTypeName(type),
+                                MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsColor")
+                            )
+                        }
+                        TypeType.Padding -> {
+                            it.addStatement(
+                                "is %T -> %T(full = resolved.%M())",
+                                typeNameOf<NodeConstant>(),
+                                getTypeName(type),
+                                MemberName("app.ultradev.hytaleuiparser.asttools", "valueAsInt32")
+                            )
+                        }
+
+                        else -> {}
                     }
                 }
                 .addStatement(
