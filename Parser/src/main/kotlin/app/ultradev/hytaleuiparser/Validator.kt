@@ -189,16 +189,22 @@ class Validator(
             node.properties.forEach {
                 if (!seenProperties.add(it.identifier!!.identifier))
                     return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $type", it)
-                validateProperty(it.value!!, type.properties[it.identifier!!.identifier]!!)
+                val propName = it.identifier!!.identifier
+                val requiredType = type.properties[propName]
+                    ?: return@forEach validationError("Unknown property $propName on $type", it)
+                validateProperty(it.value!!, requiredType)
             }
             val varSeenProperties = mutableSetOf<String>()
             reemitExternalErrors("Could not validate variable element", node) {
                 variable.properties.filter { it.identifier!!.identifier !in seenProperties }.forEach {
                     if (!varSeenProperties.add(it.identifier!!.identifier))
                         return@forEach validationError("Duplicate property ${it.identifier!!.identifier} on $type", it)
+                    val propName = it.identifier!!.identifier
+                    val requiredType = type.properties[propName]
+                        ?: return@forEach validationError("Unknown property $propName on $type", it)
                     validateProperty(
                         it.value!!,
-                        type.properties[it.identifier!!.identifier]!!
+                        requiredType
                     )
                 }
             }
