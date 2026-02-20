@@ -2,17 +2,19 @@ package app.ultradev.hytaleuiparser.renderer
 
 import app.ultradev.hytaleuiparser.renderer.cache.RenderCacheCollection
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
+import app.ultradev.hytaleuiparser.source.AssetSource
 import java.awt.Cursor
 import java.awt.Point
 
 class RenderContext(
+    val assetSource: AssetSource,
     var isInteractive: Boolean = true,
     var previousMousePosition: Point = Point(0, 0),
     var mousePosition: Point = Point(0, 0),
 ) {
     var active: AbstractUIElement? = null
 
-    val cache: RenderCacheCollection = RenderCacheCollection()
+    val cache: RenderCacheCollection = RenderCacheCollection(assetSource)
 
     var setCursor: (Cursor) -> Unit = {}
 
