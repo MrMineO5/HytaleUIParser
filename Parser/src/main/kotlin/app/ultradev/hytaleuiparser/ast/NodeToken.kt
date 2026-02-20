@@ -13,4 +13,8 @@ data class NodeToken(
         get() = token.startOffset + token.text.length
 
     override fun clone(): NodeToken = NodeToken(token)
+
+    override fun toString(): String {
+        return "NodeToken('${token.text}' at ${file.path}:${token.startLine+1}:${token.startColumn+1})"
+    }
 }
