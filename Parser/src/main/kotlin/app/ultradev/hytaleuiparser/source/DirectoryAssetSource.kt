@@ -12,6 +12,8 @@ import kotlin.io.path.walk
 class DirectoryAssetSource(
     val directory: Path
 ) : AssetSource {
+    constructor(directory: String) : this(Path.of(directory))
+
     override fun listUIFiles(): List<Path> {
         return directory.walk()
             .filter { it.isRegularFile() && it.extension == "ui" }

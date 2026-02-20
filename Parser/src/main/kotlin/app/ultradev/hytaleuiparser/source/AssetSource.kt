@@ -6,4 +6,10 @@ import java.nio.file.Path
 interface AssetSource {
     fun listUIFiles(): List<Path>
     fun getAsset(path: Path): InputStream?
+
+    operator fun plus(other: AssetSource): AssetSource {
+        val thisSources = if (this is CombinedAssetSource) sources else listOf(this)
+        val otherSources = if (other is CombinedAssetSource) other.sources else listOf(other)
+        return CombinedAssetSource(thisSources + otherSources)
+    }
 }
