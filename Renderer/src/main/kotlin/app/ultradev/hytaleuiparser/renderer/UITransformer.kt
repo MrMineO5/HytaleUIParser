@@ -42,6 +42,8 @@ object UITransformer {
     }
 
     private fun processVarNode(implNode: NodeElement, varNode: NodeElement): AbstractUIElement {
+        varNode.body?.setActiveScopeKey(implNode)
+
         val properties = ElementProperties.fromProperties(implNode.resolvedType, implNode.resolveProperties())
 
         val children = if (implNode.resolvedType.allowsChildren) {
