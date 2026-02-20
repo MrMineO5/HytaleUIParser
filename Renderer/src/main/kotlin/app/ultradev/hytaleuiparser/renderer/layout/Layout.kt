@@ -35,11 +35,14 @@ interface Layout {
                 LayoutMode.MiddleCenter -> LayoutMiddleCenter
 
                 LayoutMode.LeftCenterWrap -> LayoutLeftCenterWrap
-                // TODO: Support more modes
-                else -> {
-                    System.err.println("Warning: Unimplemented layout mode: $mode")
-                    LayoutFull
-                }
+
+                // TODO: Implement scrolling correctly...
+                // These layouts will probably just set a larger content pane than the element size which should
+                //  trigger a scrollbar (in hytale at least)
+                LayoutMode.TopScrolling -> LayoutTop
+                LayoutMode.BottomScrolling -> LayoutBottom
+                LayoutMode.LeftScrolling -> LayoutLeft
+                LayoutMode.RightScrolling -> LayoutRight
             }
         }
     }
