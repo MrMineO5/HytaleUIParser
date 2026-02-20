@@ -31,7 +31,7 @@ open class NodeType(
     fun resolveValue(): Map<String, VariableValue> {
         val output = mutableMapOf<String, VariableValue>()
         spreads.forEach {
-            val res = it.variableAsReference.resolvedValue ?: return@forEach
+            val res = it.variableAsReference.deepResolve() ?: return@forEach
             if (res !is NodeType) error("Spread resolved to non-type: $res")
             output.putAll(res.resolveValue())
         }
