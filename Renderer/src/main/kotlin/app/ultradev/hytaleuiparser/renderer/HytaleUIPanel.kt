@@ -58,6 +58,9 @@ class HytaleUIPanel(
                 recomputeLayout()
             }
         })
+
+        // Ensure the layout is computed before the first paint
+        recomputeLayout()
     }
 
     fun recomputeLayout() {
