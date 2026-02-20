@@ -38,7 +38,7 @@ fun VariableValue.valueAsString(): String {
     val finalValue = this.deepResolve()
     when (finalValue) {
         is NodeConstant -> return finalValue.valueText
-        is NodeTranslation -> return finalValue.resolvedTranslation ?: finalValue.text
+        is NodeTranslation -> return finalValue.resolvedTranslation?.removePrefix("[TMP] ") ?: finalValue.text
         else -> error("Could not interpret $finalValue as a string.")
     }
 }
@@ -54,7 +54,20 @@ fun VariableValue.valueAsColor(): Color {
     when (finalValue) {
         is NodeColor -> {
             val hexPart = finalValue.value!!.valueText.removePrefix("#")
-            val color = Color(Integer.parseInt(hexPart, 16))
+            val color = when (hexPart.length) {
+                8 -> { // #RRGGBBAA
+                    val rgba = Integer.parseInt(hexPart, 16)
+                    val argb = ((rgba and 0xFF) shl 24) or (rgba ushr 8)
+                    Color(argb, true)
+                }
+                6 -> { // #RRGGBB
+                    Color(Integer.parseInt(hexPart, 16))
+                }
+                else -> { // #RGB is not allowed
+                    error("Invalid color hex code: $hexPart")
+                }
+            }
+
             if (finalValue.opacity != null) {
                 val opacity = finalValue.opacity!!.value!!.valueAsFloat()
                 return Color(color.red, color.green, color.blue, (opacity * 255).toInt())
