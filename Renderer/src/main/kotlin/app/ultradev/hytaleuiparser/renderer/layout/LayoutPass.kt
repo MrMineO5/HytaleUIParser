@@ -7,7 +7,7 @@ object LayoutPass {
         val mode = element.layoutMode
         Layout.get(mode).doLayout(element)
 
-        element.children.forEach {
+        element.visibleChildren.forEach {
             if (it is BranchUIElement) run(it)
         }
     }
