@@ -28,7 +28,7 @@ abstract class BranchUIElement(
     }
 
     override fun mouseDown(context: RenderContext): Boolean {
-        visibleChildren.forEach {
+        visibleChildren.asReversed().forEach {
             if (!context.mouseInside(it.box)) return@forEach
             if (it.mouseDown(context)) return true
         }
