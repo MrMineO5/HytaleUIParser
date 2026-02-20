@@ -34,7 +34,7 @@ sealed class AstNode(
         activeScopeKey = node
         propagateScopeChildren().forEach { it.setVarScope(node, scope) }
     }
-    internal fun setActiveScopeKey(node: AstNode?) {
+    fun setActiveScopeKey(node: AstNode?) {
         activeScopeKey = node
         propagateScopeChildren().forEach { it.setActiveScopeKey(node) }
     }
