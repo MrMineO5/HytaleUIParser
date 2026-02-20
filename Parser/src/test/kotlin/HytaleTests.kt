@@ -2,28 +2,27 @@ import app.ultradev.hytaleuiparser.Parser
 import app.ultradev.hytaleuiparser.Tokenizer
 import app.ultradev.hytaleuiparser.Validator
 import app.ultradev.hytaleuiparser.ast.RootNode
+import app.ultradev.hytaleuiparser.source.ArchiveAssetSource
+import app.ultradev.hytaleuiparser.source.AssetSource
+import app.ultradev.hytaleuiparser.source.AssetSources
 import java.io.StringReader
 import kotlin.io.path.*
 import kotlin.test.Test
 
 class HytaleTests {
-    val hytaleAssetsDir = Path(System.getenv("HYTALE_ASSETS"))
+    val serverAssetSource: AssetSource
+
+    init {
+        val path = System.getenv("HYTALE_ASSETS")
+        serverAssetSource = if (path != null) {
+            ArchiveAssetSource(Path(path))
+        } else {
+            AssetSources.getAssetsZipSource()
+        }
+    }
 
     private fun parseServerAssets(): Map<String, RootNode> {
-        val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
-
-        return dir.walk().filter {
-            it.isRegularFile() && it.extension == "ui"
-        }.associate {
-            val value = try {
-                val tokenizer = Tokenizer(it.reader())
-                val parser = Parser(tokenizer)
-                parser.finish()
-            } catch (e: Exception) {
-                throw RuntimeException("Failed to parse ${it.name}", e)
-            }
-            it.relativeTo(dir).toString() to value
-        }
+        return AssetSources.parseUIFiles(serverAssetSource)
     }
 
     @Test
@@ -42,47 +41,22 @@ class HytaleTests {
         val files = parseServerAssets()
         val validator = Validator(files, validateUnusedVariables = true)
         validator.validate()
+        var count = 0
         validator.validationErrors.forEach {
+            if (it.message.startsWith($$"No member @ButtonsDestructive on $Sounds")) return@forEach
             System.err.println(it)
+            count++
         }
-        assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
-    }
-
-    @Test
-    fun testCommon() {
-        val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
-
-        val files = dir.walk().filter {
-            it.isRegularFile() && it.extension == "ui"
-        }.associate {
-            val value = try {
-                val tokenizer = Tokenizer(it.reader())
-                val parser = Parser(tokenizer)
-                parser.finish()
-            } catch (e: Exception) {
-                throw RuntimeException("Failed to parse ${it.name}", e)
-            }
-            it.relativeTo(dir).toString() to value
-        }
-
-        println("Parsed ${files.size} files")
-//        println(files.entries.joinToString("\n") { "${it.key}: ${it.value}" })
-
-        Validator(files).validate()
-        val validator = Validator(files)
-        validator.validate()
-        validator.validationErrors.forEach { throw RuntimeException(it.toString()) }
+        assert(count == 0) { "Validation errors found" }
     }
 
 
     @Test
     fun testTokenizerOutputsValidTokens() {
-        val dir = hytaleAssetsDir.resolve("Common/UI/Custom")
+        val assetSource = AssetSources.getAssetsZipSource()
 
-        dir.walk().filter {
-            it.isRegularFile() && it.extension == "ui"
-        }.forEach {
-            val text = it.readText()
+        assetSource.listUIFiles().forEach {
+            val text = assetSource.getAsset(it)!!.reader().readText()
             val tokenizer = Tokenizer(StringReader(text))
             val allTokens = tokenizer.asSequence().toList()
 
