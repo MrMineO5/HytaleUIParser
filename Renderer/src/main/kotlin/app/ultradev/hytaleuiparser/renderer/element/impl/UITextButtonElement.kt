@@ -8,6 +8,7 @@ import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.render.drawPatchStyle
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
+import java.awt.font.FontRenderContext
 
 class UITextButtonElement(
     node: AstNode,
@@ -18,6 +19,14 @@ class UITextButtonElement(
         get() = TextRenderStyle.fromLabelStyle(
             properties.style?.default?.labelStyle ?: LabelStyle.EMPTY
         )
+
+    override fun contentDesiredHeight(available: Int): Int {
+        return textRenderInfo.getHeight(FontRenderContext(null, false, false), text)
+    }
+
+    override fun contentDesiredWidth(available: Int): Int {
+        return textRenderInfo.getWidth(FontRenderContext(null, false, false), text)
+    }
 
     override fun draw(target: RenderTarget, context: RenderContext) {
         super.draw(target, context)
