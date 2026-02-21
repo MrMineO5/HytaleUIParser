@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.element
 
 import app.ultradev.hytaleuiparser.ast.AstNode
+import app.ultradev.hytaleuiparser.ast.NodeElementWithSelector
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.types.Padding
 import app.ultradev.hytaleuiparser.renderer.RenderBox
@@ -17,6 +18,8 @@ abstract class AbstractUIElement(
     val node: AstNode
 ) {
     abstract val properties: ElementProperties
+
+    val selector: String? get() = (node as? NodeElementWithSelector)?.selector?.identifier
 
     val visible get() = properties.visible ?: true
 
@@ -93,4 +96,8 @@ abstract class AbstractUIElement(
     open fun mouseWheel(delta: Int, context: RenderContext): Boolean {
         return false
     }
+
+
+
+    abstract fun withProperties(properties: ElementProperties): AbstractUIElement
 }

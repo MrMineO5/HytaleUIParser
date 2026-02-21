@@ -1,7 +1,9 @@
 package app.ultradev.hytaleuiparser.renderer.element.impl
 
 import app.ultradev.hytaleuiparser.ast.AstNode
+import app.ultradev.hytaleuiparser.generated.elements.ButtonProperties
 import app.ultradev.hytaleuiparser.generated.elements.CheckBoxProperties
+import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.LabelProperties
 import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
@@ -35,4 +37,6 @@ class UICheckBoxElement(
     override fun mouseUp(context: RenderContext) {
         if (context.active == this && context.mouseInside(box)) state = !state
     }
+
+    override fun withProperties(properties: ElementProperties) = UICheckBoxElement(node, properties as CheckBoxProperties)
 }

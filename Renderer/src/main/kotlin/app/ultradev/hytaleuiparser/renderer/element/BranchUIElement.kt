@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.element
 
 import app.ultradev.hytaleuiparser.ast.AstNode
+import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.layout.Layout
@@ -40,4 +41,6 @@ abstract class BranchUIElement(
             it.mouseUp(context)
         }
     }
+
+    abstract fun withChildren(children: List<AbstractUIElement>): BranchUIElement
 }

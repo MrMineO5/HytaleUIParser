@@ -7,4 +7,8 @@ class UnknownUIElement(
     node: AstNode,
     children: List<AbstractUIElement>,
     override val properties: ElementProperties
-) : BranchUIElement(node, children)
+) : BranchUIElement(node, children) {
+    override fun withChildren(children: List<AbstractUIElement>) = UnknownUIElement(node, children, properties)
+
+    override fun withProperties(properties: ElementProperties): AbstractUIElement = UnknownUIElement(node, children, properties)
+}

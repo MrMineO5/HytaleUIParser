@@ -1,6 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer.element.impl
 
 import app.ultradev.hytaleuiparser.ast.AstNode
+import app.ultradev.hytaleuiparser.generated.elements.ButtonProperties
+import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.LabelProperties
 import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
@@ -46,4 +48,6 @@ class UINumberFieldElement(
             context.setCursor(Cursor(Cursor.DEFAULT_CURSOR))
         }
     }
+
+    override fun withProperties(properties: ElementProperties) = UINumberFieldElement(node, properties as NumberFieldProperties)
 }

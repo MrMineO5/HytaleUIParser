@@ -1,6 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer.element.impl
 
 import app.ultradev.hytaleuiparser.ast.AstNode
+import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
+import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.elements.TextButtonProperties
 import app.ultradev.hytaleuiparser.generated.types.LabelStyle
 import app.ultradev.hytaleuiparser.renderer.RenderContext
@@ -52,4 +54,6 @@ class UITextButtonElement(
     override fun mouseUp(context: RenderContext) {
         if (context.active == this) context.active = null
     }
+
+    override fun withProperties(properties: ElementProperties) = UITextButtonElement(node, properties as TextButtonProperties)
 }

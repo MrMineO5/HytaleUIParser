@@ -2,6 +2,7 @@ package app.ultradev.hytaleuiparser.renderer.element.impl
 
 import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.generated.elements.ButtonProperties
+import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
@@ -37,4 +38,7 @@ class UIButtonElement(
     override fun mouseUp(context: RenderContext) {
         if (context.active == this) context.active = null
     }
+
+    override fun withChildren(children: List<AbstractUIElement>) = UIButtonElement(node, children, properties)
+    override fun withProperties(properties: ElementProperties) = UIButtonElement(node, children, properties as ButtonProperties)
 }
