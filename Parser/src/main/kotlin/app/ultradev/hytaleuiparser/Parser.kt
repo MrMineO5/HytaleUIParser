@@ -3,186 +3,186 @@ package app.ultradev.hytaleuiparser
 import app.ultradev.hytaleuiparser.ast.*
 import app.ultradev.hytaleuiparser.token.Token
 
-class Parser(tokens: Iterator<app.ultradev.hytaleuiparser.token.Token>) {
-    val tokens = _root_ide_package_.app.ultradev.hytaleuiparser.TokenIterator(tokens, skipComments = true)
-    val nodes = mutableListOf<app.ultradev.hytaleuiparser.ast.AstNode>()
+class Parser(tokens: Iterator<Token>) {
+    val tokens = TokenIterator(tokens, skipComments = true)
+    val nodes = mutableListOf<AstNode>()
 
-    val parserErrors = mutableListOf<app.ultradev.hytaleuiparser.ParserError>()
+    val parserErrors = mutableListOf<ParserError>()
 
-    fun parserError(message: String, token: app.ultradev.hytaleuiparser.token.Token) {
-        parserErrors.add(_root_ide_package_.app.ultradev.hytaleuiparser.ParserError(message, token))
+    fun parserError(message: String, token: Token) {
+        parserErrors.add(ParserError(message, token))
     }
 
-    private fun recoverable(block: () -> app.ultradev.hytaleuiparser.ast.AstNode?): app.ultradev.hytaleuiparser.ast.AstNode? {
+    private fun recoverable(block: () -> AstNode?): AstNode? {
         return try {
             block()
-        } catch (e: app.ultradev.hytaleuiparser.ParserException) {
+        } catch (e: ParserException) {
             parserError(e.message ?: "Unknown error", e.token)
             null
         }
     }
 
-    fun finish(): app.ultradev.hytaleuiparser.ast.RootNode {
+    fun finish(): RootNode {
         parseCompletely()
-        val root = _root_ide_package_.app.ultradev.hytaleuiparser.ast.RootNode(nodes)
+        val root = RootNode(nodes)
         root.applyParent(root)
         return root
     }
 
     private fun parseCompletely() {
-        while (tokens.peek().type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.EOF) {
+        while (tokens.peek().type != Token.Type.EOF) {
             nodes.add(parseRoot())
         }
     }
 
-    private fun parseRoot(): app.ultradev.hytaleuiparser.ast.AstNode {
+    private fun parseRoot(): AstNode {
         val node = tokens.peek()
 
         return when (node.type) {
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.VARIABLE -> parseVariableAssignmentOrElement()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.REFERENCE -> parseRefAssignmentOrElement()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.IDENTIFIER -> parseElement()
+            Token.Type.VARIABLE -> parseVariableAssignmentOrElement()
+            Token.Type.REFERENCE -> parseRefAssignmentOrElement()
+            Token.Type.IDENTIFIER -> parseElement()
 
-            else -> throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+            else -> throw ParserException(
                 "Unsupported root node type found: ${node.type}",
                 node
             )
         }
     }
 
-    private fun parseVariable(): app.ultradev.hytaleuiparser.ast.NodeVariable {
+    private fun parseVariable(): NodeVariable {
         val reference = tokens.peek()
-        if (reference.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.VARIABLE) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (reference.type != Token.Type.VARIABLE) throw ParserException(
             "Expected variable marker",
             reference
         )
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeVariable(listOf(nextToken()))
+        return NodeVariable(listOf(nextToken()))
     }
 
-    private fun parseIdentifier(): app.ultradev.hytaleuiparser.ast.NodeIdentifier {
+    private fun parseIdentifier(): NodeIdentifier {
         val token = tokens.peek()
-        if (token.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.IDENTIFIER) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (token.type != Token.Type.IDENTIFIER) throw ParserException(
             "Expected identifier",
             token
         )
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeIdentifier(listOf(nextToken()))
+        return NodeIdentifier(listOf(nextToken()))
     }
 
-    private fun parseVariableAssignment(): app.ultradev.hytaleuiparser.ast.NodeAssignVariable {
+    private fun parseVariableAssignment(): NodeAssignVariable {
         val variable = parseVariable()
         val assignment = tokens.next()
-        if (assignment.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.ASSIGNMENT) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (assignment.type != Token.Type.ASSIGNMENT) throw ParserException(
             "Expected assignment operator",
             assignment
         )
         val value = parseVariableValue()
-        if (value !is app.ultradev.hytaleuiparser.ast.VariableValue) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (value !is VariableValue) throw ParserException(
             "Expected variable value after assignment operator", assignment
         ) // TODO: AstNode should always have a token?
         val end = parseEndStatement()
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeAssignVariable(
-            _root_ide_package_.app.ultradev.hytaleuiparser.listOfInsertMissing(
+        return NodeAssignVariable(
+            listOfInsertMissing(
                 variable,
-                _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(assignment),
+                NodeToken(assignment),
                 value,
                 end
             )
         )
     }
 
-    private fun parseReference(): app.ultradev.hytaleuiparser.ast.NodeReference {
+    private fun parseReference(): NodeReference {
         val reference = tokens.next()
-        if (reference.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.REFERENCE) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (reference.type != Token.Type.REFERENCE) throw ParserException(
             "Expected reference marker",
             reference
         )
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeReference(
+        return NodeReference(
             listOf(
-                _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(
+                NodeToken(
                     reference
                 )
             )
         )
     }
 
-    private fun parseReferenceAssignment(): app.ultradev.hytaleuiparser.ast.NodeAssignReference {
+    private fun parseReferenceAssignment(): NodeAssignReference {
         val reference = parseReference()
         val assignment = tokens.next()
-        if (assignment.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.ASSIGNMENT) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (assignment.type != Token.Type.ASSIGNMENT) throw ParserException(
             "Expected assignment operator",
             assignment
         )
         val filePath = parseQuotedStringConstant()
         val endStatement = parseEndStatement()
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeAssignReference(
-            _root_ide_package_.app.ultradev.hytaleuiparser.listOfInsertMissing(
+        return NodeAssignReference(
+            listOfInsertMissing(
                 reference,
-                _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(assignment),
+                NodeToken(assignment),
                 filePath,
                 endStatement
             )
         )
     }
 
-    private fun parseEndStatement(): app.ultradev.hytaleuiparser.ast.NodeToken? {
-        if (tokens.peek().type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.END_STATEMENT) {
+    private fun parseEndStatement(): NodeToken? {
+        if (tokens.peek().type != Token.Type.END_STATEMENT) {
             parserError("Expected end statement", tokens.peek())
             return null
         }
         val endStatement = tokens.next()
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(endStatement)
+        return NodeToken(endStatement)
     }
 
-    private fun parseQuotedStringConstant(): app.ultradev.hytaleuiparser.ast.NodeConstant {
+    private fun parseQuotedStringConstant(): NodeConstant {
         val token = tokens.next()
-        if (token.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.STRING) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (token.type != Token.Type.STRING) throw ParserException(
             "Expected quoted string constant", token
         )
-        if (token.text.first() != '"' || token.text.last() != '"') throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (token.text.first() != '"' || token.text.last() != '"') throw ParserException(
             "Expected quoted string constant, found ${token.text}", token
         )
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeConstant(
+        return NodeConstant(
             listOf(
-                _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(
+                NodeToken(
                     token
                 )
             )
         )
     }
 
-    private fun parseUnquotedStringConstant(): app.ultradev.hytaleuiparser.ast.NodeConstant {
+    private fun parseUnquotedStringConstant(): NodeConstant {
         val token = tokens.next()
-        if (token.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.IDENTIFIER) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (token.type != Token.Type.IDENTIFIER) throw ParserException(
             "Expected identifier constant", token
         )
-        return _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeConstant(
+        return NodeConstant(
             listOf(
-                _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(
+                NodeToken(
                     token
                 )
             )
         )
     }
 
-    private fun parseVariableReference(): app.ultradev.hytaleuiparser.ast.AstNode {
+    private fun parseVariableReference(): AstNode {
         val token = tokens.peek()
         val variable = when (token.type) {
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.VARIABLE -> parseVariable()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.REFERENCE -> parseRefMember()
-            else -> throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+            Token.Type.VARIABLE -> parseVariable()
+            Token.Type.REFERENCE -> parseRefMember()
+            else -> throw ParserException(
                 "Expected variable reference",
                 token
             )
         }
-        var curr: app.ultradev.hytaleuiparser.ast.AstNode = variable
-        while (tokens.peek().type == _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MEMBER_MARKER) {
+        var curr: AstNode = variable
+        while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
             val marker = tokens.next()
             val member = recoverable { parseIdentifier() }
             val valid = member != null
-            curr = _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeMemberField(
-                _root_ide_package_.app.ultradev.hytaleuiparser.listOfInsertMissing(
+            curr = NodeMemberField(
+                listOfInsertMissing(
                     curr,
-                    _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(marker),
+                    NodeToken(marker),
                     member
                 ), valid
             )
@@ -190,58 +190,58 @@ class Parser(tokens: Iterator<app.ultradev.hytaleuiparser.token.Token>) {
         return curr
     }
 
-    private fun parseVariableValue(): app.ultradev.hytaleuiparser.ast.AstNode {
+    private fun parseVariableValue(): AstNode {
         val token = tokens.peek()
 
         val variable = when (token.type) {
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.STRING -> parseQuotedStringConstant()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.NUMBER -> _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeConstant(
-                listOf(_root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(tokens.next()))
+            Token.Type.STRING -> parseQuotedStringConstant()
+            Token.Type.NUMBER -> NodeConstant(
+                listOf(NodeToken(tokens.next()))
             )
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.SELECTOR -> parseColor()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.IDENTIFIER -> {
+            Token.Type.SELECTOR -> parseColor()
+            Token.Type.IDENTIFIER -> {
                 val next = tokens.peek(2)
                 when (next.type) {
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.START_ELEMENT, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.SELECTOR -> parseElement()
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.START_PARENTHESIS -> parseType()
+                    Token.Type.START_ELEMENT, Token.Type.SELECTOR -> parseElement()
+                    Token.Type.START_PARENTHESIS -> parseType()
 
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.FIELD_DELIMITER, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.END_STATEMENT, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.END_PARENTHESIS,
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_ADD, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_SUBTRACT, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_MULTIPLY, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_DIVIDE -> parseUnquotedStringConstant()
+                    Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_PARENTHESIS,
+                    Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> parseUnquotedStringConstant()
 
-                    else -> throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+                    else -> throw ParserException(
                         "Unexpected token after identifier",
                         next
                     )
                 }
             }
 
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.VARIABLE, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.REFERENCE -> parseVariableReference()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.TRANSLATION_MARKER -> parseTranslation()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.START_PARENTHESIS -> {
+            Token.Type.VARIABLE, Token.Type.REFERENCE -> parseVariableReference()
+            Token.Type.TRANSLATION_MARKER -> parseTranslation()
+            Token.Type.START_PARENTHESIS -> {
                 val afterStart = tokens.peek(2)
                 val isType = when (afterStart.type) {
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.SPREAD -> true
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.END_PARENTHESIS -> true
-                    _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.IDENTIFIER -> tokens.peek(3).type == _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.FIELD_MARKER
+                    Token.Type.SPREAD -> true
+                    Token.Type.END_PARENTHESIS -> true
+                    Token.Type.IDENTIFIER -> tokens.peek(3).type == Token.Type.FIELD_MARKER
                     else -> false
                 }
                 if (isType) parseType() else parseMathParenthesis()
             }
 
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.START_ARRAY -> parseArray()
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_SUBTRACT -> {
+            Token.Type.START_ARRAY -> parseArray()
+            Token.Type.MATH_SUBTRACT -> {
                 val minus = tokens.next()
                 val value = parseVariableValue()
-                _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeNegate(
+                NodeNegate(
                     listOf(
-                        _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(
+                        NodeToken(
                             minus
                         ), value
                     )
                 )
             }
 
-            else -> throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+            else -> throw ParserException(
                 "Expected a variable value",
                 token
             )
@@ -252,16 +252,16 @@ class Parser(tokens: Iterator<app.ultradev.hytaleuiparser.token.Token>) {
         val next = tokens.peek()
 
         return when (next.type) {
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_ADD, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_SUBTRACT, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_MULTIPLY, _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MATH_DIVIDE -> {
+            Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> {
                 val mathOperator = tokens.next()
                 val right = parseVariableValue()
-                if (right is app.ultradev.hytaleuiparser.ast.NodeMathOperation) {
-                    _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeMathOperation(
-                        _root_ide_package_.app.ultradev.hytaleuiparser.listOfInsertMissing(
-                            _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeMathOperation(
-                                _root_ide_package_.app.ultradev.hytaleuiparser.listOfInsertMissing(
+                if (right is NodeMathOperation) {
+                    NodeMathOperation(
+                        listOfInsertMissing(
+                            NodeMathOperation(
+                                listOfInsertMissing(
                                     variable,
-                                    _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(mathOperator),
+                                    NodeToken(mathOperator),
                                     right.param1
                                 )
                             ),
@@ -269,25 +269,25 @@ class Parser(tokens: Iterator<app.ultradev.hytaleuiparser.token.Token>) {
                         )
                     )
                 } else {
-                    _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeMathOperation(
+                    NodeMathOperation(
                         listOf(
                             variable,
-                            _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(mathOperator),
+                            NodeToken(mathOperator),
                             right
                         )
                     )
                 }
             }
 
-            _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MEMBER_MARKER -> {
+            Token.Type.MEMBER_MARKER -> {
                 var current = variable
-                while (tokens.peek().type == _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.MEMBER_MARKER) {
+                while (tokens.peek().type == Token.Type.MEMBER_MARKER) {
                     val memberMarker = tokens.next()
                     val member = parseIdentifier()
-                    current = _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeMemberField(
+                    current = NodeMemberField(
                         listOf(
                             current,
-                            _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(memberMarker),
+                            NodeToken(memberMarker),
                             member
                         )
                     )
@@ -299,15 +299,15 @@ class Parser(tokens: Iterator<app.ultradev.hytaleuiparser.token.Token>) {
         }
     }
 
-    private fun parseArray(): app.ultradev.hytaleuiparser.ast.NodeArray {
+    private fun parseArray(): NodeArray {
         val start = tokens.next()
-        if (start.type != _root_ide_package_.app.ultradev.hytaleuiparser.token.Token.Type.START_ARRAY) throw _root_ide_package_.app.ultradev.hytaleuiparser.ParserException(
+        if (start.type != Token.Type.START_ARRAY) throw ParserException(
             "Expected start array",
             start
         )
 
-        val children = mutableListOf<app.ultradev.hytaleuiparser.ast.AstNode>(
-            _root_ide_package_.app.ultradev.hytaleuiparser.ast.NodeToken(
+        val children = mutableListOf<AstNode>(
+            NodeToken(
                 start
             )
         )
