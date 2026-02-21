@@ -12,4 +12,5 @@ fun main(args: Array<String>) {
 
     TypeGen.generateTypes()
     ElementGen.generateElements()
+    BsonGen.generateBsonExtensions()
 }

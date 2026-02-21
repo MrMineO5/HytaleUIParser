@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     api(project(":Parser"))
+    api("org.mongodb:bson:5.6.3")
 }
 
 // -------------------------

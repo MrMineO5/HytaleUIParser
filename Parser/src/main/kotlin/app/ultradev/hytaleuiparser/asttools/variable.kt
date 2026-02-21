@@ -53,20 +53,7 @@ fun VariableValue.valueAsColor(): Color {
     val finalValue = this.deepResolve()
     when (finalValue) {
         is NodeColor -> {
-            val hexPart = finalValue.value!!.valueText.removePrefix("#")
-            val color = when (hexPart.length) {
-                8 -> { // #RRGGBBAA
-                    val rgba = Integer.parseInt(hexPart, 16)
-                    val argb = ((rgba and 0xFF) shl 24) or (rgba ushr 8)
-                    Color(argb, true)
-                }
-                6 -> { // #RRGGBB
-                    Color(Integer.parseInt(hexPart, 16))
-                }
-                else -> { // #RGB is not allowed
-                    error("Invalid color hex code: $hexPart")
-                }
-            }
+            val color = finalValue.value!!.valueText.parseHexColor()
 
             if (finalValue.opacity != null) {
                 val opacity = finalValue.opacity!!.value!!.valueAsFloat()
@@ -75,6 +62,23 @@ fun VariableValue.valueAsColor(): Color {
             return color
         }
         else -> error("Could not interpret $finalValue as a color.")
+    }
+}
+
+fun String.parseHexColor(): Color {
+    val hexPart = this.removePrefix("#")
+    return when (hexPart.length) {
+        8 -> { // #RRGGBBAA
+            val rgba = Integer.parseInt(hexPart, 16)
+            val argb = ((rgba and 0xFF) shl 24) or (rgba ushr 8)
+            Color(argb, true)
+        }
+        6 -> { // #RRGGBB
+            Color(Integer.parseInt(hexPart, 16))
+        }
+        else -> { // #RGB is not allowed
+            error("Invalid color hex code: $hexPart")
+        }
     }
 }
 

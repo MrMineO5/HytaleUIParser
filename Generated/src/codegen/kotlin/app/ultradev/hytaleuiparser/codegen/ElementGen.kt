@@ -11,7 +11,7 @@ object ElementGen {
 
     lateinit var propertiesInterface: ClassName
 
-    private fun propertyClassName(type: ElementType): ClassName {
+    fun propertyClassName(type: ElementType): ClassName {
         return ClassName(PACKAGE, type.name + "Properties")
     }
 
