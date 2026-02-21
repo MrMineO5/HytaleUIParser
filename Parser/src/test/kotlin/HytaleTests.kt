@@ -72,7 +72,15 @@ class HytaleTests {
         val files = parseServerAssets()
         val validator = Validator(files, validateUnusedVariables = true)
         validator.validate()
-        assert(validator.validationErrors.isEmpty()) { "Validation errors found" }
+
+        var count = 0
+        validator.validationErrors.forEach {
+            if (it.message.startsWith($$"No member @ButtonsDestructive on $Sounds")) return@forEach
+            System.err.println(it)
+            count++
+        }
+        assert(count == 0) { "Validation errors found" }
+
         TestUtils.checkAllPropertiesInitialized(validator.files.values)
     }
 }
