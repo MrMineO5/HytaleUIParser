@@ -69,7 +69,7 @@ fun String.parseHexColor(): Color {
     val hexPart = this.removePrefix("#")
     return when (hexPart.length) {
         8 -> { // #RRGGBBAA
-            val rgba = Integer.parseInt(hexPart, 16)
+            val rgba = Integer.parseUnsignedInt(hexPart, 16)
             val argb = ((rgba and 0xFF) shl 24) or (rgba ushr 8)
             Color(argb, true)
         }
