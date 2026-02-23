@@ -11,6 +11,22 @@ enum class TypeType(
     Float,
     Boolean,
     Color,
+    Dict,
+
+    LabelSpan(
+        mapOf(
+            "Text" to String,
+            "IsUppercase" to Boolean,
+            "IsBold" to Boolean,
+            "IsItalics" to Boolean,
+            "IsMonospace" to Boolean,
+            "IsUnderlined" to Boolean,
+            "Color" to Color,
+            "OutlineColor" to Color,
+            "Link" to String,
+            "Params" to Dict,
+        )
+    ),
 
     SoundStyle(
         mapOf(
@@ -450,7 +466,7 @@ enum class TypeType(
           "Background" to PatchStyle,
           "Icon" to InputFieldIcon,
           "Style" to InputFieldStyle,
-          "PlaceholderStyle" to TextTooltipStyle,
+          "PlaceholderStyle" to InputFieldStyle,
           "Anchor" to Anchor,
           "Padding" to Padding,
           "PlaceholderText" to String,
