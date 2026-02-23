@@ -105,3 +105,6 @@ fun VariableValue.valueAsProperties(): Map<String, VariableValue> {
         else -> error("Could not interpret $finalValue as a properties object.")
     }
 }
+
+// TODO: Dicts are not usually used within UI files
+fun VariableValue.valueAsDict(): Map<String, Any> = emptyMap()

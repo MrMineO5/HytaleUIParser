@@ -112,6 +112,16 @@ object BsonGen {
                         MemberName("app.ultradev.hytaleuiparser.asttools", "parseHexColor")
                     )
 
+                    TypeType.Dict -> parseBuilder.addCode(
+                        """
+                        |require(bson is %T) { %P }
+                        |return bson.%M()
+                        """.trimMargin(),
+                        typeNameOf<BsonDocument>(),
+                        "Expected BsonDocument, got ${'$'}{bson::class.simpleName}: ${'$'}bson",
+                        MemberName("app.ultradev.hytaleuiparser.generated", "toDict")
+                    )
+
                     else -> error("Unknown primitive type: $type")
                 }
             }

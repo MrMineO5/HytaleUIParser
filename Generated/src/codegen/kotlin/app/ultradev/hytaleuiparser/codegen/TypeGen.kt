@@ -16,7 +16,7 @@ object TypeGen {
         TypeType.entries.forEach(::generateType)
     }
 
-    fun getTypeName(type: TypeType): ClassName {
+    fun getTypeName(type: TypeType): TypeName {
         return if (type.isPrimitive) {
             when (type) {
                 TypeType.String -> String::class.asTypeName()
@@ -24,6 +24,7 @@ object TypeGen {
                 TypeType.Float -> Float::class.asTypeName()
                 TypeType.Boolean -> Boolean::class.asTypeName()
                 TypeType.Color -> Color::class.asTypeName()
+                TypeType.Dict -> typeNameOf<Map<String, Any?>>()
                 else -> error("Unknown primitive type: $type")
             }
         } else {
@@ -87,7 +88,7 @@ object TypeGen {
             return CodeBlock.of(
                 "properties[\"%L\"]?.let(%L)",
                 name,
-                getTypeName(type).member("fromVariable").reference()
+                (getTypeName(type) as ClassName).member("fromVariable").reference()
             )
         }
     }
