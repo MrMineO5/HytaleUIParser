@@ -1,10 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer
 
-import app.ultradev.hytaleuiparser.Validator
 import app.ultradev.hytaleuiparser.renderer.command.CommandApplicator
-import app.ultradev.hytaleuiparser.renderer.command.UICommand
+import app.ultradev.hytaleuiparser.spec.command.UICommand
 import app.ultradev.hytaleuiparser.source.AssetSources
-import app.ultradev.hytaleuiparser.source.DirectoryAssetSource
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.imageio.ImageIO

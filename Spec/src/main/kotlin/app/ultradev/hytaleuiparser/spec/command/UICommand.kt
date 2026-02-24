@@ -1,4 +1,4 @@
-package app.ultradev.hytaleuiparser.renderer.command
+package app.ultradev.hytaleuiparser.spec.command
 
 import java.io.InputStream
 import java.io.OutputStream

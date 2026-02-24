@@ -14,6 +14,8 @@ import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
 import app.ultradev.hytaleuiparser.renderer.extensions.insertBefore
 import app.ultradev.hytaleuiparser.source.AssetSource
 import app.ultradev.hytaleuiparser.source.AssetSources
+import app.ultradev.hytaleuiparser.spec.command.Selector
+import app.ultradev.hytaleuiparser.spec.command.UICommand
 import org.bson.BsonDocument
 import org.bson.BsonInt32
 import org.bson.BsonString
