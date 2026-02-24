@@ -28,4 +28,8 @@ class RenderContext(
         return box.contains(previousMousePosition.x, previousMousePosition.y)
                 && !box.contains(mousePosition.x, mousePosition.y)
     }
+
+    fun reset() {
+        active = null
+    }
 }

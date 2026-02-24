@@ -7,20 +7,17 @@ import app.ultradev.hytaleuiparser.renderer.target.AWTRenderTarget
 import app.ultradev.hytaleuiparser.source.AssetSource
 import app.ultradev.hytaleuiparser.source.EmptyAssetSource
 import java.awt.Graphics
-import java.awt.event.ComponentAdapter
-import java.awt.event.ComponentEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
-import java.awt.event.MouseMotionAdapter
-import java.awt.event.MouseWheelEvent
+import java.awt.event.*
 import java.awt.image.BufferedImage
 import javax.swing.JPanel
 
 class HytaleUIPanel(
-    val element: AbstractUIElement,
+    element: AbstractUIElement,
     val backgroundImage: BufferedImage? = null,
-    val assetSource: AssetSource = EmptyAssetSource,
+    assetSource: AssetSource = EmptyAssetSource,
 ) : JPanel() {
+    var element = element
+        private set
     val context = RenderContext(assetSource)
 
     init {
@@ -29,7 +26,7 @@ class HytaleUIPanel(
         addMouseMotionListener(object : MouseMotionAdapter() {
             override fun mouseMoved(e: MouseEvent) {
                 context.mousePosition = e.point
-                element.mouseMoved(context)
+                this@HytaleUIPanel.element.mouseMoved(context)
                 context.previousMousePosition = context.mousePosition
                 repaint()
             }
@@ -38,13 +35,13 @@ class HytaleUIPanel(
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
                 context.mousePosition = e.point
-                element.mouseDown(context)
+                this@HytaleUIPanel.element.mouseDown(context)
                 repaint()
             }
 
             override fun mouseReleased(e: MouseEvent) {
                 context.mousePosition = e.point
-                element.mouseUp(context)
+                this@HytaleUIPanel.element.mouseUp(context)
                 repaint()
             }
 
@@ -65,8 +62,14 @@ class HytaleUIPanel(
 
     fun recomputeLayout() {
         element.box = RenderBox(0, 0, width, height)
-        if (element is BranchUIElement) LayoutPass.run(element)
+        LayoutPass.run(element as? BranchUIElement ?: return)
         repaint()
+    }
+
+    fun replaceElement(newElement: AbstractUIElement) {
+        element = newElement
+        context.reset()
+        recomputeLayout()
     }
 
     override fun paintComponent(g: Graphics) {
