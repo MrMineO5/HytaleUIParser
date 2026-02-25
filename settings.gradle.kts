@@ -9,4 +9,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "HytaleUIParser"
 
-include("Spec", "Generated", "Parser", "Renderer", "all")
+include("Spec", "Generated", "Parser", "Renderer", "Plugin", "all")
