@@ -44,3 +44,6 @@ bin/
 ### Hytale assets, you can grab
 hytaleAssets/
 /docs/custom-ui
+
+### Test server
+/Plugin/run

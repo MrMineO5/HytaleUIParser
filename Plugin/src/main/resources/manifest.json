@@ -1,0 +1,28 @@
+{
+    "Group": "UltraDev",
+    "Name": "UIDebug",
+    "Main": "app.ultradev.hytaleuiparser.plugin.HytaleUIParserPlugin",
+    "Version": "3.0.1",
+    "Description": "Debugging tool for previewing fully built UI pages in IDEs",
+    "Authors": [
+        {
+            "Name": "Ellie"
+        },
+        {
+            "Name": "UltraDev"
+        }
+    ],
+    "Website": "https://github.com/MrMineO5/HytaleUIParser/",
+    "ServerVersion": "*",
+    "Dependencies": {
+        
+    },
+    "OptionalDependencies": {
+        
+    },
+    "LoadBefore": {
+        
+    },
+    "DisabledByDefault": false,
+    "IncludesAssetPack": false
+}
