@@ -1,5 +1,6 @@
 package app.ultradev.hytaleuiparser.spec.command
 
+import java.io.EOFException
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -21,7 +22,7 @@ fun InputStream.readVarInt(): Int {
     var value = 0
     var shift = 0
     while (true) {
-        val next = this.read()
+        val next = this.readOrThrow()
         value = value or ((next and 0x7F) shl shift)
         if (next and 0x80 == 0) return value
         shift += 7
@@ -29,5 +30,13 @@ fun InputStream.readVarInt(): Int {
 }
 fun InputStream.readLengthPrefixedString(): String {
     val length = this.readVarInt()
-    return String(this.readNBytes(length))
+    val bytes = this.readNBytes(length)
+    if (bytes.size < length) throw EOFException("EOF reached while reading string")
+    return String(bytes)
+}
+
+fun InputStream.readOrThrow(): Int {
+    val value = this.read()
+    if (value == -1) throw EOFException()
+    return value
 }

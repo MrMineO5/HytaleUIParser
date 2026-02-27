@@ -26,7 +26,7 @@ data class CustomUIInfo(
 
     companion object {
         fun read(inputStream: InputStream): CustomUIInfo {
-            val flag = inputStream.read()
+            val flag = inputStream.readOrThrow()
             val type = Type.entries[flag and 0x7]
             val clear = flag and 0x80 != 0
 

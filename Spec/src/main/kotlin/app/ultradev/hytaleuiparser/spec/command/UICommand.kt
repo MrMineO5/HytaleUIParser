@@ -35,8 +35,8 @@ data class UICommand(
 
     companion object {
         fun read(inputStream: InputStream): UICommand {
-            val type = Type.entries[inputStream.read()]
-            val flags = inputStream.read()
+            val type = Type.entries[inputStream.readOrThrow()]
+            val flags = inputStream.readOrThrow()
 
             fun maybeRead(flag: Int): String? {
                 return if (flags and flag == flag) {
