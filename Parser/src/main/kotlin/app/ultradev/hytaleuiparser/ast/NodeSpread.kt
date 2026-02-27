@@ -10,6 +10,10 @@ class NodeSpread(
     val variable by child<AstNode>(1)
     val endStatement by optionalChild<NodeToken>(2)
 
+    init {
+        checkType<VariableReference>(variable)
+    }
+
     override fun validate(validationError: (String, AstNode) -> Unit) {
         if (variable !is VariableReference) validationError(
             "Expected variable reference after spread operator",
@@ -17,7 +21,7 @@ class NodeSpread(
         )
     }
 
-    val variableAsReference: VariableReference = variable as VariableReference
+    val variableAsReference: VariableReference get() = variable as VariableReference
 
     override fun clone() = NodeSpread(children.clone(), valid)
 }

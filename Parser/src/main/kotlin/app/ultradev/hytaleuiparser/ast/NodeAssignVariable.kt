@@ -11,7 +11,7 @@ class NodeAssignVariable(
     val value by child<AstNode>(2)
     val endStatement by child<NodeToken>(3)
 
-    val valueAsVariable: VariableValue = value as VariableValue
+    val valueAsVariable: VariableValue get() = value as VariableValue
 
     override fun validate(validationError: (String, AstNode) -> Unit) {
         if (value !is VariableValue) validationError("Expected variable value after assignment operator", findClosestChild(2))

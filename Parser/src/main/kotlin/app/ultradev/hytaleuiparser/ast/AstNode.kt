@@ -1,14 +1,19 @@
 package app.ultradev.hytaleuiparser.ast
 
+import app.ultradev.hytaleuiparser.convertNegativeIndex
 import app.ultradev.hytaleuiparser.ast.visitor.AstVisitor
+import app.ultradev.hytaleuiparser.getOrNullAllowNegative
 import app.ultradev.hytaleuiparser.token.Token
 import app.ultradev.hytaleuiparser.validation.Scope
 import kotlin.reflect.KProperty
 
 sealed class AstNode(
     val children: List<AstNode>,
-    val valid: Boolean,
+    valid: Boolean = true
 ) {
+    var valid: Boolean = valid
+        protected set
+
     open val tokens: List<Token>
         get() = children.flatMap { it.tokens }
 
@@ -70,11 +75,12 @@ sealed class AstNode(
     protected open fun validate(validationError: (String, AstNode) -> Unit) {}
 
 
-    internal fun startValidation0()  {
+    internal fun startValidation0() {
         scopes.clear()
         startValidation()
         children.forEach { it.startValidation0() }
     }
+
     /**
      * Called at the beginning of validation.
      *
@@ -104,15 +110,27 @@ sealed class AstNode(
      */
     abstract fun clone(): AstNode
 
+
+    protected inline fun <reified T> checkType(node: AstNode?) {
+        if (node !is T) {
+            valid = false
+        }
+    }
+
     /**
      * Get the index'th child of this node. Negative indices count from the end of the list (i.e. -1 is the last child).
      */
-    protected inline fun <reified T : AstNode> child(index: Int) = NodeDelegate<T>(index)
+    protected inline fun <reified T : AstNode> child(index: Int): NodeDelegate<T> {
+        val finalIndex = index.convertNegativeIndex(children)
+        if (finalIndex !in children.indices || children[finalIndex] !is T) {
+            valid = false
+        }
+        return NodeDelegate(index)
+    }
     protected inline fun <reified T : AstNode> optionalChild(index: Int) = NodeDelegate<T?>(index)
     protected class NodeDelegate<T : AstNode?>(val index: Int) {
         operator fun getValue(thisRef: AstNode, property: KProperty<*>): T? {
-            val finalIndex = if (index < 0) thisRef.children.size + index else index
-            return thisRef.children.getOrNull(finalIndex) as? T
+            return thisRef.children.getOrNullAllowNegative(index) as? T
         }
     }
 

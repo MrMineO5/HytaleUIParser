@@ -24,3 +24,8 @@ fun listOfInsertMissing(vararg nodes: AstNode?) = doInsertMissing(mutableListOf(
 
 fun <T, R> IndexedValue<T>.mapValue(transform: (T) -> R): IndexedValue<R> = IndexedValue(this.index, transform(this.value))
 fun <T, R> Sequence<IndexedValue<T>>.mapValue(transform: (T) -> R): Sequence<IndexedValue<R>> = map { it.mapValue(transform) }
+
+fun Int.convertNegativeIndex(list: List<*>): Int {
+    return if (this < 0) list.size + this else this
+}
+fun <T> List<T>.getOrNullAllowNegative(index: Int) = getOrNull(index.convertNegativeIndex(this))

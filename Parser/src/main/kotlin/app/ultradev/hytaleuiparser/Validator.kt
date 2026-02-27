@@ -382,6 +382,8 @@ class Validator(
         }
         node.resolvedTypes.add(type)
         node.spreads.forEach { spread ->
+            if (!spread.valid) return@forEach
+
             val value = deepLookupReference(spread.variableAsReference) ?: return@forEach
             if (value !is NodeType) return@forEach validationError(
                 "Expected type, got ${value::class.simpleName}",
@@ -398,7 +400,7 @@ class Validator(
                         )
                     }", field
                 )
-            validateProperty(field.value!!, reqType)
+            validateProperty(field.value ?: return@forEach, reqType)
         }
     }
 

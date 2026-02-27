@@ -1,0 +1,16 @@
+@Test = ButtonStyle(Default: (Background: #00FF00, ), );
+@Test2 = (...@Test, Pressed: (Background: #FF0000), );
+
+@ElementVar = Group {
+    Button {
+        Style: @Test2;
+        Label {
+            Text: @Text;
+        }
+    }
+};
+
+@Tag = "[Tag] ";
+@ElementVar {
+    @Text = @Tag + "Test Text";
+}

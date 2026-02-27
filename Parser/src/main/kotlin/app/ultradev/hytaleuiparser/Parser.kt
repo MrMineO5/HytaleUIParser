@@ -216,7 +216,7 @@ class Parser(tokens: Iterator<Token>) {
                         // TODO: Eat tokens...?
                         tokens.next()
                         tokens.next()
-                        return NodeVariable(listOf(NodeToken(next)), false)
+                        return NodeVariable(listOf(NodeToken(next)))
                     }
                 }
             }
@@ -252,7 +252,7 @@ class Parser(tokens: Iterator<Token>) {
                     "Expected a variable value",
                     token
                 )
-                return NodeVariable(listOf(NodeToken(token)), false)
+                return NodeVariable(listOf(NodeToken(token)))
             }
         }
 
@@ -472,7 +472,7 @@ class Parser(tokens: Iterator<Token>) {
         val fieldMarker = tokens.next()
         if (fieldMarker.type != Token.Type.FIELD_MARKER) {
             parserError("Expected field marker", fieldMarker)
-            return NodeField(listOf(NodeToken(fieldMarker), NodeToken(fieldMarker), NodeToken(fieldMarker), NodeToken(fieldMarker)), false)
+            return NodeField(listOf(identifier, NodeToken(fieldMarker)))
         }
         val value = parseVariableValue()
 
@@ -550,7 +550,7 @@ class Parser(tokens: Iterator<Token>) {
                 // TODO: Eat tokens x2?
                 tokens.next()
                 tokens.next()
-                NodeAssignReference(listOf(NodeReference(listOf(NodeToken(nextNext)), false)), false)
+                NodeAssignReference(listOf(NodeReference(listOf(NodeToken(nextNext)))))
             }
         }
     }
@@ -608,12 +608,8 @@ class Parser(tokens: Iterator<Token>) {
                 tokens.next()
                 tokens.next()
                 NodeAssignVariable(listOf(
-                    NodeVariable(listOf(NodeToken(nextNext)), false),
-                    NodeVariable(listOf(NodeToken(nextNext)), false),
-                    NodeVariable(listOf(NodeToken(nextNext)), false),
-                    NodeVariable(listOf(NodeToken(nextNext)), false),
-                ),
-                false)
+                    NodeVariable(listOf(NodeToken(next))),
+                ))
             }
         }
     }
