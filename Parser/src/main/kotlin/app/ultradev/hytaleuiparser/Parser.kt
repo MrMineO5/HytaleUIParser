@@ -208,10 +208,16 @@ class Parser(tokens: Iterator<Token>) {
                     Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT, Token.Type.END_PARENTHESIS,
                     Token.Type.MATH_ADD, Token.Type.MATH_SUBTRACT, Token.Type.MATH_MULTIPLY, Token.Type.MATH_DIVIDE -> parseUnquotedStringConstant()
 
-                    else -> throw ParserException(
-                        "Unexpected token after identifier",
-                        next
-                    )
+                    else -> {
+                        parserError(
+                            "Unexpected token after identifier",
+                            next
+                        )
+                        // TODO: Eat tokens...?
+                        tokens.next()
+                        tokens.next()
+                        return NodeVariable(listOf(NodeToken(next)), false)
+                    }
                 }
             }
 
@@ -241,10 +247,13 @@ class Parser(tokens: Iterator<Token>) {
                 )
             }
 
-            else -> throw ParserException(
-                "Expected a variable value",
-                token
-            )
+            else -> {
+                parserError(
+                    "Expected a variable value",
+                    token
+                )
+                return NodeVariable(listOf(NodeToken(token)), false)
+            }
         }
 
         if (!tokens.hasNext()) return variable
@@ -342,10 +351,10 @@ class Parser(tokens: Iterator<Token>) {
 
     private fun parseMathParenthesis(): AstNode {
         val start = tokens.next()
-        if (start.type != Token.Type.START_PARENTHESIS) throw ParserException("Expected start parenthesis", start)
+        if (start.type != Token.Type.START_PARENTHESIS) parserError("Expected start parenthesis", start)
         val value = parseVariableValue()
         val end = tokens.next()
-        if (end.type != Token.Type.END_PARENTHESIS) throw ParserException("Expected end parenthesis", end)
+        if (end.type != Token.Type.END_PARENTHESIS) parserError("Expected end parenthesis", end)
         return value
     }
 
@@ -419,7 +428,10 @@ class Parser(tokens: Iterator<Token>) {
 
     private fun parseElementBody(): NodeBody {
         val start = tokens.next()
-        if (start.type != Token.Type.START_ELEMENT) throw ParserException("Expected start element", start)
+        if (start.type != Token.Type.START_ELEMENT) {
+            parserError("Expected start element", start)
+            return NodeBody(listOf(NodeToken(start), NodeToken(start), NodeToken(start)), false)
+        }
 
         val children = mutableListOf<AstNode>(NodeToken(start))
 
@@ -458,7 +470,10 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseField(): NodeField {
         val identifier = parseIdentifier()
         val fieldMarker = tokens.next()
-        if (fieldMarker.type != Token.Type.FIELD_MARKER) throw ParserException("Expected field marker", fieldMarker)
+        if (fieldMarker.type != Token.Type.FIELD_MARKER) {
+            parserError("Expected field marker", fieldMarker)
+            return NodeField(listOf(NodeToken(fieldMarker), NodeToken(fieldMarker), NodeToken(fieldMarker), NodeToken(fieldMarker)), false)
+        }
         val value = parseVariableValue()
 
         val next = tokens.peek()
@@ -466,7 +481,12 @@ class Parser(tokens: Iterator<Token>) {
             Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT -> NodeToken(tokens.next())
             Token.Type.END_PARENTHESIS -> null
 
-            else -> throw ParserException("Expected field delimiter, end statement, or end type after field", next)
+            else -> {
+                parserError("Expected field delimiter, end statement, or end type after field", next)
+                // TODO: Eat token?
+                tokens.next()
+                null
+            }
         }
 
         return NodeField(listOfInsertMissing(identifier, NodeToken(fieldMarker), value, end))
@@ -513,7 +533,7 @@ class Parser(tokens: Iterator<Token>) {
     private fun parseRefMember(): NodeRefMember {
         val reference = parseReference()
         val memberMarker = tokens.next()
-        if (memberMarker.type != Token.Type.MEMBER_MARKER) throw ParserException("Expected member marker", memberMarker)
+        if (memberMarker.type != Token.Type.MEMBER_MARKER) parserError("Expected member marker", memberMarker)
         val member = recoverable { parseVariable() }
         return NodeRefMember(listOfInsertMissing(reference, NodeToken(memberMarker), member))
     }
@@ -525,7 +545,13 @@ class Parser(tokens: Iterator<Token>) {
         return when (nextNext.type) {
             Token.Type.ASSIGNMENT -> parseReferenceAssignment()
             Token.Type.MEMBER_MARKER -> parseElement()
-            else -> throw ParserException("Expected reference assignment or member", nextNext)
+            else -> {
+                parserError("Expected reference assignment or member", nextNext)
+                // TODO: Eat tokens x2?
+                tokens.next()
+                tokens.next()
+                NodeAssignReference(listOf(NodeReference(listOf(NodeToken(nextNext)), false)), false)
+            }
         }
     }
 
@@ -539,7 +565,12 @@ class Parser(tokens: Iterator<Token>) {
             Token.Type.FIELD_DELIMITER -> NodeToken(tokens.next())
             Token.Type.END_PARENTHESIS -> null
 
-            else -> throw ParserException("Expected field delimiter or end type after spread", next)
+            else -> {
+                parserError("Expected field delimiter or end type after spread", next)
+                // TODO: Eat token?
+                tokens.next()
+                null
+            }
         }
         return NodeSpread(listOfInsertMissing(NodeToken(spreadMarker), variable, end))
     }
@@ -571,7 +602,19 @@ class Parser(tokens: Iterator<Token>) {
         return when (nextNext.type) {
             Token.Type.ASSIGNMENT -> parseVariableAssignment()
             Token.Type.START_ELEMENT, Token.Type.SELECTOR -> parseElement()
-            else -> throw ParserException("Expected variable assignment or element", nextNext)
+            else -> { 
+                parserError("Expected variable assignment or element", nextNext)
+                // TODO: Eat tokens x2?
+                tokens.next()
+                tokens.next()
+                NodeAssignVariable(listOf(
+                    NodeVariable(listOf(NodeToken(nextNext)), false),
+                    NodeVariable(listOf(NodeToken(nextNext)), false),
+                    NodeVariable(listOf(NodeToken(nextNext)), false),
+                    NodeVariable(listOf(NodeToken(nextNext)), false),
+                ),
+                false)
+            }
         }
     }
 

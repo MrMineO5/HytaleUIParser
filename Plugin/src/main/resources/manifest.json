@@ -6,9 +6,6 @@
     "Description": "Debugging tool for previewing fully built UI pages in IDEs",
     "Authors": [
         {
-            "Name": "Ellie"
-        },
-        {
             "Name": "UltraDev"
         }
     ],

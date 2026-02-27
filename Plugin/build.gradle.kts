@@ -14,7 +14,7 @@ hytale {
         version = project.version.toString()
         serverVersion = "*"
 
-        author("Ellie")
+        //author("Ellie")
         author("UltraDev")
     }
 }
