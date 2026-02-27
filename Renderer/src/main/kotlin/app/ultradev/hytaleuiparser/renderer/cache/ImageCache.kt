@@ -1,13 +1,13 @@
 package app.ultradev.hytaleuiparser.renderer.cache
 
-import app.ultradev.hytaleuiparser.source.AssetSource
+import app.ultradev.hytaleuiparser.source.AssetSourceProvider
 import java.awt.Image
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
-class ImageCache(val source: AssetSource) {
+class ImageCache(sourceProvider: AssetSourceProvider) : RenderCache(sourceProvider) {
     val images = mutableMapOf<String, BufferedImage>()
 
     operator fun get(relativePath: String): BufferedImage {
@@ -34,5 +34,9 @@ class ImageCache(val source: AssetSource) {
 
         images[relativePath] = image
         return image
+    }
+
+    override fun invalidate() {
+        images.clear()
     }
 }

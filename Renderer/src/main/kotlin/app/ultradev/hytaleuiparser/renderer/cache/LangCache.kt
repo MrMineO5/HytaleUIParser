@@ -1,9 +1,10 @@
 package app.ultradev.hytaleuiparser.renderer.cache
 
 import app.ultradev.hytaleuiparser.source.AssetSource
+import app.ultradev.hytaleuiparser.source.AssetSourceProvider
 import kotlin.io.path.Path
 
-class LangCache(val source: AssetSource) {
+class LangCache(sourceProvider: AssetSourceProvider) : RenderCache(sourceProvider) {
     val translation = mutableMapOf<String, String>()
 
     operator fun get(translationKey: String): String {
@@ -26,5 +27,9 @@ class LangCache(val source: AssetSource) {
         val res = translation[translationKey] ?: translationKey
         translation[translationKey] = res
         return res
+    }
+
+    override fun invalidate() {
+        translation.clear()
     }
 }

@@ -5,6 +5,7 @@ import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutPass
 import app.ultradev.hytaleuiparser.renderer.target.AWTRenderTarget
 import app.ultradev.hytaleuiparser.source.AssetSource
+import app.ultradev.hytaleuiparser.source.AssetSourceProvider
 import app.ultradev.hytaleuiparser.source.EmptyAssetSource
 import java.awt.Graphics
 import java.awt.event.*
@@ -14,11 +15,11 @@ import javax.swing.JPanel
 class HytaleUIPanel(
     element: AbstractUIElement,
     val backgroundImage: BufferedImage? = null,
-    assetSource: AssetSource = EmptyAssetSource,
-) : JPanel() {
+    override var assetSource: AssetSource = EmptyAssetSource,
+) : JPanel(), AssetSourceProvider {
     var element = element
         private set
-    val context = RenderContext(assetSource)
+    val context = RenderContext(this)
 
     init {
         context.setCursor = ::setCursor
