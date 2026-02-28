@@ -48,8 +48,8 @@ class Tokenizer(
                 sb.append(read())
                 peek = peek()
             }
-            val ch = read()  // Skips quote, does nothing if EOF
-                ?: return Token(Token.Type.UNKNOWN, sb.toString(), startLine, startColumn, startOffset)
+            val ch = read()  // Skips quote, returns unclosed string if EOF
+                ?: return Token(Token.Type.STRING, sb.toString(), startLine, startColumn, startOffset)
             sb.append(ch)
             return Token(Token.Type.STRING, sb.toString(), startLine, startColumn, startOffset)
         }
