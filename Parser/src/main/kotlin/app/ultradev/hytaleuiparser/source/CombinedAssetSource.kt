@@ -9,14 +9,14 @@ class CombinedAssetSource(
     override fun listAllFiles(): List<Path> {
         val allPaths = sources.map { it.listAllFiles() }
 
-        val out = ArrayList<Path>(allPaths.sumOf { it.size })
+        val out = HashSet<Path>(allPaths.sumOf { it.size })
         allPaths.forEach { paths ->
             paths.forEach { path ->
                 if (out.contains(path)) return@forEach
                 out.add(path)
             }
         }
-        return out
+        return out.toList()
     }
 
     override fun getAsset(path: Path): InputStream? {
