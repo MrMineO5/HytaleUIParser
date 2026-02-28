@@ -6,8 +6,8 @@ import java.nio.file.Path
 class CombinedAssetSource(
     val sources: List<AssetSource>
 ) : AssetSource {
-    override fun listUIFiles(): List<Path> {
-        val allPaths = sources.map { it.listUIFiles() }
+    override fun listAllFiles(): List<Path> {
+        val allPaths = sources.map { it.listAllFiles() }
 
         val out = ArrayList<Path>(allPaths.sumOf { it.size })
         allPaths.forEach { paths ->

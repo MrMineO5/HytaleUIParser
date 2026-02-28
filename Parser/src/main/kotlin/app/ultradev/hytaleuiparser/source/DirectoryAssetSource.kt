@@ -14,9 +14,9 @@ class DirectoryAssetSource(
 ) : AssetSource {
     constructor(directory: String) : this(Path.of(directory))
 
-    override fun listUIFiles(): List<Path> {
+    override fun listAllFiles(): List<Path> {
         return directory.walk()
-            .filter { it.isRegularFile() && it.extension == "ui" }
+            .filter { it.isRegularFile() }
             .map { it.relativeTo(directory) }
             .toList()
     }

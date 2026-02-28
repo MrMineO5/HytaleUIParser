@@ -19,10 +19,9 @@ class ArchiveAssetSource(
         fs = FileSystems.newFileSystem(archive, null as ClassLoader?)
     }
 
-    override fun listUIFiles(): List<Path> {
+    override fun listAllFiles(): List<Path> {
         val root = fs.rootDirectories.first()
         return root.walk()
-            .filter { it.isRegularFile() && it.extension == "ui" }
             .map { it.relativeTo(root) }
             .toList()
     }

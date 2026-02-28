@@ -7,13 +7,13 @@ import app.ultradev.hytaleuiparser.ast.FakeAstNode
 import app.ultradev.hytaleuiparser.generated.bson.setFieldBson
 import app.ultradev.hytaleuiparser.generated.elements.GroupProperties
 import app.ultradev.hytaleuiparser.renderer.UITransformer
-import app.ultradev.hytaleuiparser.renderer.cache.LangCache
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
 import app.ultradev.hytaleuiparser.renderer.extensions.insertBefore
 import app.ultradev.hytaleuiparser.source.AssetSource
 import app.ultradev.hytaleuiparser.source.AssetSources
+import app.ultradev.hytaleuiparser.source.index.AssetIndex
 import app.ultradev.hytaleuiparser.spec.command.Selector
 import app.ultradev.hytaleuiparser.spec.command.UICommand
 import org.bson.BsonDocument
@@ -22,11 +22,11 @@ import org.bson.BsonString
 import java.io.StringReader
 
 class CommandApplicator(val assetSource: AssetSource) {
+    val assetIndex = AssetIndex.buildIndex(assetSource)
     val files = AssetSources.parseUIFiles(assetSource)
-    val langCache = LangCache(assetSource) // TODO: We should probably handle translation in the render pipeline?
 
     init {
-        Validator(files, assetSource = assetSource).validate()
+        Validator(files, assetIndex = assetIndex).validate()
     }
 
     operator fun invoke(commands: List<UICommand>): BranchUIElement = run(commands)
@@ -128,7 +128,7 @@ class CommandApplicator(val assetSource: AssetSource) {
 
     private fun parseAdHocElement(inlineText: String): UIGroupElement {
         val rootNode = Parser(Tokenizer(StringReader(inlineText))).finish()
-        Validator(mapOf("__adhoc_element.ui" to rootNode), assetSource = assetSource).validate()
+        Validator(mapOf("__adhoc_element.ui" to rootNode), assetIndex = assetIndex).validate()
         return UITransformer.transform(rootNode)
     }
 
@@ -186,7 +186,8 @@ class CommandApplicator(val assetSource: AssetSource) {
             val value = bson[it]
             if (value is BsonDocument) {
                 if (value.contains("MessageId")) {
-                    var message = langCache[value["MessageId"]!!.asString().value]
+                    val key = value["MessageId"]!!.asString().value
+                    var message = assetIndex.translationKeys[key] ?: key
                     val params = value["Params"]?.asDocument() ?: BsonDocument()
                     params.keys.forEach { paramName ->
                         val param = params[paramName] ?: return@forEach
