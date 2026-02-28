@@ -47,9 +47,9 @@ class Validator(
 
     fun validateRoot(path: String, revalidate: Boolean = false): RootNode? {
         if (validated.contains(path) && !revalidate) return files[path] ?: error("Couldn't find $path")
-        validated.add(path)
 
         val root = files[path] ?: return null
+        validated.add(path)
 
         // Reset internal validation state
         root.startValidation0()
