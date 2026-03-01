@@ -35,4 +35,6 @@ object NopRenderTarget : RenderTarget {
         info: TextRenderStyle
     ) {
     }
+
+    override fun setClip(box: RenderBox?): RenderBox? = box
 }

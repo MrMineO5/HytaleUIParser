@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.layout.impl
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
+import app.ultradev.hytaleuiparser.renderer.BoxSize
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.extensions.maxOfOrZero
 import app.ultradev.hytaleuiparser.renderer.layout.Layout
@@ -13,6 +14,8 @@ object LayoutFull : Layout {
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
-    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalWidth(available) }
+    override val combineMode = BoxSize.BoxCombineMode(
+        BoxSize.AxisCombineMode.MAX_OR_ZERO,
+        BoxSize.AxisCombineMode.MAX_OR_ZERO
+    )
 }

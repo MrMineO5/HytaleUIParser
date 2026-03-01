@@ -44,6 +44,15 @@ data class RenderBox(
         )
     }
 
+    fun offset(axis: Axis): Int = when (axis) {
+        Axis.HORIZONTAL -> x
+        Axis.VERTICAL -> y
+    }
+    fun size(axis: Axis): Int = when (axis) {
+        Axis.HORIZONTAL -> width
+        Axis.VERTICAL -> height
+    }
+
     fun withPadding(padding: Padding): RenderBox {
         val top = padding.top ?: padding.vertical ?: padding.full ?: 0
         val bottom = padding.bottom ?: padding.vertical ?: padding.full ?: 0

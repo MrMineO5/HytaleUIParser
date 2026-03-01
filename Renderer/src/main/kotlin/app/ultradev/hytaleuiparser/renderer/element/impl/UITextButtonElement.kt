@@ -2,15 +2,14 @@ package app.ultradev.hytaleuiparser.renderer.element.impl
 
 import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
-import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.elements.TextButtonProperties
 import app.ultradev.hytaleuiparser.generated.types.LabelStyle
+import app.ultradev.hytaleuiparser.renderer.BoxSize
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.render.drawPatchStyle
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
-import java.awt.font.FontRenderContext
 
 class UITextButtonElement(
     node: AstNode,
@@ -22,12 +21,11 @@ class UITextButtonElement(
             properties.style?.default?.labelStyle ?: LabelStyle.EMPTY
         )
 
-    override fun contentDesiredHeight(available: Int): Int {
-        return textRenderInfo.getHeight(FontRenderContext(null, false, false), text)
-    }
-
-    override fun contentDesiredWidth(available: Int): Int {
-        return textRenderInfo.getWidth(FontRenderContext(null, false, false), text)
+    override fun contentDesiredSize(available: BoxSize): BoxSize {
+        return BoxSize(
+            textRenderInfo.getHeight(),
+            textRenderInfo.getWidth(text)
+        )
     }
 
     override fun draw(target: RenderTarget, context: RenderContext) {

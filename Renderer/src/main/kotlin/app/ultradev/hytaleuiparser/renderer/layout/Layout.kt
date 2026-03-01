@@ -1,6 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer.layout
 
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
+import app.ultradev.hytaleuiparser.renderer.BoxSize
+import app.ultradev.hytaleuiparser.renderer.BoxSize.Companion.combine
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutBottom
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutCenter
@@ -16,8 +18,10 @@ import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutTop
 interface Layout {
     fun doLayout(element: BranchUIElement)
 
-    fun contentDesiredWidth(element: BranchUIElement, available: Int): Int
-    fun contentDesiredHeight(element: BranchUIElement, available: Int): Int
+    val combineMode: BoxSize.BoxCombineMode
+    fun contentDesiredSize(element: BranchUIElement, available: BoxSize): BoxSize {
+        return element.visibleChildren.map { it.totalSize(available) }.combine(combineMode)
+    }
 
     companion object {
         fun get(mode: LayoutMode): Layout {

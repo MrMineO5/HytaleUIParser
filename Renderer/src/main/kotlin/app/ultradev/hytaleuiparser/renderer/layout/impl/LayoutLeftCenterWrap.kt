@@ -1,5 +1,6 @@
 package app.ultradev.hytaleuiparser.renderer.layout.impl
 
+import app.ultradev.hytaleuiparser.renderer.BoxSize
 import app.ultradev.hytaleuiparser.renderer.RenderBox
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
@@ -16,14 +17,15 @@ object LayoutLeftCenterWrap : Layout {
         var maxTotalHeight: Int = 0
     )
 
-    private fun splitIntoRows(availableWidth: Int, children: List<AbstractUIElement>): List<Row> {
+    private fun splitIntoRows(available: BoxSize, children: Sequence<AbstractUIElement>): List<Row> {
         val rows = mutableListOf<Row>()
         var current = Row()
 
         children.forEach { child ->
-            val childWidth = child.totalWidth(availableWidth)
-            val height = child.totalHeight(100) // TODO: how do we even?
-            if (current.children.isNotEmpty() && current.totalWidth + childWidth > availableWidth) {
+            val totalSize = child.totalSize(available)
+            val childWidth = totalSize.width
+            val height = totalSize.height
+            if (current.children.isNotEmpty() && current.totalWidth + childWidth > available.width) {
                 rows += current
                 current = Row()
             }
@@ -38,13 +40,16 @@ object LayoutLeftCenterWrap : Layout {
 
     override fun doLayout(element: BranchUIElement) {
         val cbox = element.contentBox
-        val rows = splitIntoRows(cbox.width, element.visibleChildren)
+        val boxSize = BoxSize.fromRenderBox(cbox)
+        val rows = splitIntoRows(boxSize, element.visibleChildren)
         var y = cbox.y
         rows.forEach { row ->
+            val rowBox = boxSize.copy(height = row.maxTotalHeight)
+
             val flexMetrics = LayoutTools.flexMetrics(
-                row.children,
+                row.children.asSequence(),
                 cbox.width,
-                totalSize = { it.totalWidth(cbox.width) }
+                totalSize = { it.totalSize(rowBox).width }
             )
 
             var x = cbox.x + (cbox.width - flexMetrics.totalSize) / 2
@@ -52,8 +57,8 @@ object LayoutLeftCenterWrap : Layout {
                 val info = LayoutTools.computeFlex(
                     child,
                     flexMetrics.sizePerFlexWeight,
-                    totalSize = { it.totalWidth(cbox.width) },
-                    desiredSize = { it.desiredWidthFromTotal(cbox.width) },
+                    totalSize = { it.totalSize(rowBox).width },
+                    desiredSize = { it.desiredSizeFromTotal(rowBox).width },
                     startOffset = child.properties.anchor?.leftFallback(),
                     endOffset = child.properties.anchor?.rightFallback(),
                     size = child.properties.anchor?.width
@@ -64,7 +69,7 @@ object LayoutLeftCenterWrap : Layout {
                     y + row.maxTotalHeight,
                     child.properties.anchor?.top,
                     child.properties.anchor?.bottom,
-                    child.desiredHeight(100) // TODO: how do we even?
+                    child.desiredSize(rowBox).height
                 )
 
                 child.box = RenderBox(x + info.relativeStart, cy, info.relativeSize, endY - cy)
@@ -75,11 +80,14 @@ object LayoutLeftCenterWrap : Layout {
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int =
-        element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
+    override val combineMode: BoxSize.BoxCombineMode
+        get() = error("Combine mode should not be used directly")
 
-    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int {
+    override fun contentDesiredSize(element: BranchUIElement, available: BoxSize): BoxSize {
         val rows = splitIntoRows(available, element.visibleChildren)
-        return rows.maxOfOrZero { it.totalWidth }
+        return BoxSize(
+            rows.maxOfOrZero { it.totalWidth },
+            rows.sumOf { it.maxTotalHeight }
+        )
     }
 }

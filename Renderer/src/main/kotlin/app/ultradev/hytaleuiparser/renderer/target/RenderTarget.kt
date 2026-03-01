@@ -25,4 +25,6 @@ interface RenderTarget {
         box: RenderBox,
         info: TextRenderStyle,
     )
+
+    fun setClip(box: RenderBox?): RenderBox?
 }

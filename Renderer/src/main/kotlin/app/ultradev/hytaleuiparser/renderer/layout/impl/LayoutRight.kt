@@ -1,5 +1,6 @@
 package app.ultradev.hytaleuiparser.renderer.layout.impl
 
+import app.ultradev.hytaleuiparser.renderer.BoxSize
 import app.ultradev.hytaleuiparser.renderer.RenderBox
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback
@@ -11,20 +12,21 @@ import app.ultradev.hytaleuiparser.renderer.layout.LayoutTools
 object LayoutRight : Layout {
     override fun doLayout(element: BranchUIElement) {
         val cbox = element.contentBox
+        val boxSize = BoxSize.fromRenderBox(cbox)
 
         val flexMetrics = LayoutTools.flexMetrics(
             element.visibleChildren,
             cbox.width,
-            totalSize = { it.totalWidth(cbox.width) }
+            totalSize = { it.totalSize(boxSize).width }
         )
 
         var x = cbox.x + cbox.width
-        element.visibleChildren.asReversed().forEach { child ->
+        element.visibleChildrenReversed.forEach { child ->
             val info = LayoutTools.computeFlex(
                 child,
                 flexMetrics.sizePerFlexWeight,
-                totalSize = { it.totalWidth(cbox.width) },
-                desiredSize = { it.desiredWidthFromTotal(cbox.width) },
+                totalSize = { it.totalSize(boxSize).width },
+                desiredSize = { it.desiredSizeFromTotal(boxSize).width },
                 startOffset = child.properties.anchor?.leftFallback(),
                 endOffset = child.properties.anchor?.rightFallback(),
                 size = child.properties.anchor?.width
@@ -44,6 +46,8 @@ object LayoutRight : Layout {
         }
     }
 
-    override fun contentDesiredHeight(element: BranchUIElement, available: Int): Int = element.visibleChildren.maxOfOrZero { it.totalHeight(available) }
-    override fun contentDesiredWidth(element: BranchUIElement, available: Int): Int = element.visibleChildren.sumOf { it.totalWidth(available) }
+    override val combineMode = BoxSize.BoxCombineMode(
+        BoxSize.AxisCombineMode.SUM,
+        BoxSize.AxisCombineMode.MAX_OR_ZERO
+    )
 }

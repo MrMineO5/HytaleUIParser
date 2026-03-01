@@ -6,10 +6,8 @@ import app.ultradev.hytaleuiparser.generated.types.LabelStyle
 import app.ultradev.hytaleuiparser.renderer.RenderBox
 import java.awt.Color
 import java.awt.Font
-import java.awt.font.FontRenderContext
+import java.awt.Toolkit
 import java.awt.font.TextAttribute
-import java.awt.geom.Rectangle2D
-import kotlin.math.roundToInt
 
 data class TextRenderStyle(
     val fontName: String,
@@ -23,55 +21,101 @@ data class TextRenderStyle(
     val verticalAlignment: LabelAlignment,
 
     val uppercase: Boolean,
+    val wrap: Boolean,
 ) {
     val font by lazy { toFont() }
+    val fontMetrics by lazy { Toolkit.getDefaultToolkit().getFontMetrics(font) }
+
     private fun toFont(): Font {
         val baseFont = when (fontName) {
-            "Default" -> GameFonts.default
+            "Default" -> {
+                if (bold) GameFonts.defaultBold else GameFonts.default
+            }
+
             "Secondary" -> GameFonts.secondary
             else -> error("Unknown font: $fontName")
         }
 
         val attrs = mutableMapOf<TextAttribute, Any>()
         attrs[TextAttribute.SIZE] = fontSize
-        attrs[TextAttribute.WEIGHT] = if (bold) TextAttribute.WEIGHT_BOLD else TextAttribute.WEIGHT_REGULAR
-        attrs[TextAttribute.POSTURE] = if (italics) TextAttribute.POSTURE_OBLIQUE else TextAttribute.POSTURE_REGULAR
+        if (italics) attrs[TextAttribute.POSTURE] = TextAttribute.POSTURE_OBLIQUE
 
         return baseFont.deriveFont(attrs)
     }
 
-    fun transform(text: String): String {
-        return if (uppercase) text.uppercase() else text
+    fun wrap(text: String, maxWidth: Int): List<String> {
+        if (text.contains("\n")) return text.split("\n").flatMap { wrap(it, maxWidth) }
+        val words = text.split(" ")
+        val lines = mutableListOf<String>()
+        var currentLine = ""
+
+        words.forEach { word ->
+            val newLine = currentLine.let {
+                if (it.isNotEmpty()) "$it " else it
+            } + word
+            if (getWidth(newLine) > maxWidth) {
+                if (currentLine.isNotEmpty()) {
+                    lines.add(currentLine)
+                    currentLine = word
+                } else {
+                    currentLine = word
+                    while (getWidth(currentLine) > maxWidth) {
+                        var leftIndex = 0
+                        var rightIndex = currentLine.length
+                        while (leftIndex < rightIndex) {
+                            val midIndex = (leftIndex + rightIndex) / 2
+                            val midWord = currentLine.substring(0, midIndex)
+                            val midWidth = getWidth(midWord)
+                            if (midWidth > maxWidth) {
+                                rightIndex = midIndex
+                            } else {
+                                leftIndex = midIndex + 1
+                            }
+                        }
+                        val midIndex = (leftIndex + rightIndex) / 2
+                        val midWord = currentLine.substring(0, midIndex)
+                        currentLine = currentLine.substring(midIndex)
+                        lines.add(midWord)
+                    }
+                }
+            } else {
+                currentLine = newLine
+            }
+        }
+        if (currentLine.isNotEmpty()) {
+            lines.add(currentLine)
+        }
+        return lines
     }
 
-    fun getBounds(context: FontRenderContext, text: String): Rectangle2D {
-        return font.getStringBounds(
-            transform(text),
-            context
-        )
-    }
-    fun getWidth(context: FontRenderContext, text: String): Int {
-        return getBounds(context, text).let { it.width + it.x }.roundToInt()
-    }
-    fun getHeight(context: FontRenderContext, text: String): Int {
-        return getBounds(context, text).height.roundToInt()
+    fun getWidth(text: String): Int {
+        return fontMetrics.stringWidth(text)
     }
 
-    fun calculateAlignment(box: RenderBox, text: String): Pair<Int, Int> {
-        val bounds = getBounds(FontRenderContext(null, true, false), text)
+    fun getHeight(): Int {
+        // TODO: So weird this is necessary
+        return fontMetrics.height - 1
+    }
 
-        val renderX = when (horizontalAlignment) {
-            LabelAlignment.Start -> box.x - bounds.x
-            LabelAlignment.Center -> box.x - bounds.x + (box.width - bounds.width) / 2
-            LabelAlignment.End -> box.x - bounds.x + box.width - bounds.width
-        }.toInt()
-        val renderY = when (verticalAlignment) {
-            LabelAlignment.Start -> box.y - bounds.y
-            LabelAlignment.Center -> box.y - bounds.y + (box.height - bounds.height) / 2
-            LabelAlignment.End -> box.y - bounds.y + box.height - bounds.height
-        }.toInt()
+    fun calculateAlignment(box: RenderBox, text: List<String>): List<Pair<Int, Int>> {
+        val totalHeight = getHeight() * text.size
 
-        return renderX to renderY
+        val startY = when (verticalAlignment) {
+            LabelAlignment.Start -> box.y
+            LabelAlignment.Center -> box.y + (box.height - totalHeight) / 2
+            LabelAlignment.End -> box.y + box.height - totalHeight
+        } + fontMetrics.ascent
+
+        return text.mapIndexed { index, line ->
+            val width = getWidth(line)
+            val renderX = when (horizontalAlignment) {
+                LabelAlignment.Start -> box.x
+                LabelAlignment.Center -> box.x + (box.width - width) / 2
+                LabelAlignment.End -> box.x + box.width - width
+            }
+
+            renderX to startY + index * getHeight()
+        }
     }
 
     companion object {
@@ -86,6 +130,7 @@ data class TextRenderStyle(
                 style.horizontalAlignment ?: style.alignment ?: LabelAlignment.Start,
                 style.verticalAlignment ?: style.alignment ?: LabelAlignment.Start,
                 style.renderUppercase ?: false,
+                style.wrap ?: false,
             )
         }
 
@@ -100,6 +145,7 @@ data class TextRenderStyle(
                 LabelAlignment.Start,
                 LabelAlignment.Center,
                 style.renderUppercase ?: false,
+                false,
             )
         }
     }

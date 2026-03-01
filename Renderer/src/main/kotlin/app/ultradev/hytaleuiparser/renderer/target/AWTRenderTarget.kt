@@ -6,12 +6,16 @@ import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 import java.awt.Graphics
 import java.awt.Graphics2D
+import java.awt.Rectangle
 import java.awt.RenderingHints
+import java.awt.font.FontRenderContext
 import java.awt.image.BufferedImage
 
 class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
     override val box: RenderBox
         get() = graphics.clipBounds.let { RenderBox(it.x, it.y, it.width, it.height) }
+
+    private val fontRenderContext: FontRenderContext
 
     init {
         if (graphics is Graphics2D) {
@@ -19,6 +23,9 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
             graphics.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON
             )
+            fontRenderContext = graphics.fontRenderContext
+        } else {
+            fontRenderContext = FontRenderContext(null, false, false)
         }
     }
 
@@ -47,11 +54,24 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
     }
 
     override fun renderText(text: String, box: RenderBox, info: TextRenderStyle) {
-        val (tx, ty) = info.calculateAlignment(box, text)
+        var textToDraw = text
+        if (info.uppercase) textToDraw = textToDraw.uppercase()
+        val lines = if (info.wrap) {
+            info.wrap(text, box.width)
+        } else textToDraw.split("\n")
 
         graphics.color = info.color
         graphics.font = info.font
-        val textToDraw = if (info.uppercase) text.uppercase() else text
-        graphics.drawString(textToDraw, tx, ty)
+
+        val alignments = info.calculateAlignment(box, lines)
+        lines.zip(alignments).forEach { (line, coord) ->
+            graphics.drawString(line, coord.first, coord.second)
+        }
+    }
+
+    override fun setClip(box: RenderBox?): RenderBox? {
+        val old = graphics.clipBounds?.let { RenderBox(it.x, it.y, it.width, it.height) }
+        graphics.clip = box?.let { Rectangle(it.x, it.y, it.width, it.height) }
+        return old
     }
 }

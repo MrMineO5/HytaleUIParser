@@ -1,11 +1,14 @@
 package app.ultradev.hytaleuiparser.renderer
 
+import app.ultradev.hytaleuiparser.Validator
 import app.ultradev.hytaleuiparser.ast.FakeAstNode
 import app.ultradev.hytaleuiparser.generated.elements.GroupProperties
 import app.ultradev.hytaleuiparser.renderer.command.CommandApplicator
 import app.ultradev.hytaleuiparser.renderer.command.UIDebugClient
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
 import app.ultradev.hytaleuiparser.source.AssetSources
+import app.ultradev.hytaleuiparser.source.DirectoryAssetSource
+import app.ultradev.hytaleuiparser.source.index.AssetIndex
 import app.ultradev.hytaleuiparser.spec.command.CustomUIInfo
 import app.ultradev.hytaleuiparser.spec.command.UICommand
 import java.awt.BorderLayout
@@ -15,7 +18,7 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 
 object TestRenderer {
-    val source = AssetSources.getAssetsZipSource(patchline = "release")
+    val source = AssetSources.getAssetsZipSource(patchline = "release") + DirectoryAssetSource("/home/ultra/IdeaProjects/HyPrison/src/main/resources")
 
     val testCommands = listOf(
         UICommand(UICommand.Type.Append, null, null, "Pages/BarterPage.ui"),
@@ -212,25 +215,27 @@ object TestRenderer {
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         frame.size = Dimension(800, 600)
 
-//        val assets = AssetSources.parseUIFiles(source)
-//        val validator = Validator(assets, assetSource = source)
+        val assets = AssetSources.parseUIFiles(source)
+        val index = AssetIndex.buildIndex(source)
+        val validator = Validator(assets, assetIndex = index)
 
 //        val rootUIElement = CommandApplicator(source)(testCommands)
 
-//        val testPage = validator.validateRoot("Common/UI/Custom/Pages/PrefabSavePage.ui") ?: error("Failed to validate page")
-//
-//        val rootUIElement = UITransformer.transform(testPage)
+        val testPage = validator.validateRoot("Common/UI/Custom/Blacksmith/blank.ui") ?: error("Failed to validate page")
+
+        val rootUIElement = UITransformer.transform(testPage)
 
 
         val backgroundImage = ImageIO.read(javaClass.getResourceAsStream("/background.png"))
 
         val parent = JPanel(BorderLayout())
         val previewPane = HytaleUIPanel(
-            UIGroupElement(
-                FakeAstNode,
-                listOf(),
-                GroupProperties()
-            ),
+//            UIGroupElement(
+//                FakeAstNode,
+//                listOf(),
+//                GroupProperties()
+//            ),
+            rootUIElement,
             backgroundImage,
             source
         )
@@ -243,14 +248,14 @@ object TestRenderer {
 
         frame.isVisible = true
 
-        val client = UIDebugClient()
-        client.connect()
-        println("Connected!")
-
-        client.listen {
-            if (!it.clear || it.type != CustomUIInfo.Type.Page) return@listen
-            val renderedElement = CommandApplicator(source)(it.commands)
-            previewPane.replaceElement(renderedElement)
-        }
+//        val client = UIDebugClient()
+//        client.connect()
+//        println("Connected!")
+//
+//        client.listen {
+//            if (!it.clear || it.type != CustomUIInfo.Type.Page) return@listen
+//            val renderedElement = CommandApplicator(source)(it.commands)
+//            previewPane.replaceElement(renderedElement)
+//        }
     }
 }

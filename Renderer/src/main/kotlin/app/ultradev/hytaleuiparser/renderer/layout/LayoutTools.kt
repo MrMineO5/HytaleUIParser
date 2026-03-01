@@ -1,6 +1,14 @@
 package app.ultradev.hytaleuiparser.renderer.layout
 
+import app.ultradev.hytaleuiparser.renderer.Axis
+import app.ultradev.hytaleuiparser.renderer.BoxSize
+import app.ultradev.hytaleuiparser.renderer.RenderBox
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
+import app.ultradev.hytaleuiparser.renderer.extensions.end
+import app.ultradev.hytaleuiparser.renderer.extensions.endFallback
+import app.ultradev.hytaleuiparser.renderer.extensions.size
+import app.ultradev.hytaleuiparser.renderer.extensions.start
+import app.ultradev.hytaleuiparser.renderer.extensions.startFallback
 
 object LayoutTools {
     data class FlexMetrics(
@@ -20,6 +28,19 @@ object LayoutTools {
         val relativeSize: Int get() = relativeEnd - relativeStart
     }
 
+    fun resolveAxis(
+        child: AbstractUIElement,
+        box: RenderBox,
+        axis: Axis,
+    ): Pair<Int, Int> {
+        return resolveAxis(
+            box.offset(axis),
+            box.offset(axis) + box.size(axis),
+            child.properties.anchor?.start(axis),
+            child.properties.anchor?.end(axis),
+            child.properties.anchor?.size(axis)
+        )
+    }
     fun resolveAxis(
         parentStart: Int,
         parentEnd: Int,
@@ -49,7 +70,14 @@ object LayoutTools {
     }
 
     fun flexMetrics(
-        children: Iterable<AbstractUIElement>,
+        children: Sequence<AbstractUIElement>,
+        boxSize: BoxSize,
+        axis: Axis
+    ): FlexMetrics {
+        return flexMetrics(children, boxSize[axis]) { it.totalSize(boxSize)[axis] }
+    }
+    fun flexMetrics(
+        children: Sequence<AbstractUIElement>,
         availableSize: Int,
         totalSize: (AbstractUIElement) -> Int
     ): FlexMetrics {
@@ -67,6 +95,23 @@ object LayoutTools {
             ((availableSize - totalNonFlexSize) / totalFlexWeight).coerceAtLeast(0)
         } else 0
         return FlexMetrics(totalFlexWeight, totalNonFlexSize, sizePerFlexWeight)
+    }
+
+    fun computeFlex(
+        child: AbstractUIElement,
+        sizePerFlexWeight: Int,
+        available: BoxSize,
+        axis: Axis,
+    ): ElementFlexInfo {
+        return computeFlex(
+            child,
+            sizePerFlexWeight,
+            { it.desiredSizeFromTotal(available)[axis] },
+            { it.totalSize(available)[axis] },
+            child.properties.anchor?.startFallback(axis),
+            child.properties.anchor?.endFallback(axis),
+            child.properties.anchor?.size(axis)
+        )
     }
 
     fun computeFlex(
