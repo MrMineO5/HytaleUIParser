@@ -1,6 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer
 
 import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 
 object NineSlice {
@@ -17,6 +18,9 @@ object NineSlice {
     ): BufferedImage {
         val out = BufferedImage(targetWidth, targetHeight, src.type)
         val g = out.createGraphics()
+        g.setRenderingHint(
+            RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR
+        )
 
         // Defining the grid
         val sourceH = intArrayOf(

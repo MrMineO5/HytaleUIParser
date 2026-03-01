@@ -2,6 +2,7 @@ package app.ultradev.hytaleuiparser.renderer.target
 
 import app.ultradev.hytaleuiparser.renderer.NineSlice
 import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.render.RenderImage
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 import java.awt.Graphics
@@ -26,6 +27,9 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
             graphics.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON
             )
+            graphics.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON
+            )
             fontRenderContext = graphics.fontRenderContext
         } else {
             fontRenderContext = FontRenderContext(null, false, false)
@@ -33,7 +37,7 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
     }
 
     override fun renderImage(
-        image: BufferedImage,
+        image: RenderImage,
         x: Int,
         y: Int,
         width: Int,
@@ -43,12 +47,15 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
     ) {
         if (width == 0 || height == 0) return
         val scaled = NineSlice.scale(
-            image,
-            width, height,
-            horizontalBorder, verticalBorder,
-            horizontalBorder, verticalBorder
+            image.image,
+            width * image.scale, height * image.scale,
+            horizontalBorder * image.scale, verticalBorder * image.scale,
+            horizontalBorder * image.scale, verticalBorder * image.scale
         )
-        graphics.drawImage(scaled, x + offsetX, y + offsetY, null)
+        val correctSize = if (image.scale != 1) {
+            scaled.getScaledInstance(scaled.width / image.scale, scaled.height / image.scale, BufferedImage.SCALE_SMOOTH)
+        } else scaled
+        graphics.drawImage(correctSize, x + offsetX, y + offsetY, null)
     }
 
     override fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int) {
