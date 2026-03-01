@@ -27,4 +27,5 @@ interface RenderTarget {
     )
 
     fun setClip(box: RenderBox?): RenderBox?
+    fun setOffset(x: Int, y: Int): Pair<Int, Int>
 }

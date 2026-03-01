@@ -45,11 +45,13 @@ class HytaleUIPanel(
                 this@HytaleUIPanel.element.mouseUp(context)
                 repaint()
             }
-
-            override fun mouseWheelMoved(e: MouseWheelEvent) {
-                if (e.scrollType != MouseWheelEvent.WHEEL_UNIT_SCROLL) return
-            }
         })
+
+        addMouseWheelListener { e ->
+            if (e.scrollType != MouseWheelEvent.WHEEL_UNIT_SCROLL) return@addMouseWheelListener
+            this@HytaleUIPanel.element.mouseWheel(e.unitsToScroll, context)
+            repaint()
+        }
 
         addComponentListener(object : ComponentAdapter() {
             override fun componentResized(e: ComponentEvent) {

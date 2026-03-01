@@ -17,6 +17,9 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
 
     private val fontRenderContext: FontRenderContext
 
+    private var offsetX = 0
+    private var offsetY = 0
+
     init {
         if (graphics is Graphics2D) {
             // Enable antialiasing for text
@@ -45,12 +48,12 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
             horizontalBorder, verticalBorder,
             horizontalBorder, verticalBorder
         )
-        graphics.drawImage(scaled, x, y, null)
+        graphics.drawImage(scaled, x + offsetX, y + offsetY, null)
     }
 
     override fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int) {
         graphics.color = color
-        graphics.fillRect(x, y, width, height)
+        graphics.fillRect(x + offsetX, y + offsetY, width, height)
     }
 
     override fun renderText(text: String, box: RenderBox, info: TextRenderStyle) {
@@ -63,7 +66,7 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         graphics.color = info.color
         graphics.font = info.font
 
-        val alignments = info.calculateAlignment(box, lines)
+        val alignments = info.calculateAlignment(box.shift(offsetX, offsetY), lines)
         lines.zip(alignments).forEach { (line, coord) ->
             graphics.drawString(line, coord.first, coord.second)
         }
@@ -73,5 +76,13 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         val old = graphics.clipBounds?.let { RenderBox(it.x, it.y, it.width, it.height) }
         graphics.clip = box?.let { Rectangle(it.x, it.y, it.width, it.height) }
         return old
+    }
+
+    override fun setOffset(x: Int, y: Int): Pair<Int, Int> {
+        val oldX = offsetX
+        val oldY = offsetY
+        offsetX = x
+        offsetY = y
+        return oldX to oldY
     }
 }

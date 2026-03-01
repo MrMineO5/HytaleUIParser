@@ -53,6 +53,13 @@ data class RenderBox(
         Axis.VERTICAL -> height
     }
 
+    fun shift(x: Int, y: Int) = RenderBox(
+        this.x + x,
+        this.y + y,
+        this.width,
+        this.height
+    )
+
     fun withPadding(padding: Padding): RenderBox {
         val top = padding.top ?: padding.vertical ?: padding.full ?: 0
         val bottom = padding.bottom ?: padding.vertical ?: padding.full ?: 0

@@ -9,7 +9,7 @@ import app.ultradev.hytaleuiparser.renderer.layout.Layout
 object LayoutFull : Layout {
     override fun doLayout(element: BranchUIElement) {
         element.visibleChildren.forEach { child ->
-            child.box = element.contentBox
+            child.box = element.childBox
                 .withAnchor(child.properties.anchor ?: Anchor.EMPTY)
         }
     }

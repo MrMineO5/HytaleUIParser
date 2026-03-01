@@ -37,4 +37,5 @@ object NopRenderTarget : RenderTarget {
     }
 
     override fun setClip(box: RenderBox?): RenderBox? = box
+    override fun setOffset(x: Int, y: Int): Pair<Int, Int> = x to y
 }

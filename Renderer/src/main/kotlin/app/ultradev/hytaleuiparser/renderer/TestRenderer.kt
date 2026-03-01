@@ -219,11 +219,11 @@ object TestRenderer {
         val index = AssetIndex.buildIndex(source)
         val validator = Validator(assets, assetIndex = index)
 
-//        val rootUIElement = CommandApplicator(source)(testCommands)
+        val rootUIElement = CommandApplicator(source)(testCommands)
 
-        val testPage = validator.validateRoot("Common/UI/Custom/Blacksmith/blank.ui") ?: error("Failed to validate page")
+//        val testPage = validator.validateRoot("Common/UI/Custom/Blacksmith/blank.ui") ?: error("Failed to validate page")
 
-        val rootUIElement = UITransformer.transform(testPage)
+//        val rootUIElement = UITransformer.transform(testPage)
 
 
         val backgroundImage = ImageIO.read(javaClass.getResourceAsStream("/background.png"))

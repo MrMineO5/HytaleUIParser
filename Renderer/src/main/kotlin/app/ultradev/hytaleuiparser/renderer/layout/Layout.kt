@@ -14,6 +14,7 @@ import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutMiddle
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutMiddleCenter
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutRight
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutTop
+import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutTopScrolling
 
 interface Layout {
     fun doLayout(element: BranchUIElement)
@@ -43,7 +44,7 @@ interface Layout {
                 // TODO: Implement scrolling correctly...
                 // These layouts will probably just set a larger content pane than the element size which should
                 //  trigger a scrollbar (in hytale at least)
-                LayoutMode.TopScrolling -> LayoutTop
+                LayoutMode.TopScrolling -> LayoutTopScrolling
                 LayoutMode.BottomScrolling -> LayoutBottom
                 LayoutMode.LeftScrolling -> LayoutLeft
                 LayoutMode.RightScrolling -> LayoutRight

@@ -11,7 +11,7 @@ import app.ultradev.hytaleuiparser.renderer.layout.LayoutTools
 
 object LayoutCenter : Layout {
     override fun doLayout(element: BranchUIElement) {
-        val cbox = element.contentBox
+        val cbox = element.childBox
         val boxSize = BoxSize.fromRenderBox(cbox)
 
         val flexMetrics = LayoutTools.flexMetrics(

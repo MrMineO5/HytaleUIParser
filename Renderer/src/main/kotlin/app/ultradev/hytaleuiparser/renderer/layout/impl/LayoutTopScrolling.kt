@@ -4,16 +4,13 @@ import app.ultradev.hytaleuiparser.renderer.Axis
 import app.ultradev.hytaleuiparser.renderer.BoxSize
 import app.ultradev.hytaleuiparser.renderer.RenderBox
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
-import app.ultradev.hytaleuiparser.renderer.extensions.bottomFallback
-import app.ultradev.hytaleuiparser.renderer.extensions.maxOfOrZero
-import app.ultradev.hytaleuiparser.renderer.extensions.topFallback
 import app.ultradev.hytaleuiparser.renderer.layout.Layout
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutTools
 
-object LayoutTop : Layout {
+object LayoutTopScrolling : Layout {
     override fun doLayout(element: BranchUIElement) {
         val cbox = element.childBox
-        val boxSize = BoxSize.fromRenderBox(cbox)
+        val boxSize = BoxSize.fromRenderBox(cbox) - BoxSize(0, 20)
 
         val flexMetrics = LayoutTools.flexMetrics(element.visibleChildren, boxSize, Axis.VERTICAL)
 
@@ -32,6 +29,7 @@ object LayoutTop : Layout {
 
             y += info.size
         }
+        element.layoutContentHeight = y - cbox.y
     }
 
     override val combineMode = BoxSize.BoxCombineMode(

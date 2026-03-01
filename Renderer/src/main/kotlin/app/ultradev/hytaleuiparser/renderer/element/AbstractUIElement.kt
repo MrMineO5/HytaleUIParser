@@ -26,6 +26,11 @@ abstract class AbstractUIElement(
     lateinit var box: RenderBox
     val contentBox: RenderBox get() = box.withPadding(properties.padding ?: Padding.EMPTY)
 
+    internal var layoutContentWidth: Int? = null
+    internal var layoutContentHeight: Int? = null
+    val contentWidth: Int? get() = layoutContentWidth ?: properties.contentWidth
+    val contentHeight: Int? get() = layoutContentHeight ?: properties.contentHeight
+
     open fun contentDesiredSize(available: BoxSize): BoxSize = BoxSize.ZERO
 
     fun desiredSize(available: BoxSize): BoxSize {
@@ -68,9 +73,9 @@ abstract class AbstractUIElement(
 
 
     fun draw0(target: RenderTarget, context: RenderContext) {
-        val old = target.setClip(contentBox)
+//        val old = target.setClip(contentBox)
         draw(target, context)
-        target.setClip(old)
+//        target.setClip(old)
         afterDraw(target, context)
     }
 

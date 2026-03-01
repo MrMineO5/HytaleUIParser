@@ -39,7 +39,7 @@ object LayoutLeftCenterWrap : Layout {
     }
 
     override fun doLayout(element: BranchUIElement) {
-        val cbox = element.contentBox
+        val cbox = element.childBox
         val boxSize = BoxSize.fromRenderBox(cbox)
         val rows = splitIntoRows(boxSize, element.visibleChildren)
         var y = cbox.y

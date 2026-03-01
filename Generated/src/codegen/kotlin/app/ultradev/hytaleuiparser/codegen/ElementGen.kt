@@ -27,6 +27,13 @@ object ElementGen {
                     )
                 }
             }
+            .addFunction(
+                FunSpec.builder("get")
+                    .addModifiers(KModifier.OPERATOR, KModifier.ABSTRACT)
+                    .returns(typeNameOf<Any?>())
+                    .addParameter("name", typeNameOf<String>())
+                    .build()
+            )
 
         val companion = TypeSpec.companionObjectBuilder()
         companion.addFunction(
@@ -37,7 +44,11 @@ object ElementGen {
                 .beginControlFlow("return when (type)")
                 .also {
                     ElementType.entries.forEach { type ->
-                        it.addStatement("%M -> %T.fromProperties(properties)", type::class.member(type.name), propertyClassName(type))
+                        it.addStatement(
+                            "%M -> %T.fromProperties(properties)",
+                            type::class.member(type.name),
+                            propertyClassName(type)
+                        )
                     }
                 }
                 .endControlFlow()
@@ -68,7 +79,10 @@ object ElementGen {
                     .also {
                         type.properties.forEach { (name, type) ->
                             it.addParameter(
-                                ParameterSpec.builder(name.lowercaseFirstChar(), TypeGen.getTypeName(type).copy(nullable = true))
+                                ParameterSpec.builder(
+                                    name.lowercaseFirstChar(),
+                                    TypeGen.getTypeName(type).copy(nullable = true)
+                                )
                                     .defaultValue("null")
                                     .build()
                             )
@@ -87,6 +101,21 @@ object ElementGen {
                     )
                 }
             }
+            .addFunction(
+                FunSpec.builder("get")
+                    .addModifiers(KModifier.OPERATOR, KModifier.OVERRIDE)
+                    .returns(typeNameOf<Any?>())
+                    .addParameter("name", typeNameOf<String>())
+                    .beginControlFlow("return when (name)")
+                    .also {
+                        type.properties.forEach { (name, type) ->
+                            it.addStatement("\"%L\" -> %L", name, name.lowercaseFirstChar())
+                        }
+                    }
+                    .addStatement("else -> null")
+                    .endControlFlow()
+                    .build()
+            )
 
         val companion = TypeSpec.companionObjectBuilder()
         companion.addFunction(

@@ -28,4 +28,37 @@ fun Anchor.end(axis: Axis): Int? = when (axis) {
     Axis.VERTICAL -> this.bottom
 }
 
+fun axisAnchor(
+    axis: Axis,
+
+    inlineSize: Int? = null,
+    crossSize: Int? = null,
+
+    inlineStart: Int? = null,
+    inlineEnd: Int? = null,
+    crossStart: Int? = null,
+    crossEnd: Int? = null,
+): Anchor {
+    return when (axis) {
+        Axis.HORIZONTAL -> Anchor(
+            left = inlineStart,
+            right = inlineEnd,
+            width = inlineSize,
+
+            top = crossStart,
+            bottom = crossEnd,
+            height = crossSize,
+        )
+        Axis.VERTICAL -> Anchor(
+            top = inlineStart,
+            bottom = inlineEnd,
+            height = inlineSize,
+
+            left = crossStart,
+            right = crossEnd,
+            width = crossSize,
+        )
+    }
+}
+
 
