@@ -222,7 +222,6 @@ object TestRenderer {
         val rootUIElement = CommandApplicator(source)(testCommands)
 
 //        val testPage = validator.validateRoot("Common/UI/Custom/Blacksmith/blank.ui") ?: error("Failed to validate page")
-
 //        val rootUIElement = UITransformer.transform(testPage)
 
 

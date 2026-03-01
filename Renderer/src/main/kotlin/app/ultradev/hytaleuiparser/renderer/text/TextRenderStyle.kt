@@ -4,6 +4,9 @@ import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
 import app.ultradev.hytaleuiparser.generated.types.LabelAlignment
 import app.ultradev.hytaleuiparser.generated.types.LabelStyle
 import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.text.msdf.MSDFFonts
+import app.ultradev.hytaleuiparser.renderer.text.msdf.MSDFRenderer
+import org.w3c.dom.Text
 import java.awt.Color
 import java.awt.Font
 import java.awt.Toolkit
@@ -26,6 +29,8 @@ data class TextRenderStyle(
     val font by lazy { toFont() }
     val fontMetrics by lazy { Toolkit.getDefaultToolkit().getFontMetrics(font) }
 
+    val msdfFont by lazy { toMsdfFont() }
+
     private fun toFont(): Font {
         val baseFont = when (fontName) {
             "Default" -> {
@@ -41,6 +46,15 @@ data class TextRenderStyle(
         if (italics) attrs[TextAttribute.POSTURE] = TextAttribute.POSTURE_OBLIQUE
 
         return baseFont.deriveFont(attrs)
+    }
+    private fun toMsdfFont(): MSDFRenderer {
+        return when (fontName) {
+            "Default" -> {
+                if (bold) MSDFFonts.defaultBold else MSDFFonts.default
+            }
+            "Secondary" -> MSDFFonts.secondary
+            else -> error("Unknown font: $fontName")
+        }
     }
 
     fun wrap(text: String, maxWidth: Int): List<String> {
@@ -89,12 +103,31 @@ data class TextRenderStyle(
     }
 
     fun getWidth(text: String): Int {
-        return fontMetrics.stringWidth(text)
+        return when (TextRenderMode.active) {
+            TextRenderMode.TTF -> fontMetrics.stringWidth(text)
+            TextRenderMode.MSDF -> msdfFont.getWidth(text, fontSize)
+        }
     }
 
     fun getHeight(): Int {
-        // TODO: So weird this is necessary
-        return fontMetrics.height - 1
+        return when (TextRenderMode.active) {
+            TextRenderMode.TTF -> fontMetrics.height - 1
+            TextRenderMode.MSDF -> msdfFont.getHeight(fontSize)
+        }
+    }
+
+    fun getAscent(): Int {
+        return when (TextRenderMode.active) {
+            TextRenderMode.TTF -> fontMetrics.ascent
+            TextRenderMode.MSDF -> -msdfFont.getAscent(fontSize)
+        }
+    }
+
+    fun getDescent(): Int {
+        return when (TextRenderMode.active) {
+            TextRenderMode.TTF -> fontMetrics.descent
+            TextRenderMode.MSDF -> msdfFont.getDescent(fontSize)
+        }
     }
 
     fun calculateAlignment(box: RenderBox, text: List<String>): List<Pair<Int, Int>> {
@@ -104,7 +137,7 @@ data class TextRenderStyle(
             LabelAlignment.Start -> box.y
             LabelAlignment.Center -> box.y + (box.height - totalHeight) / 2
             LabelAlignment.End -> box.y + box.height - totalHeight
-        } + fontMetrics.ascent
+        } + getAscent()
 
         return text.mapIndexed { index, line ->
             val width = getWidth(line)

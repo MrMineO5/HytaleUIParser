@@ -1,7 +1,9 @@
 plugins {
     id("buildsrc.convention.common")
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 dependencies {
     implementation(project(":Generated"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
 }

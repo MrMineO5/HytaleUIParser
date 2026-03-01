@@ -3,20 +3,18 @@ package app.ultradev.hytaleuiparser.renderer.target
 import app.ultradev.hytaleuiparser.renderer.NineSlice
 import app.ultradev.hytaleuiparser.renderer.RenderBox
 import app.ultradev.hytaleuiparser.renderer.render.RenderImage
+import app.ultradev.hytaleuiparser.renderer.text.TextRenderMode
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
 import java.awt.RenderingHints
-import java.awt.font.FontRenderContext
 import java.awt.image.BufferedImage
 
 class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
     override val box: RenderBox
         get() = graphics.clipBounds.let { RenderBox(it.x, it.y, it.width, it.height) }
-
-    private val fontRenderContext: FontRenderContext
 
     private var offsetX = 0
     private var offsetY = 0
@@ -30,9 +28,6 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
             graphics.setRenderingHint(
                 RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON
             )
-            fontRenderContext = graphics.fontRenderContext
-        } else {
-            fontRenderContext = FontRenderContext(null, false, false)
         }
     }
 
@@ -53,7 +48,7 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
             horizontalBorder * image.scale, verticalBorder * image.scale
         )
         val correctSize = if (image.scale != 1) {
-            scaled.getScaledInstance(scaled.width / image.scale, scaled.height / image.scale, BufferedImage.SCALE_SMOOTH)
+            scaled.getScaledInstance(scaled.width / image.scale, scaled.height / image.scale, BufferedImage.SCALE_FAST)
         } else scaled
         graphics.drawImage(correctSize, x + offsetX, y + offsetY, null)
     }
@@ -71,11 +66,16 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         } else textToDraw.split("\n")
 
         graphics.color = info.color
-        graphics.font = info.font
 
         val alignments = info.calculateAlignment(box.shift(offsetX, offsetY), lines)
         lines.zip(alignments).forEach { (line, coord) ->
-            graphics.drawString(line, coord.first, coord.second)
+            when (TextRenderMode.active) {
+                TextRenderMode.TTF -> {
+                    graphics.font = info.font
+                    graphics.drawString(line, coord.first, coord.second)
+                }
+                TextRenderMode.MSDF -> info.msdfFont.drawString(graphics, info.fontSize, coord.first, coord.second, line)
+            }
         }
     }
 
