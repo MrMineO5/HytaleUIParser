@@ -375,7 +375,7 @@ class Parser(tokens: Iterator<Token>) {
             val next = tokens.peek()
 
             when (next.type) {
-                Token.Type.IDENTIFIER -> children.add(parseField())
+                Token.Type.IDENTIFIER -> children.add(parseField(isType = true))
                 Token.Type.SPREAD -> children.add(parseSpread())
                 Token.Type.REFERENCE -> children.add(parseRefMember())
 
@@ -452,7 +452,7 @@ class Parser(tokens: Iterator<Token>) {
                     val nextNext = tokens.peek(2)
                     when (nextNext.type) {
                         Token.Type.FIELD_MARKER -> {
-                            children.add(parseField())
+                            children.add(parseField(isType = false))
                         }
 
                         Token.Type.START_ELEMENT, Token.Type.SELECTOR -> children.add(parseElement())
@@ -467,7 +467,7 @@ class Parser(tokens: Iterator<Token>) {
         throw ParserException("Unclosed element body", start)
     }
 
-    private fun parseField(): NodeField {
+    private fun parseField(isType: Boolean): NodeField {
         val identifier = parseIdentifier()
         val fieldMarker = tokens.next()
         if (fieldMarker.type != Token.Type.FIELD_MARKER) {
@@ -478,7 +478,11 @@ class Parser(tokens: Iterator<Token>) {
 
         val next = tokens.peek()
         val end = when (next.type) {
-            Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT -> NodeToken(tokens.next())
+            Token.Type.FIELD_DELIMITER, Token.Type.END_STATEMENT -> {
+                if (isType && next.type == Token.Type.END_STATEMENT) parserError("Should be field delimiter ','", next)
+                if (!isType && next.type == Token.Type.FIELD_DELIMITER) parserError("Should be end statement ';'", next)
+                NodeToken(tokens.next())
+            }
             Token.Type.END_PARENTHESIS -> null
 
             else -> {
