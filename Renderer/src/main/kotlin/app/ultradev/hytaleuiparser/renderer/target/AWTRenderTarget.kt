@@ -72,9 +72,9 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
             when (TextRenderMode.active) {
                 TextRenderMode.TTF -> {
                     graphics.font = info.font
-                    graphics.drawString(line, coord.first, coord.second)
+                    graphics.drawString(line, coord.first.toInt(), coord.second.toInt())
                 }
-                TextRenderMode.MSDF -> info.msdfFont.drawString(graphics, info.fontSize, coord.first, coord.second, line)
+                TextRenderMode.MSDF -> info.msdfFont.drawString(graphics, info.fontSize, coord.first.toInt(), coord.second.toInt(), line)
             }
         }
     }

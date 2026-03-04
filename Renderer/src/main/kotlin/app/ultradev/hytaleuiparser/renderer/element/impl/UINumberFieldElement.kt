@@ -22,8 +22,8 @@ class UINumberFieldElement(
 
     override fun contentDesiredSize(available: BoxSize): BoxSize {
         return BoxSize(
-            textRenderInfo.getHeight(),
-            textRenderInfo.getWidth(text)
+            textRenderInfo.getHeight().toInt(),
+            textRenderInfo.getWidth(text).toInt()
         )
     }
 

@@ -173,20 +173,20 @@ class MSDFRenderer(
     }
 
 
-    fun getWidth(text: String, size: Float): Int {
+    fun getWidth(text: String, size: Float): Float {
         val scale = size / definition.metrics.emSize
-        return text.asSequence().mapNotNull(lookupTable::get).sumOf { it.advance * scale }.toInt()
+        return text.asSequence().mapNotNull(lookupTable::get).sumOf { it.advance * scale }.toFloat()
     }
-    fun getHeight(size: Float): Int {
+    fun getHeight(size: Float): Float {
         val scale = size / definition.metrics.emSize
-        return (definition.metrics.lineHeight * scale).toInt()
+        return (definition.metrics.lineHeight * scale).toFloat()
     }
-    fun getAscent(size: Float): Int {
+    fun getAscent(size: Float): Float {
         val scale = size / definition.metrics.emSize
-        return (definition.metrics.ascender * scale).toInt()
+        return (definition.metrics.ascender * scale).toFloat()
     }
-    fun getDescent(size: Float): Int {
+    fun getDescent(size: Float): Float {
         val scale = size / definition.metrics.emSize
-        return (definition.metrics.descender * scale).toInt()
+        return (definition.metrics.descender * scale).toFloat()
     }
 }

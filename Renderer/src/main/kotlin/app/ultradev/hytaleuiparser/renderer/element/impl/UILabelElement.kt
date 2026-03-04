@@ -22,10 +22,10 @@ class UILabelElement(
         val wrapped = textRenderInfo.wrap(text, available.width)
 
         val height = textRenderInfo.getHeight() * wrapped.size
-        val width = wrapped.maxOfOrZero { textRenderInfo.getWidth(it) }
+        val width = wrapped.maxOfOrZero { textRenderInfo.getWidth(it).toInt() }
         return BoxSize(
             width,
-            height
+            height.toInt()
         )
     }
 

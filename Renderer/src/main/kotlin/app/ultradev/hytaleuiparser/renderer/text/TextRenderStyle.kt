@@ -102,48 +102,48 @@ data class TextRenderStyle(
         return lines
     }
 
-    fun getWidth(text: String): Int {
+    fun getWidth(text: String): Float {
         return when (TextRenderMode.active) {
-            TextRenderMode.TTF -> fontMetrics.stringWidth(text)
+            TextRenderMode.TTF -> fontMetrics.stringWidth(text).toFloat()
             TextRenderMode.MSDF -> msdfFont.getWidth(text, fontSize)
         }
     }
 
-    fun getHeight(): Int {
+    fun getHeight(): Float {
         return when (TextRenderMode.active) {
-            TextRenderMode.TTF -> fontMetrics.height - 1
+            TextRenderMode.TTF -> fontMetrics.height - 1f
             TextRenderMode.MSDF -> msdfFont.getHeight(fontSize)
         }
     }
 
-    fun getAscent(): Int {
+    fun getAscent(): Float {
         return when (TextRenderMode.active) {
-            TextRenderMode.TTF -> fontMetrics.ascent
+            TextRenderMode.TTF -> fontMetrics.ascent.toFloat()
             TextRenderMode.MSDF -> -msdfFont.getAscent(fontSize)
         }
     }
 
-    fun getDescent(): Int {
+    fun getDescent(): Float {
         return when (TextRenderMode.active) {
-            TextRenderMode.TTF -> fontMetrics.descent
+            TextRenderMode.TTF -> fontMetrics.descent.toFloat()
             TextRenderMode.MSDF -> msdfFont.getDescent(fontSize)
         }
     }
 
-    fun calculateAlignment(box: RenderBox, text: List<String>): List<Pair<Int, Int>> {
+    fun calculateAlignment(box: RenderBox, text: List<String>): List<Pair<Float, Float>> {
         val totalHeight = getHeight() * text.size
 
         val startY = when (verticalAlignment) {
-            LabelAlignment.Start -> box.y
-            LabelAlignment.Center -> box.y + (box.height - totalHeight) / 2
+            LabelAlignment.Start -> box.y.toFloat()
+            LabelAlignment.Center -> box.y + (box.height - totalHeight) / 2f
             LabelAlignment.End -> box.y + box.height - totalHeight
         } + getAscent()
 
         return text.mapIndexed { index, line ->
             val width = getWidth(line)
             val renderX = when (horizontalAlignment) {
-                LabelAlignment.Start -> box.x
-                LabelAlignment.Center -> box.x + (box.width - width) / 2
+                LabelAlignment.Start -> box.x.toFloat()
+                LabelAlignment.Center -> box.x + (box.width - width) / 2f
                 LabelAlignment.End -> box.x + box.width - width
             }
 
