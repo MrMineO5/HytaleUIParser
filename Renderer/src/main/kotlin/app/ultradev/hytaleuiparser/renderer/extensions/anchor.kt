@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.extensions
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
-import app.ultradev.hytaleuiparser.renderer.Axis
+import app.ultradev.hytaleuiparser.renderer.type.Axis
 
 fun Anchor.leftFallback(): Int? = this.left ?: this.horizontal ?: this.full
 fun Anchor.rightFallback(): Int? = this.right ?: this.horizontal ?: this.full

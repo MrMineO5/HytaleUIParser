@@ -2,8 +2,8 @@ package app.ultradev.hytaleuiparser.renderer.render
 
 import app.ultradev.hytaleuiparser.generated.types.PatchStyle
 import app.ultradev.hytaleuiparser.generated.types.ScrollbarStyle
-import app.ultradev.hytaleuiparser.renderer.Axis
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.Axis
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.extensions.axisAnchor
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget

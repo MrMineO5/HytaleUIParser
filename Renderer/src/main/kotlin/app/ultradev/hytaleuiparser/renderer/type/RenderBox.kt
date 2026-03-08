@@ -1,7 +1,8 @@
-package app.ultradev.hytaleuiparser.renderer
+package app.ultradev.hytaleuiparser.renderer.type
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
 import app.ultradev.hytaleuiparser.generated.types.Padding
+import app.ultradev.hytaleuiparser.renderer.type.Axis
 import app.ultradev.hytaleuiparser.renderer.extensions.bottomFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.rightFallback
@@ -59,6 +60,7 @@ data class RenderBox(
         this.width,
         this.height
     )
+    fun shift(point: Point) = shift(point.x, point.y)
 
     fun withPadding(padding: Padding): RenderBox {
         val top = padding.top ?: padding.vertical ?: padding.full ?: 0

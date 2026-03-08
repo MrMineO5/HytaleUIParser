@@ -4,6 +4,7 @@ import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutPass
 import app.ultradev.hytaleuiparser.renderer.target.AWTRenderTarget
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.source.AssetSource
 import app.ultradev.hytaleuiparser.source.AssetSourceProvider
 import app.ultradev.hytaleuiparser.source.EmptyAssetSource

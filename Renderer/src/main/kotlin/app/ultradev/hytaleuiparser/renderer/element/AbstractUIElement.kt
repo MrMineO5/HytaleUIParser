@@ -4,8 +4,8 @@ import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.ast.NodeElementWithSelector
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.types.Padding
-import app.ultradev.hytaleuiparser.renderer.BoxSize
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.extensions.bottomFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback

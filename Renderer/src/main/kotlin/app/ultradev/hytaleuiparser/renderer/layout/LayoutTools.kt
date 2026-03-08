@@ -1,8 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer.layout
 
-import app.ultradev.hytaleuiparser.renderer.Axis
-import app.ultradev.hytaleuiparser.renderer.BoxSize
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.Axis
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.extensions.end
 import app.ultradev.hytaleuiparser.renderer.extensions.endFallback

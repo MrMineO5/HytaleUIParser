@@ -1,9 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer.layout.impl
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
-import app.ultradev.hytaleuiparser.renderer.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
-import app.ultradev.hytaleuiparser.renderer.extensions.maxOfOrZero
 import app.ultradev.hytaleuiparser.renderer.layout.Layout
 
 object LayoutFull : Layout {

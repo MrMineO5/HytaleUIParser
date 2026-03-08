@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
 import app.ultradev.hytaleuiparser.renderer.NineSlice
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.render.RenderImage
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderMode
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle

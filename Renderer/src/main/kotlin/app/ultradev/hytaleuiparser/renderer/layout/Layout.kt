@@ -1,8 +1,8 @@
 package app.ultradev.hytaleuiparser.renderer.layout
 
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
-import app.ultradev.hytaleuiparser.renderer.BoxSize
-import app.ultradev.hytaleuiparser.renderer.BoxSize.Companion.combine
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize.Companion.combine
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutBottom
 import app.ultradev.hytaleuiparser.renderer.layout.impl.LayoutCenter

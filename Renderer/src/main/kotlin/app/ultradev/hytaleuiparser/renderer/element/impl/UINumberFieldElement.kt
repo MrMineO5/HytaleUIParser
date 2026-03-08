@@ -4,7 +4,7 @@ import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
-import app.ultradev.hytaleuiparser.renderer.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget

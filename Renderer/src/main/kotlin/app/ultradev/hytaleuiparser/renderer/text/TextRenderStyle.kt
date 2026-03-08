@@ -3,10 +3,9 @@ package app.ultradev.hytaleuiparser.renderer.text
 import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
 import app.ultradev.hytaleuiparser.generated.types.LabelAlignment
 import app.ultradev.hytaleuiparser.generated.types.LabelStyle
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.text.msdf.MSDFFonts
 import app.ultradev.hytaleuiparser.renderer.text.msdf.MSDFRenderer
-import org.w3c.dom.Text
 import java.awt.Color
 import java.awt.Font
 import java.awt.Toolkit

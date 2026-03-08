@@ -1,19 +1,13 @@
 package app.ultradev.hytaleuiparser.renderer.target.opengl
 
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutPass
 import app.ultradev.hytaleuiparser.renderer.target.OpenGLRenderTarget
-import app.ultradev.hytaleuiparser.renderer.text.msdf.MSDFRenderer
 import app.ultradev.hytaleuiparser.source.AssetSource
-import com.jogamp.opengl.GL
-import com.jogamp.opengl.GL3
 import com.jogamp.opengl.GLAutoDrawable
 import com.jogamp.opengl.GLEventListener
-import java.awt.Color
-import java.awt.image.BufferedImage
-import java.io.File
 import javax.imageio.ImageIO
 
 class GLEventListener(val rootUIElement: BranchUIElement, val source: AssetSource) : GLEventListener {

@@ -1,6 +1,6 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.TestRenderer
 import app.ultradev.hytaleuiparser.renderer.command.CommandApplicator
 import app.ultradev.hytaleuiparser.renderer.render.RenderImage

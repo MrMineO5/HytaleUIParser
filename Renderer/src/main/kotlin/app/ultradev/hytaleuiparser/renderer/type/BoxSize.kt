@@ -1,5 +1,6 @@
-package app.ultradev.hytaleuiparser.renderer
+package app.ultradev.hytaleuiparser.renderer.type
 
+import app.ultradev.hytaleuiparser.renderer.type.Axis
 import kotlin.math.max
 
 data class BoxSize(

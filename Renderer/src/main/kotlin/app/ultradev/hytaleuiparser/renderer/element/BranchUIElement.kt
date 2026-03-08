@@ -3,9 +3,9 @@ package app.ultradev.hytaleuiparser.renderer.element
 import app.ultradev.hytaleuiparser.ast.AstNode
 import app.ultradev.hytaleuiparser.generated.types.LayoutMode
 import app.ultradev.hytaleuiparser.generated.types.ScrollbarStyle
-import app.ultradev.hytaleuiparser.renderer.Axis
-import app.ultradev.hytaleuiparser.renderer.BoxSize
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.Axis
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.extensions.totalSpace
 import app.ultradev.hytaleuiparser.renderer.layout.Layout

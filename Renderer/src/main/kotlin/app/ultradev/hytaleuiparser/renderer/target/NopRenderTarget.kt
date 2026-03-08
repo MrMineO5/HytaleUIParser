@@ -1,10 +1,9 @@
 package app.ultradev.hytaleuiparser.renderer.target
 
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.render.RenderImage
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
-import java.awt.image.BufferedImage
 
 object NopRenderTarget : RenderTarget {
     override val box: RenderBox

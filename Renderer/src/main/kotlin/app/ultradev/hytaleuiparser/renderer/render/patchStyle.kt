@@ -2,7 +2,7 @@ package app.ultradev.hytaleuiparser.renderer.render
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
 import app.ultradev.hytaleuiparser.generated.types.PatchStyle
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.RenderContext
 import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 

@@ -2,7 +2,7 @@ package app.ultradev.hytaleuiparser.renderer
 
 import app.ultradev.hytaleuiparser.renderer.cache.RenderCacheCollection
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
-import app.ultradev.hytaleuiparser.source.AssetSource
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.source.AssetSourceProvider
 import java.awt.Cursor
 import java.awt.Point

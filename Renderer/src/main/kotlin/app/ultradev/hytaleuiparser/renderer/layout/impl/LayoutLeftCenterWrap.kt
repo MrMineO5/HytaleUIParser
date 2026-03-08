@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.layout.impl
 
-import app.ultradev.hytaleuiparser.renderer.BoxSize
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.BoxSize
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback

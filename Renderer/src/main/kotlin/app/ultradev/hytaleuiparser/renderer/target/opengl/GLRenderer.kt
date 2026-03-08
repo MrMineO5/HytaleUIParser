@@ -1,6 +1,6 @@
 package app.ultradev.hytaleuiparser.renderer.target.opengl
 
-import app.ultradev.hytaleuiparser.renderer.RenderBox
+import app.ultradev.hytaleuiparser.renderer.type.RenderBox
 import app.ultradev.hytaleuiparser.renderer.text.msdf.MSDFRenderer
 import com.jogamp.opengl.GL
 import java.awt.Color
