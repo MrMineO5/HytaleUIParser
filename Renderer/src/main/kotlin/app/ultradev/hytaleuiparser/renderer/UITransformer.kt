@@ -8,6 +8,8 @@ import app.ultradev.hytaleuiparser.generated.elements.ButtonProperties
 import app.ultradev.hytaleuiparser.generated.elements.CheckBoxProperties
 import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.GroupProperties
+import app.ultradev.hytaleuiparser.generated.elements.ItemSlotButtonProperties
+import app.ultradev.hytaleuiparser.generated.elements.ItemSlotProperties
 import app.ultradev.hytaleuiparser.generated.elements.LabelProperties
 import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.elements.TextButtonProperties
@@ -16,6 +18,8 @@ import app.ultradev.hytaleuiparser.renderer.element.UnknownUIElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIButtonElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UICheckBoxElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UIGroupElement
+import app.ultradev.hytaleuiparser.renderer.element.impl.UIItemSlotButtonElement
+import app.ultradev.hytaleuiparser.renderer.element.impl.UIItemSlotElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UILabelElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UINumberFieldElement
 import app.ultradev.hytaleuiparser.renderer.element.impl.UITextButtonElement
@@ -83,10 +87,12 @@ object UITransformer {
             is TextButtonProperties -> UITextButtonElement(node, properties)
             is NumberFieldProperties -> UINumberFieldElement(node, properties)
             is CheckBoxProperties -> UICheckBoxElement(node, properties)
+            is ItemSlotProperties -> UIItemSlotElement(node, properties)
 
             // Branch nodes
             is GroupProperties -> UIGroupElement(node, children, properties)
             is ButtonProperties -> UIButtonElement(node, children, properties)
+            is ItemSlotButtonProperties -> UIItemSlotButtonElement(node, children, properties)
 
             else -> {
                 System.err.println("Warning: Unknown element type: ${properties::class.simpleName}")

@@ -18,7 +18,7 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 
 object TestRenderer {
-    val source = AssetSources.getAssetsZipSource(patchline = "release") + DirectoryAssetSource("/home/ultra/IdeaProjects/HyPrison/src/main/resources")
+    val source = AssetSources.getAssetsZipSource(patchline = "pre-release") + DirectoryAssetSource("/home/ultra/IdeaProjects/HyPrison/src/main/resources")
 
     val testCommands = listOf(
         UICommand(UICommand.Type.Append, null, null, "Pages/BarterPage.ui"),
