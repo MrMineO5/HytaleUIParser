@@ -6,15 +6,12 @@ import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 
 object NopRenderTarget : RenderTarget {
-    override val box: RenderBox
+    override val windowBounds: RenderBox
         get() = RenderBox(0, 0, 1, 1)
 
     override fun renderImage(
         image: RenderImage,
-        x: Int,
-        y: Int,
-        width: Int,
-        height: Int,
+        box: RenderBox,
         horizontalBorder: Int,
         verticalBorder: Int
     ) {
@@ -22,10 +19,7 @@ object NopRenderTarget : RenderTarget {
 
     override fun renderFill(
         color: Color,
-        x: Int,
-        y: Int,
-        width: Int,
-        height: Int
+        box: RenderBox
     ) {
     }
 
@@ -36,6 +30,5 @@ object NopRenderTarget : RenderTarget {
     ) {
     }
 
-    override fun setClip(box: RenderBox?): RenderBox? = box
-    override fun setOffset(x: Int, y: Int): Pair<Int, Int> = x to y
+    override fun setClip(box: RenderBox?) {}
 }

@@ -5,9 +5,8 @@ import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.elements.NumberFieldProperties
 import app.ultradev.hytaleuiparser.generated.types.InputFieldStyle
 import app.ultradev.hytaleuiparser.renderer.type.BoxSize
-import app.ultradev.hytaleuiparser.renderer.RenderContext
+import app.ultradev.hytaleuiparser.renderer.context.RenderContext
 import app.ultradev.hytaleuiparser.renderer.element.AbstractUIElement
-import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Cursor
 
@@ -27,20 +26,20 @@ class UINumberFieldElement(
         )
     }
 
-    override fun draw(target: RenderTarget, context: RenderContext) {
-        super.draw(target, context)
+    override fun draw(context: RenderContext) {
+        super.draw(context)
         if (text.isNotEmpty()) {
-            target.renderText(text, contentBox, textRenderInfo)
+            context.draw.renderText(text, contentBox, textRenderInfo)
         } else {
-            target.renderText("0", contentBox, placeholderTextRenderInfo) // TODO: Placeholder value?
+            context.draw.renderText("0", contentBox, placeholderTextRenderInfo) // TODO: Placeholder value?
         }
     }
 
     override fun mouseMoved(context: RenderContext) {
-        if (context.movedInto(box)) {
-            context.setCursor(Cursor(Cursor.TEXT_CURSOR))
-        } else if (context.movedOutOf(box)) {
-            context.setCursor(Cursor(Cursor.DEFAULT_CURSOR))
+        if (context.interactivity.movedInto(box)) {
+            context.interactivity.setCursor(Cursor(Cursor.TEXT_CURSOR))
+        } else if (context.interactivity.movedOutOf(box)) {
+            context.interactivity.setCursor(Cursor(Cursor.DEFAULT_CURSOR))
         }
     }
 

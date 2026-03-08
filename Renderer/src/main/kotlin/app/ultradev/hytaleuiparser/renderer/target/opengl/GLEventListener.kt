@@ -1,7 +1,7 @@
 package app.ultradev.hytaleuiparser.renderer.target.opengl
 
 import app.ultradev.hytaleuiparser.renderer.type.RenderBox
-import app.ultradev.hytaleuiparser.renderer.RenderContext
+import app.ultradev.hytaleuiparser.renderer.context.RenderContext
 import app.ultradev.hytaleuiparser.renderer.element.BranchUIElement
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutPass
 import app.ultradev.hytaleuiparser.renderer.target.OpenGLRenderTarget
@@ -51,6 +51,7 @@ class GLEventListener(val rootUIElement: BranchUIElement, val source: AssetSourc
         renderer.drawImage(backgroundImage, -bgStartXW, 0f, stateManager.width + 2 * bgStartXW, stateManager.height.toFloat())
 
         val target = OpenGLRenderTarget(renderer)
-        rootUIElement.draw0(target, context)
+        context.draw.setTarget(target)
+        rootUIElement.draw0(context)
     }
 }

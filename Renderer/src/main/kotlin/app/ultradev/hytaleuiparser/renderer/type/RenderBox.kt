@@ -2,13 +2,13 @@ package app.ultradev.hytaleuiparser.renderer.type
 
 import app.ultradev.hytaleuiparser.generated.types.Anchor
 import app.ultradev.hytaleuiparser.generated.types.Padding
-import app.ultradev.hytaleuiparser.renderer.type.Axis
 import app.ultradev.hytaleuiparser.renderer.extensions.bottomFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.rightFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.topFallback
 import app.ultradev.hytaleuiparser.renderer.layout.LayoutTools
 import kotlin.math.max
+import kotlin.math.min
 
 data class RenderBox(
     val x: Int,
@@ -49,6 +49,7 @@ data class RenderBox(
         Axis.HORIZONTAL -> x
         Axis.VERTICAL -> y
     }
+
     fun size(axis: Axis): Int = when (axis) {
         Axis.HORIZONTAL -> width
         Axis.VERTICAL -> height
@@ -60,6 +61,7 @@ data class RenderBox(
         this.width,
         this.height
     )
+
     fun shift(point: Point) = shift(point.x, point.y)
 
     fun withPadding(padding: Padding): RenderBox {
@@ -69,4 +71,19 @@ data class RenderBox(
         val right = padding.right ?: padding.horizontal ?: padding.full ?: 0
         return RenderBox(x + left, y + top, width - left - right, height - top - bottom)
     }
+
+    fun intersect(other: RenderBox): RenderBox {
+        val newX = max(x, other.x)
+        val newY = max(y, other.y)
+        val newEndX = min(x + width, other.x + other.width)
+        val newEndY = min(y + height, other.y + other.height)
+        return RenderBox(
+            newX,
+            newY,
+            max(0, newEndX - newX),
+            max(0, newEndY - newY)
+        )
+    }
+
+    fun isEmpty() = width == 0 || height == 0
 }

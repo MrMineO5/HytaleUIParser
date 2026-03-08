@@ -6,19 +6,16 @@ import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
 import java.awt.Color
 
 interface RenderTarget {
-    val box: RenderBox
+    val windowBounds: RenderBox
 
     fun renderImage(
         image: RenderImage,
-        x: Int,
-        y: Int,
-        width: Int,
-        height: Int,
+        box: RenderBox,
         horizontalBorder: Int = 0,
         verticalBorder: Int = 0
     )
 
-    fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int)
+    fun renderFill(color: Color, box: RenderBox)
 
     fun renderText(
         text: String,
@@ -26,6 +23,5 @@ interface RenderTarget {
         info: TextRenderStyle,
     )
 
-    fun setClip(box: RenderBox?): RenderBox?
-    fun setOffset(x: Int, y: Int): Pair<Int, Int>
+    fun setClip(box: RenderBox?)
 }

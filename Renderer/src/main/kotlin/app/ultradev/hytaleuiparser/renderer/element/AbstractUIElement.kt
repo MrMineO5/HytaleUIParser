@@ -6,13 +6,12 @@ import app.ultradev.hytaleuiparser.generated.elements.ElementProperties
 import app.ultradev.hytaleuiparser.generated.types.Padding
 import app.ultradev.hytaleuiparser.renderer.type.BoxSize
 import app.ultradev.hytaleuiparser.renderer.type.RenderBox
-import app.ultradev.hytaleuiparser.renderer.RenderContext
+import app.ultradev.hytaleuiparser.renderer.context.RenderContext
 import app.ultradev.hytaleuiparser.renderer.extensions.bottomFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.leftFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.rightFallback
 import app.ultradev.hytaleuiparser.renderer.extensions.topFallback
 import app.ultradev.hytaleuiparser.renderer.render.drawPatchStyle
-import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 
 abstract class AbstractUIElement(
     val node: AstNode
@@ -72,18 +71,16 @@ abstract class AbstractUIElement(
     }
 
 
-    fun draw0(target: RenderTarget, context: RenderContext) {
-//        val old = target.setClip(contentBox)
-        draw(target, context)
-//        target.setClip(old)
-        afterDraw(target, context)
+    fun draw0(context: RenderContext) {
+        draw(context)
+        afterDraw(context)
     }
 
-    open fun draw(target: RenderTarget, context: RenderContext) {
-        drawPatchStyle(target, context, box, properties.background)
+    open fun draw(context: RenderContext) {
+        drawPatchStyle(context, box, properties.background)
     }
 
-    open fun afterDraw(target: RenderTarget, context: RenderContext) {}
+    open fun afterDraw(context: RenderContext) {}
 
 
     /* ----------------

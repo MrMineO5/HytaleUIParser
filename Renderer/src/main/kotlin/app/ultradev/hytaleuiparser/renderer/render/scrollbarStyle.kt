@@ -4,13 +4,11 @@ import app.ultradev.hytaleuiparser.generated.types.PatchStyle
 import app.ultradev.hytaleuiparser.generated.types.ScrollbarStyle
 import app.ultradev.hytaleuiparser.renderer.type.Axis
 import app.ultradev.hytaleuiparser.renderer.type.RenderBox
-import app.ultradev.hytaleuiparser.renderer.RenderContext
+import app.ultradev.hytaleuiparser.renderer.context.RenderContext
 import app.ultradev.hytaleuiparser.renderer.extensions.axisAnchor
-import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 import java.awt.Color
 
 fun drawScrollBarStyle(
-    target: RenderTarget,
     context: RenderContext,
     box: RenderBox,
     total: Int,
@@ -37,7 +35,7 @@ fun drawScrollBarStyle(
             inlineEnd = 0,
         )
     )
-    drawPatchStyle(target, context, backgroundBox, style.background)
+    drawPatchStyle(context, backgroundBox, style.background)
 
     val handleStart = position * box.size(axis) / total
     val handleEnd = (position + screen) * box.size(axis) / total
@@ -50,10 +48,10 @@ fun drawScrollBarStyle(
             inlineSize = handleEnd - handleStart
         )
     )
-    val styleToUse = if (context.mouseInside(handleBox)) {
+    val styleToUse = if (context.interactivity.mouseInside(handleBox)) {
         style.hoveredHandle
     } else {
         style.handle
     }
-    drawPatchStyle(target, context, handleBox, styleToUse)
+    drawPatchStyle(context, handleBox, styleToUse)
 }

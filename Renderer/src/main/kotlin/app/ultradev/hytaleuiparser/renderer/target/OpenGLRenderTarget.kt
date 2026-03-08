@@ -7,6 +7,7 @@ import app.ultradev.hytaleuiparser.renderer.render.RenderImage
 import app.ultradev.hytaleuiparser.renderer.target.opengl.GLEventListener
 import app.ultradev.hytaleuiparser.renderer.target.opengl.GLRenderer
 import app.ultradev.hytaleuiparser.renderer.text.TextRenderStyle
+import app.ultradev.hytaleuiparser.renderer.type.Point
 import com.jogamp.opengl.GLCapabilities
 import com.jogamp.opengl.GLProfile
 import com.jogamp.opengl.awt.GLCanvas
@@ -21,34 +22,28 @@ import javax.swing.JFrame
 import kotlin.system.exitProcess
 
 class OpenGLRenderTarget(val renderer: GLRenderer) : RenderTarget {
-    override val box: RenderBox
+    override val windowBounds: RenderBox
         get() = RenderBox(0, 0, renderer.stateManager.width, renderer.stateManager.height)
-
-    private var offsetX = 0
-    private var offsetY = 0
 
     override fun renderImage(
         image: RenderImage,
-        x: Int,
-        y: Int,
-        width: Int,
-        height: Int,
+        box: RenderBox,
         horizontalBorder: Int,
         verticalBorder: Int
     ) {
-        if (width == 0 || height == 0) return
+        if (box.isEmpty()) return
         renderer.drawImage(
             image.image,
-            offsetX + x.toFloat(), offsetY + y.toFloat(),
-            width.toFloat(), height.toFloat(),
+            box.x.toFloat(), box.y.toFloat(),
+            box.width.toFloat(), box.height.toFloat(),
             horizontalBorder.toFloat(), verticalBorder.toFloat(),
             horizontalBorder.toFloat(), verticalBorder.toFloat(),
             image.scale.toFloat()
         )
     }
 
-    override fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int) {
-        renderer.drawFill(offsetX + x.toFloat(), offsetY + y.toFloat(), width.toFloat(), height.toFloat(), color)
+    override fun renderFill(color: Color, box: RenderBox) {
+        renderer.drawFill(box.x.toFloat(), box.y.toFloat(), box.width.toFloat(), box.height.toFloat(), color)
     }
 
     override fun renderText(text: String, box: RenderBox, info: TextRenderStyle) {
@@ -58,27 +53,14 @@ class OpenGLRenderTarget(val renderer: GLRenderer) : RenderTarget {
             info.wrap(text, box.width)
         } else textToDraw.split("\n")
 
-        val alignments = info.calculateAlignment(box.shift(offsetX, offsetY), lines)
+        val alignments = info.calculateAlignment(box, lines)
         lines.zip(alignments).forEach { (line, coord) ->
             renderer.drawString(info.msdfFont, coord.first, coord.second, info.fontSize, line, info.color)
         }
     }
 
-    private var clipBox: RenderBox? = null
-
-    override fun setClip(box: RenderBox?): RenderBox? {
-        val old = clipBox
-        clipBox = box
+    override fun setClip(box: RenderBox?) {
         renderer.setClipBox(box)
-        return old
-    }
-
-    override fun setOffset(x: Int, y: Int): Pair<Int, Int> {
-        val oldX = offsetX
-        val oldY = offsetY
-        offsetX = x
-        offsetY = y
-        return oldX to oldY
     }
 
     companion object {
@@ -91,22 +73,25 @@ class OpenGLRenderTarget(val renderer: GLRenderer) : RenderTarget {
             canvas.addGLEventListener(renderer)
             canvas.addMouseMotionListener(object : MouseMotionAdapter() {
                 override fun mouseMoved(e: MouseEvent) {
-                    renderer.context.mousePosition = e.point
+                    renderer.context.interactivity.updateMousePosition(Point.fromAwt(e.point))
                     rootUIElement.mouseMoved(renderer.context)
-                    renderer.context.previousMousePosition = renderer.context.mousePosition
+                    canvas.repaint()
+                }
+
+                override fun mouseDragged(e: MouseEvent) {
+                    renderer.context.interactivity.updateMousePosition(Point.fromAwt(e.point))
+                    rootUIElement.mouseMoved(renderer.context)
                     canvas.repaint()
                 }
             })
 
             canvas.addMouseListener(object : MouseAdapter() {
                 override fun mousePressed(e: MouseEvent) {
-                    renderer.context.mousePosition = e.point
                     rootUIElement.mouseDown(renderer.context)
                     canvas.repaint()
                 }
 
                 override fun mouseReleased(e: MouseEvent) {
-                    renderer.context.mousePosition = e.point
                     rootUIElement.mouseUp(renderer.context)
                     canvas.repaint()
                 }

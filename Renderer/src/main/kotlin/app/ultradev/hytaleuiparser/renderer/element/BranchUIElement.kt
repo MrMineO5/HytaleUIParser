@@ -6,11 +6,10 @@ import app.ultradev.hytaleuiparser.generated.types.ScrollbarStyle
 import app.ultradev.hytaleuiparser.renderer.type.Axis
 import app.ultradev.hytaleuiparser.renderer.type.BoxSize
 import app.ultradev.hytaleuiparser.renderer.type.RenderBox
-import app.ultradev.hytaleuiparser.renderer.RenderContext
+import app.ultradev.hytaleuiparser.renderer.context.RenderContext
 import app.ultradev.hytaleuiparser.renderer.extensions.totalSpace
 import app.ultradev.hytaleuiparser.renderer.layout.Layout
 import app.ultradev.hytaleuiparser.renderer.render.drawScrollBarStyle
-import app.ultradev.hytaleuiparser.renderer.target.RenderTarget
 
 abstract class BranchUIElement(
     node: AstNode,
@@ -55,12 +54,11 @@ abstract class BranchUIElement(
         return Layout.get(layoutMode).contentDesiredSize(this, available - scrollbarBox) + scrollbarBox
     }
 
-    override fun draw(target: RenderTarget, context: RenderContext) {
-        super.draw(target, context)
+    override fun draw(context: RenderContext) {
+        super.draw(context)
         val ch = contentHeight
         if (ch != null && ch > childBox.height) {
             drawScrollBarStyle(
-                target,
                 context,
                 contentBox,
                 ch,
@@ -72,36 +70,39 @@ abstract class BranchUIElement(
         }
     }
 
-    override fun afterDraw(target: RenderTarget, context: RenderContext) {
-        var oldClip: RenderBox? = null
-        var oldOffset: Pair<Int, Int> = 0 to 0
-        var targetInfoSet = false
+    private fun <T> withScrollModification(context: RenderContext, applyClip: Boolean, action: () -> T): T {
+        var didApplyOffset = false
         if (contentHeight != null) {
-            oldClip = target.setClip(RenderBox(0, childBox.y, Int.MAX_VALUE, childBox.height))
-            oldOffset = target.setOffset(0, -scrollOffset)
-            targetInfoSet = true
+            if (applyClip) context.draw.pushClip(RenderBox(0, childBox.y, Int.MAX_VALUE, childBox.height))
+            context.draw.pushOffset(0, -scrollOffset)
+            didApplyOffset = true
         }
-        visibleChildren.forEach { it.draw0(target, context) }
-        if (targetInfoSet) {
-            target.setClip(oldClip)
-            target.setOffset(oldOffset.first, oldOffset.second)
+        val result = action()
+        if (didApplyOffset) {
+            context.draw.popOffset()
+            if (applyClip) context.draw.popClip()
         }
+        return result
+    }
+
+    override fun afterDraw(context: RenderContext) = withScrollModification(context, true) {
+        visibleChildren.forEach { it.draw0(context) }
     }
 
 
-    override fun mouseMoved(context: RenderContext) {
+    override fun mouseMoved(context: RenderContext) = withScrollModification(context, false) {
         visibleChildren.forEach { it.mouseMoved(context) }
     }
 
-    override fun mouseDown(context: RenderContext): Boolean {
+    override fun mouseDown(context: RenderContext): Boolean = withScrollModification(context, false) {
         visibleChildrenReversed.forEach {
-            if (!context.mouseInside(it.box)) return@forEach
-            if (it.mouseDown(context)) return true
+            if (!context.interactivity.mouseInside(it.box)) return@forEach
+            if (it.mouseDown(context)) return@withScrollModification true
         }
-        return false
+        return@withScrollModification false
     }
 
-    override fun mouseUp(context: RenderContext) {
+    override fun mouseUp(context: RenderContext) = withScrollModification(context, false) {
         visibleChildren.forEach {
             it.mouseUp(context)
         }
@@ -109,10 +110,10 @@ abstract class BranchUIElement(
 
     abstract fun withChildren(children: List<AbstractUIElement>): BranchUIElement
 
-    override fun mouseWheel(delta: Int, context: RenderContext): Boolean {
+    override fun mouseWheel(delta: Int, context: RenderContext): Boolean = withScrollModification(context, false) {
         visibleChildrenReversed.forEach {
-            if (!context.mouseInside(it.box)) return@forEach
-            if (it.mouseWheel(delta, context)) return true
+            if (!context.interactivity.mouseInside(it.box)) return@forEach
+            if (it.mouseWheel(delta, context)) return@withScrollModification true
         }
 
         val ch = contentHeight
@@ -122,6 +123,6 @@ abstract class BranchUIElement(
             if (scrollOffset > ch - childBox.height) scrollOffset = ch - childBox.height
         }
 
-        return super.mouseWheel(delta, context)
+        return@withScrollModification super.mouseWheel(delta, context)
     }
 }

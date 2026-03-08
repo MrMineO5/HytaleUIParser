@@ -13,11 +13,8 @@ import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 
 class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
-    override val box: RenderBox
+    override val windowBounds: RenderBox
         get() = graphics.clipBounds.let { RenderBox(it.x, it.y, it.width, it.height) }
-
-    private var offsetX = 0
-    private var offsetY = 0
 
     init {
         if (graphics is Graphics2D) {
@@ -33,29 +30,26 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
 
     override fun renderImage(
         image: RenderImage,
-        x: Int,
-        y: Int,
-        width: Int,
-        height: Int,
+        box: RenderBox,
         horizontalBorder: Int,
         verticalBorder: Int
     ) {
-        if (width == 0 || height == 0) return
+        if (box.isEmpty()) return
         val scaled = NineSlice.scale(
             image.image,
-            width * image.scale, height * image.scale,
+            box.width * image.scale, box.height * image.scale,
             horizontalBorder * image.scale, verticalBorder * image.scale,
             horizontalBorder * image.scale, verticalBorder * image.scale
         )
         val correctSize = if (image.scale != 1) {
             scaled.getScaledInstance(scaled.width / image.scale, scaled.height / image.scale, BufferedImage.SCALE_FAST)
         } else scaled
-        graphics.drawImage(correctSize, x + offsetX, y + offsetY, null)
+        graphics.drawImage(correctSize, box.x, box.y, null)
     }
 
-    override fun renderFill(color: Color, x: Int, y: Int, width: Int, height: Int) {
+    override fun renderFill(color: Color, box: RenderBox) {
         graphics.color = color
-        graphics.fillRect(x + offsetX, y + offsetY, width, height)
+        graphics.fillRect(box.x, box.y, box.width, box.height)
     }
 
     override fun renderText(text: String, box: RenderBox, info: TextRenderStyle) {
@@ -67,7 +61,7 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
 
         graphics.color = info.color
 
-        val alignments = info.calculateAlignment(box.shift(offsetX, offsetY), lines)
+        val alignments = info.calculateAlignment(box, lines)
         lines.zip(alignments).forEach { (line, coord) ->
             when (TextRenderMode.active) {
                 TextRenderMode.TTF -> {
@@ -79,17 +73,7 @@ class AWTRenderTarget(val graphics: Graphics) : RenderTarget {
         }
     }
 
-    override fun setClip(box: RenderBox?): RenderBox? {
-        val old = graphics.clipBounds?.let { RenderBox(it.x, it.y, it.width, it.height) }
+    override fun setClip(box: RenderBox?) {
         graphics.clip = box?.let { Rectangle(it.x, it.y, it.width, it.height) }
-        return old
-    }
-
-    override fun setOffset(x: Int, y: Int): Pair<Int, Int> {
-        val oldX = offsetX
-        val oldY = offsetY
-        offsetX = x
-        offsetY = y
-        return oldX to oldY
     }
 }
